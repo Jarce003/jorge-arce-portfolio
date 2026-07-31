@@ -14,10 +14,7 @@ type MobileMenuProps = {
 export function MobileMenu({ lang, content }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuId = "mobile-navigation";
-  const contactSubject =
-    lang === "es"
-      ? "Consulta sobre desarrollo de software"
-      : "Software development inquiry";
+  const contactHref = `/${lang}#${lang === "es" ? "contacto" : "contact"}`;
 
   return (
     <div className="relative lg:hidden">
@@ -37,9 +34,7 @@ export function MobileMenu({ lang, content }: MobileMenuProps) {
         }
         onClick={() => setIsOpen((current) => !current)}
       >
-        <span className="sr-only">
-          {isOpen ? "Close" : "Menu"}
-        </span>
+        <span className="sr-only">{isOpen ? "Close" : "Menu"}</span>
         <span className="relative block h-4 w-5" aria-hidden="true">
           <span
             className={`absolute left-0 top-0 h-0.5 w-5 bg-current transition ${
@@ -78,15 +73,13 @@ export function MobileMenu({ lang, content }: MobileMenuProps) {
           </nav>
 
           <div className="mt-2 border-t border-slate-200 pt-2">
-            <a
-              href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-                contactSubject,
-              )}`}
+            <Link
+              href={contactHref}
               className="flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white"
               onClick={() => setIsOpen(false)}
             >
               {content.header.contact}
-            </a>
+            </Link>
           </div>
         </div>
       ) : null}

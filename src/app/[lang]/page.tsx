@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectShowcase } from "@/components/project-showcase";
-import { SiteHeader } from "@/components/site-header";
+import { ContactSection } from "@/components/contact-section";
+import { ProfileSection } from "@/components/profile-section";import { SiteHeader } from "@/components/site-header";
 import { siteContent } from "@/content/site-content";
 import { isLocale } from "@/lib/i18n";
 
@@ -84,9 +85,7 @@ export default async function HomePage({ params }: HomePageProps) {
                 </Link>
 
                 <a
-                  href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-                    contactSubject,
-                  )}`}
+                  href={`/${lang}#${lang === "es" ? "contacto" : "contact"}`}
                   className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:border-slate-950"
                 >
                   {content.hero.secondaryAction}
@@ -154,9 +153,7 @@ export default async function HomePage({ params }: HomePageProps) {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-10">
             <div className="max-w-3xl">
-              <p className="section-eyebrow">
-                {content.projectsSection.eyebrow}
-              </p>
+
               <h2 className="section-title">
                 {content.projectsSection.title}
               </h2>
@@ -417,100 +414,16 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </section>
 
-        <section
-          id={sectionIds.about}
-          className="scroll-mt-24 border-y border-slate-200 bg-slate-50 py-20 sm:py-28 lg:py-32"
-        >
-          <div className="mx-auto grid max-w-7xl gap-9 px-4 sm:px-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20 lg:px-10">
-            <div className="flex min-h-60 items-center justify-center rounded-[2rem] border border-slate-200 bg-white sm:min-h-80">
-              <div className="text-center">
-                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-950 text-2xl font-bold text-white sm:h-28 sm:w-28 sm:text-3xl">
-                  JA
-                </div>
-                <p className="mt-5 text-sm font-bold text-slate-950">
-                  Jorge Arce
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Full Stack Software Engineer
-                </p>
-              </div>
-            </div>
+        <ProfileSection
+          lang={lang}
+          content={content}
+          sectionId={sectionIds.about}
+        />
 
-            <div>
-              <p className="section-eyebrow">
-                {content.aboutSection.eyebrow}
-              </p>
-              <h2 className="section-title">
-                {content.aboutSection.title}
-              </h2>
-
-              <div className="mt-6 space-y-4 text-base leading-7 text-slate-600 sm:mt-7 sm:space-y-5 sm:text-lg sm:leading-8">
-                {content.aboutSection.paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-2 sm:mt-9">
-                {content.aboutSection.facts.map((fact) => (
-                  <span
-                    key={fact}
-                    className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700"
-                  >
-                    {fact}
-                  </span>
-                ))}
-              </div>
-
-              <a
-                href="https://www.linkedin.com/in/jorge-arce-solano"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-8 inline-flex min-h-11 items-center text-sm font-bold text-slate-950 underline decoration-cyan-500 decoration-2 underline-offset-8 sm:mt-9"
-              >
-                {content.aboutSection.linkedinLabel}
-                <span className="ml-2" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-slate-950 py-20 text-white sm:py-28 lg:py-32">
-          <div className="mx-auto max-w-5xl px-4 text-center sm:px-8">
-            <p className="section-eyebrow section-eyebrow-dark">
-              {content.contactSection.eyebrow}
-            </p>
-
-            <h2 className="mx-auto mt-5 max-w-4xl text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-              {content.contactSection.title}
-            </h2>
-
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-400 sm:mt-6 sm:text-lg sm:leading-8">
-              {content.contactSection.description}
-            </p>
-
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:mt-9 sm:flex-row">
-              <a
-                href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-                  contactSubject,
-                )}`}
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-slate-950 transition hover:bg-cyan-50"
-              >
-                {content.contactSection.primaryAction}
-              </a>
-
-              <a
-                href="https://www.linkedin.com/in/jorge-arce-solano"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-700 px-6 text-sm font-bold text-white transition hover:border-slate-400"
-              >
-                {content.contactSection.secondaryAction}
-              </a>
-            </div>
-          </div>
-        </section>
+        <ContactSection
+          lang={lang}
+          content={content}
+        />
       </main>
 
       <footer className="border-t border-slate-800 bg-slate-950 text-slate-400">

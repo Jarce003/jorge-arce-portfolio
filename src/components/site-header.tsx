@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import type { SiteContent } from "@/content/site-content";
@@ -12,10 +13,7 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ lang, content }: SiteHeaderProps) {
-  const contactSubject =
-    lang === "es"
-      ? "Consulta sobre desarrollo de software"
-      : "Software development inquiry";
+  const contactHref = `/${lang}#${lang === "es" ? "contacto" : "contact"}`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-slate-50/90 backdrop-blur">
@@ -25,8 +23,14 @@ export function SiteHeader({ lang, content }: SiteHeaderProps) {
           className="group flex min-w-0 items-center gap-3"
           aria-label="Jorge Arce"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-sm font-bold text-white">
-            JA
+          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-200 shadow-sm">
+            <Image
+              src="/profile/jorge-arce-square.webp"
+              alt=""
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
           </span>
 
           <span className="hidden min-w-0 sm:block">
@@ -57,14 +61,12 @@ export function SiteHeader({ lang, content }: SiteHeaderProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher currentLocale={lang} />
 
-          <a
-            href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-              contactSubject,
-            )}`}
+          <Link
+            href={contactHref}
             className="hidden h-10 items-center rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 lg:inline-flex"
           >
             {content.header.contact}
-          </a>
+          </Link>
 
           <MobileMenu lang={lang} content={content} />
         </div>

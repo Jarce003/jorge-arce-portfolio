@@ -378,7 +378,7 @@ export const siteContent = {
     },
     aboutSection: {
       eyebrow: "Sobre mí",
-      title: "Ingeniería, operaciones y resolución de problemas",
+      title: "Desarrollo software con criterio técnico y comprensión de procesos reales",
       paragraphs: [
         "Soy Jorge Arce, Ingeniero en Sistemas graduado de la Universidad Autónoma de Centro América con la distinción Summa Cum Laude Probatus.",
         "Además del desarrollo de software, trabajo en atención de emergencias desde 2014 y tengo experiencia como instructor y coordinador de proyectos de capacitación.",
@@ -664,7 +664,7 @@ export const siteContent = {
     },
     aboutSection: {
       eyebrow: "About me",
-      title: "Engineering, operations and problem solving",
+      title: "I build software with technical judgment and real-world process understanding",
       paragraphs: [
         "I am Jorge Arce, a Systems Engineer who graduated from Universidad Autónoma de Centro América with the Summa Cum Laude Probatus distinction.",
         "Alongside software development, I have worked in emergency response since 2014 and have experience as a technical instructor and training-project coordinator.",
