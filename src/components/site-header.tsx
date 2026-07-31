@@ -1,0 +1,74 @@
+import Link from "next/link";
+
+import type { SiteContent } from "@/content/site-content";
+import type { Locale } from "@/lib/i18n";
+
+import { LanguageSwitcher } from "./language-switcher";
+
+type SiteHeaderProps = {
+  lang: Locale;
+  content: SiteContent;
+};
+
+export function SiteHeader({
+  lang,
+  content,
+}: SiteHeaderProps) {
+  const contactSubject =
+    lang === "es"
+      ? "Consulta sobre desarrollo de software"
+      : "Software development inquiry";
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-slate-50/90 backdrop-blur">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
+        <Link
+          href={`/${lang}`}
+          className="group flex min-w-0 items-center gap-3"
+          aria-label="Jorge Arce"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-sm font-bold text-white">
+            JA
+          </span>
+
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-bold text-slate-950">
+              Jorge Arce
+            </span>
+            <span className="block truncate text-xs text-slate-500">
+              {content.header.role}
+            </span>
+          </span>
+        </Link>
+
+        <nav
+          className="hidden items-center gap-7 lg:flex"
+          aria-label="Primary navigation"
+        >
+          {content.navigation.map((item) => (
+            <Link
+              key={item.href}
+              href={`/${lang}${item.href}`}
+              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher currentLocale={lang} />
+
+          <a
+            href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
+              contactSubject,
+            )}`}
+            className="hidden h-10 items-center rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+          >
+            {content.header.contact}
+          </a>
+        </div>
+      </div>
+    </header>
+  );
+}
