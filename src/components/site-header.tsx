@@ -4,16 +4,14 @@ import type { SiteContent } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
 import { LanguageSwitcher } from "./language-switcher";
+import { MobileMenu } from "./mobile-menu";
 
 type SiteHeaderProps = {
   lang: Locale;
   content: SiteContent;
 };
 
-export function SiteHeader({
-  lang,
-  content,
-}: SiteHeaderProps) {
+export function SiteHeader({ lang, content }: SiteHeaderProps) {
   const contactSubject =
     lang === "es"
       ? "Consulta sobre desarrollo de software"
@@ -21,7 +19,7 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-slate-50/90 backdrop-blur">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
+      <div className="relative mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-8 lg:px-10">
         <Link
           href={`/${lang}`}
           className="group flex min-w-0 items-center gap-3"
@@ -31,7 +29,7 @@ export function SiteHeader({
             JA
           </span>
 
-          <span className="min-w-0">
+          <span className="hidden min-w-0 sm:block">
             <span className="block truncate text-sm font-bold text-slate-950">
               Jorge Arce
             </span>
@@ -63,10 +61,12 @@ export function SiteHeader({
             href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
               contactSubject,
             )}`}
-            className="hidden h-10 items-center rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+            className="hidden h-10 items-center rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 lg:inline-flex"
           >
             {content.header.contact}
           </a>
+
+          <MobileMenu lang={lang} content={content} />
         </div>
       </div>
     </header>

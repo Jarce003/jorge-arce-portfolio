@@ -2,6 +2,15 @@ import type { Locale } from "@/lib/i18n";
 
 export type ProjectVisualVariant = "firetrack" | "evacuaplan";
 
+export type ProjectGalleryItem = {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  src: string;
+  alt: string;
+};
+
 type NavigationItem = {
   label: string;
   href: string;
@@ -13,12 +22,7 @@ type Project = {
   description: string;
   highlights: string[];
   technologies: string[];
-  visual: ProjectVisualVariant;
-  visualLabels: {
-    primary: string;
-    secondary: string;
-    tertiary: string;
-  };
+  gallery: ProjectGalleryItem[];
   externalUrl?: string;
   externalLabel?: string;
 };
@@ -142,7 +146,7 @@ export const siteContent = {
       ],
       metrics: [
         { value: "2", label: "productos propios" },
-        { value: "Full cycle", label: "de requisitos a producción" },
+        { value: "Ciclo completo", label: "de requisitos a producción" },
         { value: "C1", label: "nivel de inglés" },
       ],
     },
@@ -170,12 +174,35 @@ export const siteContent = {
             "PostgreSQL",
             "Vercel",
           ],
-          visual: "firetrack",
-          visualLabels: {
-            primary: "Panel operativo",
-            secondary: "Inventario y servicios",
-            tertiary: "Reportes y alertas",
-          },
+          gallery: [
+            {
+              id: "dashboard",
+              label: "Panel",
+              title: "Panel operativo multiempresa",
+              description:
+                "Métricas, inventario, estados, inspecciones y alertas reunidos en una vista de seguimiento diario.",
+              src: "/projects/firetrack/dashboard.webp",
+              alt: "Panel operativo de FireTrack con métricas e inventario de extintores",
+            },
+            {
+              id: "asset",
+              label: "Ficha y QR",
+              title: "Ficha técnica y acceso mediante QR",
+              description:
+                "Consulta del estado operativo, controles programados, historial y acceso rápido desde el equipo físico.",
+              src: "/projects/firetrack/asset-qr.webp",
+              alt: "Ficha de un extintor en FireTrack con etiqueta QR de demostración",
+            },
+            {
+              id: "floor-plan",
+              label: "Croquis",
+              title: "Ubicación interactiva sobre croquis",
+              description:
+                "Posicionamiento de equipos en planos multipágina y navegación entre el croquis y cada registro.",
+              src: "/projects/firetrack/croquis.webp",
+              alt: "Módulo de croquis de FireTrack con extintores ubicados sobre un plano",
+            },
+          ],
           externalUrl: "https://firetrackcr.com",
           externalLabel: "Visitar FireTrack",
         },
@@ -196,12 +223,35 @@ export const siteContent = {
             "Konva",
             "Tailwind CSS",
           ],
-          visual: "evacuaplan",
-          visualLabels: {
-            primary: "Editor interactivo",
-            secondary: "Herramientas gráficas",
-            tertiary: "Interacción táctil",
-          },
+          gallery: [
+            {
+              id: "symbols",
+              label: "Símbolos",
+              title: "Biblioteca y transformación de símbolos",
+              description:
+                "Elementos de emergencia que pueden moverse, redimensionarse, rotarse, bloquearse y copiarse.",
+              src: "/projects/evacuaplan/symbols.webp",
+              alt: "Editor EvacuaPlan con símbolos de emergencia seleccionables",
+            },
+            {
+              id: "multi-select",
+              label: "Selección múltiple",
+              title: "Edición coordinada de varios objetos",
+              description:
+                "Selección, desplazamiento y administración conjunta de objetos sin afectar elementos protegidos.",
+              src: "/projects/evacuaplan/multi-select.webp",
+              alt: "EvacuaPlan Studio con varios objetos seleccionados simultáneamente",
+            },
+            {
+              id: "structure",
+              label: "Estructura",
+              title: "Paredes, puertas y ventanas",
+              description:
+                "Herramientas propias para construir y editar la estructura base de cada nivel del croquis.",
+              src: "/projects/evacuaplan/structure.webp",
+              alt: "EvacuaPlan Studio mostrando una pared con puerta y ventana",
+            },
+          ],
         },
       ],
     },
@@ -359,7 +409,7 @@ export const siteContent = {
       ],
       metrics: [
         { value: "2", label: "independent products" },
-        { value: "Full cycle", label: "requirements to production" },
+        { value: "End-to-end", label: "requirements to production" },
         { value: "C1", label: "English proficiency" },
       ],
     },
@@ -387,12 +437,35 @@ export const siteContent = {
             "PostgreSQL",
             "Vercel",
           ],
-          visual: "firetrack",
-          visualLabels: {
-            primary: "Operational dashboard",
-            secondary: "Inventory and services",
-            tertiary: "Reports and alerts",
-          },
+          gallery: [
+            {
+              id: "dashboard",
+              label: "Dashboard",
+              title: "Multi-company operational dashboard",
+              description:
+                "Metrics, inventory, statuses, inspections and alerts brought together for daily operational monitoring.",
+              src: "/projects/firetrack/dashboard.webp",
+              alt: "FireTrack operational dashboard with extinguisher inventory metrics",
+            },
+            {
+              id: "asset",
+              label: "Asset and QR",
+              title: "Technical record and QR access",
+              description:
+                "Operational status, scheduled controls, history and fast access from the physical equipment.",
+              src: "/projects/firetrack/asset-qr.webp",
+              alt: "FireTrack extinguisher record with a safe demonstration QR label",
+            },
+            {
+              id: "floor-plan",
+              label: "Floor plan",
+              title: "Interactive equipment positioning",
+              description:
+                "Equipment placement on multi-page plans with navigation between the floor plan and each asset record.",
+              src: "/projects/firetrack/croquis.webp",
+              alt: "FireTrack floor-plan module with extinguishers positioned on a building plan",
+            },
+          ],
           externalUrl: "https://firetrackcr.com",
           externalLabel: "Visit FireTrack",
         },
@@ -413,12 +486,35 @@ export const siteContent = {
             "Konva",
             "Tailwind CSS",
           ],
-          visual: "evacuaplan",
-          visualLabels: {
-            primary: "Interactive editor",
-            secondary: "Graphical tools",
-            tertiary: "Touch interaction",
-          },
+          gallery: [
+            {
+              id: "symbols",
+              label: "Symbols",
+              title: "Emergency symbol library and transformation",
+              description:
+                "Emergency objects that can be moved, resized, rotated, locked and copied.",
+              src: "/projects/evacuaplan/symbols.webp",
+              alt: "EvacuaPlan editor with selectable emergency symbols",
+            },
+            {
+              id: "multi-select",
+              label: "Multi-select",
+              title: "Coordinated editing of multiple objects",
+              description:
+                "Selection, movement and management of several objects without affecting protected elements.",
+              src: "/projects/evacuaplan/multi-select.webp",
+              alt: "EvacuaPlan Studio with several objects selected at the same time",
+            },
+            {
+              id: "structure",
+              label: "Structure",
+              title: "Walls, doors and windows",
+              description:
+                "Custom tools for building and editing the structural foundation of each plan level.",
+              src: "/projects/evacuaplan/structure.webp",
+              alt: "EvacuaPlan Studio showing a wall with a door and window",
+            },
+          ],
         },
       ],
     },
