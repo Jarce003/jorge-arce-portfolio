@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jorge Arce Solano — Professional Portfolio
 
-## Getting Started
+![Portfolio preview](public/og/portfolio-og.png)
 
-First, run the development server:
+Bilingual professional portfolio presenting my experience developing web applications, SaaS products, operational systems and interactive software.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The website is available in Spanish and English and includes detailed case studies for FireTrack and EvacuaPlan Studio.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Featured projects
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### FireTrack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Multi-tenant SaaS platform for fire extinguisher inventory, inspections, maintenance, QR workflows, alerts, audit records, PDF reports and Excel imports.
 
-## Learn More
+My responsibilities included requirements analysis, architecture, frontend and backend development, PostgreSQL database design, Supabase authentication, Row Level Security, testing, deployment and ongoing maintenance.
 
-To learn more about Next.js, take a look at the following resources:
+### EvacuaPlan Studio
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Interactive emergency and evacuation plan editor currently in active development.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The editor includes architectural drawing tools, emergency symbols, object transformations, multi-selection, undo and redo workflows, and support for mouse, touchscreen and stylus interaction.
 
-## Deploy on Vercel
+## Main stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase
+- PostgreSQL
+- Node.js
+- Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Portfolio features
+
+- Spanish and English versions
+- Responsive and mobile-first layout
+- Real product screenshots
+- Interactive project galleries
+- Detailed technical case studies
+- Accessible navigation
+- Downloadable CV in both languages
+- WhatsApp, email, LinkedIn and GitHub contact options
+- Open Graph metadata, sitemap, robots and web manifest
+
+## Local development
+
+    npm install
+    npm run dev
+
+Open http://localhost:3000/es or http://localhost:3000/en.
+
+## Quality checks
+
+    npm run check:encoding
+    npm run build
+
+## Repository scope
+
+This repository contains the source code of my personal portfolio.
+
+The FireTrack and EvacuaPlan Studio production repositories are private and are not included here. This public repository contains only sanitized screenshots, descriptions and case-study material intended for professional review.
+
+## Contact
+
+- LinkedIn: https://www.linkedin.com/in/jorge-arce-solano
+- GitHub: https://github.com/Jarce003
+- Email: jarce-s03@hotmail.com
+- WhatsApp: +506 8328-7094
+
+## License
+
+Copyright © 2026 Jorge Arce Solano. All rights reserved.
+
+The source code and visual assets are publicly available for portfolio review. No permission is granted to copy, modify, distribute or reuse them without prior written authorization.
