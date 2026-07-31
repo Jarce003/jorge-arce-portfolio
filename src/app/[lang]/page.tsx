@@ -223,19 +223,31 @@ export default async function HomePage({ params }: HomePageProps) {
                       ))}
                     </div>
 
-                    {project.externalUrl && project.externalLabel ? (
-                      <a
-                        href={project.externalUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-8 inline-flex min-h-11 items-center text-sm font-bold text-slate-950 underline decoration-cyan-500 decoration-2 underline-offset-8 sm:mt-9"
+                    <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap">
+                      <Link
+                        href={`/${lang}/projects/${project.slug}`}
+                        className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-950 px-5 text-sm font-bold text-white transition hover:bg-slate-800"
                       >
-                        {project.externalLabel}
+                        {project.caseStudyLabel}
                         <span className="ml-2" aria-hidden="true">
-                          ↗
+                          →
                         </span>
-                      </a>
-                    ) : null}
+                      </Link>
+
+                      {project.externalUrl && project.externalLabel ? (
+                        <a
+                          href={project.externalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-5 text-sm font-bold text-slate-950 transition hover:border-slate-950"
+                        >
+                          {project.externalLabel}
+                          <span className="ml-2" aria-hidden="true">
+                            ↗
+                          </span>
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 </article>
               ))}
@@ -352,6 +364,55 @@ export default async function HomePage({ params }: HomePageProps) {
                   </p>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 bg-slate-50 py-20 sm:py-28 lg:py-32">
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-10">
+            <div>
+              <p className="section-eyebrow">
+                {content.aiSection.eyebrow}
+              </p>
+              <h2 className="section-title">
+                {content.aiSection.title}
+              </h2>
+              <p className="section-description">
+                {content.aiSection.description}
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-2">
+                {content.aiSection.uses.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-slate-800 bg-slate-950 p-6 text-white sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-400">
+                {content.aiSection.guardrailsTitle}
+              </p>
+
+              <div className="mt-6 space-y-5">
+                {content.aiSection.guardrails.map((item, index) => (
+                  <div
+                    key={item}
+                    className="grid grid-cols-[2rem_1fr] gap-3 border-t border-slate-800 pt-5 first:border-t-0 first:pt-0"
+                  >
+                    <span className="font-mono text-xs font-bold text-cyan-400">
+                      0{index + 1}
+                    </span>
+                    <p className="text-sm leading-6 text-slate-300">
+                      {item}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

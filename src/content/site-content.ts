@@ -17,6 +17,8 @@ type NavigationItem = {
 };
 
 type Project = {
+  slug: "firetrack" | "evacuaplan-studio";
+  caseStudyLabel: string;
   title: string;
   status: string;
   description: string;
@@ -89,6 +91,14 @@ export type SiteContent = {
       description: string;
     }[];
   };
+  aiSection: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    uses: string[];
+    guardrailsTitle: string;
+    guardrails: string[];
+  };
   aboutSection: {
     eyebrow: string;
     title: string;
@@ -133,7 +143,7 @@ export const siteContent = {
         "Construyo aplicaciones web que convierten procesos complejos en soluciones claras y confiables.",
       description:
         "Soy Ingeniero en Sistemas y desarrollador Full Stack. Diseño productos digitales desde el análisis de la necesidad hasta la arquitectura, implementación, validación y despliegue.",
-      primaryAction: "Ver proyectos",
+      primaryAction: "Explorar proyectos",
       secondaryAction: "Hablemos de su proyecto",
       technologiesLabel: "Stack principal",
       technologies: [
@@ -157,6 +167,8 @@ export const siteContent = {
         "Proyectos en los que he participado de extremo a extremo: definición funcional, arquitectura, desarrollo, pruebas, seguridad y despliegue.",
       projects: [
         {
+          slug: "firetrack",
+          caseStudyLabel: "Ver caso de estudio",
           title: "FireTrack",
           status: "En producción",
           description:
@@ -207,6 +219,8 @@ export const siteContent = {
           externalLabel: "Visitar FireTrack",
         },
         {
+          slug: "evacuaplan-studio",
+          caseStudyLabel: "Ver caso de estudio",
           title: "EvacuaPlan Studio",
           status: "En desarrollo activo",
           description:
@@ -343,6 +357,25 @@ export const siteContent = {
         },
       ],
     },
+    aiSection: {
+      eyebrow: "Flujo de desarrollo",
+      title: "Uso IA para avanzar más rápido, sin delegar la calidad",
+      description:
+        "Las herramientas de IA forman parte de mi proceso para explorar arquitectura, acelerar implementación, depurar y preparar pruebas. El criterio técnico y la responsabilidad sobre cada entrega siguen siendo míos.",
+      uses: [
+        "Análisis de requerimientos y alternativas",
+        "Implementación y refactorización",
+        "Depuración y revisión de errores",
+        "Diseño de pruebas y documentación",
+      ],
+      guardrailsTitle: "La responsabilidad sigue siendo humana",
+      guardrails: [
+        "Reviso y adapto cada cambio al contexto del proyecto.",
+        "Valido seguridad, permisos y acceso a datos.",
+        "Ejecuto checks de encoding, builds y pruebas funcionales.",
+        "Verifico el comportamiento antes y después del despliegue.",
+      ],
+    },
     aboutSection: {
       eyebrow: "Sobre mí",
       title: "Ingeniería, operaciones y resolución de problemas",
@@ -396,7 +429,7 @@ export const siteContent = {
         "I build web applications that turn complex processes into clear and reliable solutions.",
       description:
         "I am a Systems Engineer and Full Stack Developer. I design digital products from requirements analysis through architecture, implementation, validation and deployment.",
-      primaryAction: "View projects",
+      primaryAction: "Explore projects",
       secondaryAction: "Let’s discuss your project",
       technologiesLabel: "Core stack",
       technologies: [
@@ -420,6 +453,8 @@ export const siteContent = {
         "Projects where I have contributed across the full lifecycle: functional definition, architecture, development, testing, security and deployment.",
       projects: [
         {
+          slug: "firetrack",
+          caseStudyLabel: "View case study",
           title: "FireTrack",
           status: "In production",
           description:
@@ -470,6 +505,8 @@ export const siteContent = {
           externalLabel: "Visit FireTrack",
         },
         {
+          slug: "evacuaplan-studio",
+          caseStudyLabel: "View case study",
           title: "EvacuaPlan Studio",
           status: "Active development",
           description:
@@ -604,6 +641,25 @@ export const siteContent = {
           description:
             "I translate business requirements into understandable and traceable technical decisions.",
         },
+      ],
+    },
+    aiSection: {
+      eyebrow: "Development workflow",
+      title: "I use AI to move faster without delegating quality",
+      description:
+        "AI tools are part of my workflow for architecture exploration, implementation, debugging and test preparation. Technical judgment and responsibility for every delivery remain mine.",
+      uses: [
+        "Requirements analysis and solution exploration",
+        "Implementation and refactoring",
+        "Debugging and issue review",
+        "Test design and documentation",
+      ],
+      guardrailsTitle: "Human ownership remains essential",
+      guardrails: [
+        "I review and adapt every change to the project context.",
+        "I validate security, permissions and data access.",
+        "I run encoding checks, builds and functional tests.",
+        "I verify behavior before and after deployment.",
       ],
     },
     aboutSection: {
