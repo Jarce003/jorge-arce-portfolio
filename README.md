@@ -4,8 +4,8 @@
 
 ## Live website
 
-- Spanish: https://jorge-arce-portfolio.vercel.app/es
-- English: https://jorge-arce-portfolio.vercel.app/en
+- Spanish: https://www.jarcedev.com/es
+- English: https://www.jarcedev.com/en
 
 Bilingual professional portfolio presenting my experience developing web applications, SaaS products, operational systems and interactive software.
 
