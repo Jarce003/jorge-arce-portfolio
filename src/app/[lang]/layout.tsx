@@ -72,7 +72,7 @@ export async function generateMetadata({
       description: content.metadata.description,
       images: [
         {
-          url: "/og/portfolio-og.png",
+          url: "/og/portfolio-og-2026.png",
           width: 1200,
           height: 630,
           alt: "Jorge Arce Solano — Full Stack Software Engineer",
@@ -83,7 +83,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: content.metadata.title,
       description: content.metadata.description,
-      images: ["/og/portfolio-og.png"],
+      images: ["/og/portfolio-og-2026.png"],
     },
     icons: {
       icon: [
