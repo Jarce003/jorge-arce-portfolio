@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProjectShowcase } from "@/components/project-showcase";
+import { ProjectShowcase } from "@/components/project-showcase";import { HeroProcessCard } from "@/components/hero-process-card";
 import { ContactSection } from "@/components/contact-section";
 import { ProfileSection } from "@/components/profile-section";import { SiteHeader } from "@/components/site-header";
 import { siteContent } from "@/content/site-content";
@@ -117,11 +117,7 @@ export default async function HomePage({ params }: HomePageProps) {
               />
 
               <div className="relative">
-                <ProjectShowcase
-                  items={content.projectsSection.projects[0].gallery}
-                  priority
-                  compact
-                />
+                <HeroProcessCard lang={lang} />
               </div>
             </div>
           </div>
