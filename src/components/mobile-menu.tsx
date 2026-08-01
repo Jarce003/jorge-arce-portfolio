@@ -115,17 +115,14 @@ export function MobileMenu({
                     {item.label}
                   </a>
                 ))}
-              </nav>
-
-              <div className="mt-2 border-t border-slate-200 pt-2">
                 <a
                   href={`${homePath}${contactHash}`}
-                  className="flex min-h-12 items-center justify-center rounded-xl bg-slate-950 px-4 text-base font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2"
+                  className="flex min-h-12 items-center rounded-xl px-4 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
                   onClick={closeMenu}
                 >
                   {content.header.contact}
                 </a>
-              </div>
+              </nav>
             </div>
           </>,
           document.body,
