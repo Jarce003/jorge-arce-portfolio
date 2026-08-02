@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { EvacuaPlanDemo } from "@/components/project-demo/evacuaplan-demo";
 import { FireTrackDemo } from "@/components/project-demo/firetrack-demo";
 import type { ProjectGalleryItem } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
@@ -29,6 +30,9 @@ export function ProjectShowcase({
   const isFireTrackDemo =
     project === "firetrack";
 
+  const isEvacuaPlanDemo =
+    project === "evacuaplan-studio";
+
   const resolvedLang =
     lang ?? "es";
 
@@ -41,7 +45,7 @@ export function ProjectShowcase({
         item.id === activeId,
     ) ?? items[0];
 
-  const demoCopy =
+  const fireTrackCopy =
     resolvedLang === "es"
       ? {
           title:
@@ -56,6 +60,21 @@ export function ProjectShowcase({
             "An interactive demo with dashboard, inventory, records, QR, floor plan and activity.",
         };
 
+  const evacuaPlanCopy =
+    resolvedLang === "es"
+      ? {
+          title:
+            "Construya un croquis simplificado",
+          description:
+            "Pruebe herramientas para colocar símbolos, mover elementos, trazar rutas y agregar paredes.",
+        }
+      : {
+          title:
+            "Build a simplified evacuation plan",
+          description:
+            "Try tools for placing symbols, moving elements, drawing routes and adding walls.",
+        };
+
   if (isFireTrackDemo) {
     return (
       <div className="overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
@@ -65,11 +84,31 @@ export function ProjectShowcase({
 
         <div className="border-t border-slate-800 px-4 py-4 sm:px-5">
           <p className="text-sm font-bold text-white">
-            {demoCopy.title}
+            {fireTrackCopy.title}
           </p>
 
           <p className="mt-1 text-sm leading-6 text-slate-400">
-            {demoCopy.description}
+            {fireTrackCopy.description}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isEvacuaPlanDemo) {
+    return (
+      <div className="overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
+        <EvacuaPlanDemo
+          lang={resolvedLang}
+        />
+
+        <div className="border-t border-slate-800 px-4 py-4 sm:px-5">
+          <p className="text-sm font-bold text-white">
+            {evacuaPlanCopy.title}
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-slate-400">
+            {evacuaPlanCopy.description}
           </p>
         </div>
       </div>
