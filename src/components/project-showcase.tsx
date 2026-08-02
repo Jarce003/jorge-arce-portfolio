@@ -77,7 +77,7 @@ export function ProjectShowcase({
 
   if (isFireTrackDemo) {
     return (
-      <div className="overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
         <FireTrackDemo
           lang={resolvedLang}
         />
@@ -97,7 +97,7 @@ export function ProjectShowcase({
 
   if (isEvacuaPlanDemo) {
     return (
-      <div className="overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-[1.4rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20 sm:rounded-[1.7rem]">
         <EvacuaPlanDemo
           lang={resolvedLang}
         />

@@ -655,7 +655,7 @@ export function EvacuaPlanDemo({
           : null;
 
   return (
-    <div className="flex min-h-[36rem] flex-col bg-slate-950 text-white sm:min-h-[33rem]">
+    <div className="flex min-h-[36rem] w-full min-w-0 max-w-full flex-col overflow-hidden bg-slate-950 text-white sm:min-h-[33rem]">
       <div className="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-400 text-[0.65rem] font-black text-slate-950">
@@ -693,8 +693,8 @@ export function EvacuaPlanDemo({
         </div>
       </div>
 
-      <div className="border-b border-slate-800 bg-slate-900/70 p-2">
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="w-full min-w-0 max-w-full overflow-hidden border-b border-slate-800 bg-slate-900/70 p-2">
+        <div className="flex w-full min-w-0 max-w-full gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
           {toolItems.map((tool) => {
             const selected =
               activeTool === tool.id;
@@ -736,8 +736,8 @@ export function EvacuaPlanDemo({
         </p>
       </div>
 
-      <div className="flex-1 p-3 sm:p-4">
-        <div className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-xl shadow-black/20">
+      <div className="min-w-0 max-w-full flex-1 overflow-hidden p-3 sm:p-4">
+        <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-xl shadow-black/20">
           <svg
             ref={svgRef}
             viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
@@ -1071,7 +1071,7 @@ export function EvacuaPlanDemo({
           </svg>
         </div>
 
-        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]">
+        <div className="mt-3 grid min-w-0 max-w-full gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
           <div className="rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-3">
             <p className="text-[0.58rem] font-bold uppercase tracking-[0.13em] text-slate-500">
               {copy.selected}
@@ -1096,7 +1096,7 @@ export function EvacuaPlanDemo({
             ) : null}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             <button
               type="button"
               disabled={!selectedId}
@@ -1119,7 +1119,7 @@ export function EvacuaPlanDemo({
           </div>
         </div>
 
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid min-w-0 max-w-full grid-cols-3 gap-2">
           <div className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2.5 text-center">
             <p className="text-base font-black">
               {objects.length}

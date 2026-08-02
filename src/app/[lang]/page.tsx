@@ -162,9 +162,13 @@ export default async function HomePage({ params }: HomePageProps) {
               {content.projectsSection.projects.map((project, index) => (
                 <article
                   key={project.title}
-                  className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16"
+                  className="grid min-w-0 max-w-full items-center gap-8 lg:grid-cols-2 lg:gap-16"
                 >
-                  <div className={index % 2 === 1 ? "lg:order-2" : undefined}>
+                  <div
+                    className={`min-w-0 max-w-full ${
+                      index % 2 === 1 ? "lg:order-2" : ""
+                    }`}
+                  >
                     <ProjectShowcase
                       items={project.gallery}
                       project={project.slug}
