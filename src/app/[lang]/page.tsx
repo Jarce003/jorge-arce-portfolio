@@ -241,9 +241,6 @@ export default async function HomePage({ params }: HomePageProps) {
                           className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-5 text-sm font-bold text-slate-950 transition hover:border-slate-950"
                         >
                           {project.externalLabel}
-                          <span className="ml-2" aria-hidden="true">
-                            ↗
-                          </span>
                         </a>
                       ) : null}
                     </div>
