@@ -167,6 +167,8 @@ export default async function HomePage({ params }: HomePageProps) {
                   <div className={index % 2 === 1 ? "lg:order-2" : undefined}>
                     <ProjectShowcase
                       items={project.gallery}
+                      project={project.slug}
+                      lang={lang}
                       priority={index === 0}
                     />
                   </div>

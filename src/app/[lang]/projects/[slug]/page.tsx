@@ -116,18 +116,25 @@ export default async function CaseStudyPage({
                 </p>
               </div>
 
-              <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20">
-                <div className="relative aspect-[1.35/1] sm:aspect-[1.75/1]">
-                  <Image
-                    src={study.gallery[0].src}
-                    alt={study.gallery[0].alt}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 52vw"
-                    className="object-contain"
-                  />
+              {slug === "firetrack" ? (
+                <ProjectShowcase
+                  items={study.gallery}
+                  priority
+                />
+              ) : (
+                <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-700 bg-slate-950 shadow-2xl shadow-slate-950/20">
+                  <div className="relative aspect-[1.35/1] sm:aspect-[1.75/1]">
+                    <Image
+                      src={study.gallery[0].src}
+                      alt={study.gallery[0].alt}
+                      fill
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 52vw"
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-12 grid grid-cols-2 overflow-hidden rounded-2xl border border-slate-200 bg-white sm:grid-cols-4">
@@ -257,24 +264,26 @@ export default async function CaseStudyPage({
           </div>
         </section>
 
-        <section className="border-y border-slate-200 bg-slate-50 py-20 sm:py-28 lg:py-32">
-          <div className="mx-auto max-w-6xl px-4 sm:px-8">
-            <div className="max-w-3xl">
-              <p className="section-eyebrow">
-                {lang === "es" ? "Recorrido visual" : "Visual walkthrough"}
-              </p>
-              <h2 className="section-title">
-                {lang === "es"
-                  ? "Funciones reales del producto"
-                  : "Real product capabilities"}
-              </h2>
-            </div>
+        {slug !== "firetrack" ? (
+          <section className="border-y border-slate-200 bg-slate-50 py-20 sm:py-28 lg:py-32">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <div className="max-w-3xl">
+                <p className="section-eyebrow">
+                  {lang === "es" ? "Recorrido visual" : "Visual walkthrough"}
+                </p>
+                <h2 className="section-title">
+                  {lang === "es"
+                    ? "Funciones reales del producto"
+                    : "Real product capabilities"}
+                </h2>
+              </div>
 
-            <div className="mt-12 sm:mt-16">
-              <ProjectShowcase items={study.gallery} />
+              <div className="mt-12 sm:mt-16">
+                <ProjectShowcase items={study.gallery} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="bg-white py-20 sm:py-28 lg:py-32">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:gap-20 lg:px-10">

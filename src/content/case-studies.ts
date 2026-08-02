@@ -76,7 +76,7 @@ const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
       title: "Panel operativo multiempresa",
       description:
         "Métricas, inventario, estados, inspecciones y alertas reunidos en una vista de seguimiento diario.",
-      src: "/projects/firetrack/dashboard.webp",
+      src: "/projects/firetrack/dashboard-v2.webp",
       alt: "Panel operativo de FireTrack con métricas e inventario de extintores",
     },
     {
@@ -85,7 +85,7 @@ const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
       title: "Ficha técnica y acceso mediante QR",
       description:
         "Consulta del estado operativo, controles programados, historial y acceso rápido desde el equipo físico.",
-      src: "/projects/firetrack/asset-qr.webp",
+      src: "/projects/firetrack/asset-qr-v2.webp",
       alt: "Ficha de un extintor en FireTrack con etiqueta QR de demostración",
     },
     {
@@ -96,6 +96,15 @@ const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
         "Posicionamiento de equipos en planos multipágina y navegación entre el croquis y cada registro.",
       src: "/projects/firetrack/croquis.webp",
       alt: "Módulo de croquis de FireTrack con extintores ubicados sobre un plano",
+    },
+    {
+      id: "excel-import",
+      label: "Migración Excel",
+      title: "Importación masiva con validación previa",
+      description:
+        "Carga de inventarios desde Excel con vista previa, validación de filas y confirmación antes de crear registros.",
+      src: "/projects/firetrack/import-excel-v2.webp",
+      alt: "Vista previa de importación desde Excel en FireTrack con resultados de validación",
     },
   ],
   "evacuaplan-studio": [
@@ -477,6 +486,14 @@ export const caseStudies = {
           description:
             "Equipment placement on multi-page plans with direct navigation between the plan and each record.",
           alt: "FireTrack floor-plan module with fire extinguishers positioned on a plan",
+        },
+        {
+          ...galleries.firetrack[3],
+          label: "Excel migration",
+          title: "Bulk import with pre-validation",
+          description:
+            "Inventory uploads from Excel with row previews, validation results and confirmation before records are created.",
+          alt: "FireTrack Excel import preview showing row validation results",
         },
       ],
       problem: {
