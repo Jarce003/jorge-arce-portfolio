@@ -45,7 +45,7 @@ The editor includes architectural drawing tools, emergency symbols, object trans
 - Detailed technical case studies
 - Accessible navigation
 - Downloadable CV in both languages
-- WhatsApp, email, LinkedIn and GitHub contact options
+- Protected contact form, WhatsApp, LinkedIn and GitHub contact options
 - Open Graph metadata, sitemap, robots and web manifest
 
 ## Local development
@@ -70,7 +70,6 @@ The FireTrack and EvacuaPlan Studio production repositories are private and are 
 
 - LinkedIn: https://www.linkedin.com/in/jorge-arce-solano
 - GitHub: https://github.com/Jarce003
-- Email: jarce-s03@hotmail.com
 - WhatsApp: +506 8328-7094
 
 ## License

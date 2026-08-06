@@ -1,3 +1,4 @@
+import { ContactForm } from "@/components/contact-form";
 import type { SiteContent } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
@@ -8,30 +9,39 @@ type ContactSectionProps = {
 
 const contactLabels = {
   es: {
+    alternatives: "También puedes contactarme por",
     whatsappLabel: "WhatsApp",
-    emailLabel: "Correo",
+    whatsappValue: "Escribir por WhatsApp",
     linkedinLabel: "LinkedIn",
+    linkedinValue: "Ver perfil profesional",
     githubLabel: "GitHub",
+    githubValue: "Ver repositorios",
     resumeLabel: "Currículum",
-    resumeAction: "Descargar CV",
+    resumeValue: "Descargar CV",
   },
   en: {
+    alternatives: "You can also contact me through",
     whatsappLabel: "WhatsApp",
-    emailLabel: "Email",
+    whatsappValue: "Message me on WhatsApp",
     linkedinLabel: "LinkedIn",
+    linkedinValue: "View professional profile",
     githubLabel: "GitHub",
+    githubValue: "View repositories",
     resumeLabel: "Resume",
-    resumeAction: "Download resume",
+    resumeValue: "Download resume",
   },
 } satisfies Record<
   Locale,
   {
+    alternatives: string;
     whatsappLabel: string;
-    emailLabel: string;
+    whatsappValue: string;
     linkedinLabel: string;
+    linkedinValue: string;
     githubLabel: string;
+    githubValue: string;
     resumeLabel: string;
-    resumeAction: string;
+    resumeValue: string;
   }
 >;
 
@@ -51,42 +61,36 @@ export function ContactSection({
     whatsappMessage,
   )}`;
 
-  const emailSubject =
-    lang === "es" ? "Consulta desde el portafolio" : "Portfolio inquiry";
-
-  const emailUrl = `mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-    emailSubject,
-  )}`;
-
   const resumeUrl =
     lang === "es"
       ? "/cv/Jorge-Arce-Solano-CV-ES.pdf"
       : "/cv/Jorge-Arce-Solano-CV-EN.pdf";
 
-  const contactItems = [
+  const siteKey =
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
+    (process.env.NODE_ENV === "development"
+      ? "1x00000000000000000000AA"
+      : "");
+
+  const alternatives = [
     {
       label: labels.whatsappLabel,
-      value: "+506 8328-7094",
+      value: labels.whatsappValue,
       href: whatsappUrl,
     },
     {
-      label: labels.emailLabel,
-      value: "jarce-s03@hotmail.com",
-      href: emailUrl,
-    },
-    {
       label: labels.linkedinLabel,
-      value: "linkedin.com/in/jorge-arce-solano",
+      value: labels.linkedinValue,
       href: "https://www.linkedin.com/in/jorge-arce-solano",
     },
     {
       label: labels.githubLabel,
-      value: "github.com/Jarce003",
+      value: labels.githubValue,
       href: "https://github.com/Jarce003",
     },
     {
       label: labels.resumeLabel,
-      value: labels.resumeAction,
+      value: labels.resumeValue,
       href: resumeUrl,
       download: true,
     },
@@ -113,27 +117,39 @@ export function ContactSection({
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/60">
-            {contactItems.map((item, index) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target={item.href.startsWith("http") ? "_blank" : undefined}
-                rel={item.href.startsWith("http") ? "noreferrer" : undefined}
-                download={item.download}
-                className={`block px-6 py-6 transition hover:bg-slate-900 sm:px-8 ${
-                  index > 0 ? "border-t border-slate-800" : ""
-                }`}
-              >
-                <span className="block text-xs font-bold uppercase tracking-[0.16em] text-cyan-400">
-                  {item.label}
-                </span>
+          <div>
+            <ContactForm lang={lang} siteKey={siteKey} />
 
-                <span className="mt-2 block break-words text-base font-semibold text-white sm:text-lg">
-                  {item.value}
-                </span>
-              </a>
-            ))}
+            <div className="mt-6">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                {labels.alternatives}
+              </p>
+
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {alternatives.map((item) => {
+                  const external = item.href.startsWith("http");
+
+                  return (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      target={external ? "_blank" : undefined}
+                      rel={external ? "noreferrer" : undefined}
+                      download={item.download}
+                      className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 transition hover:border-slate-600 hover:bg-slate-900"
+                    >
+                      <span className="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-cyan-400">
+                        {item.label}
+                      </span>
+
+                      <span className="mt-2 block text-sm font-semibold text-white">
+                        {item.value}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

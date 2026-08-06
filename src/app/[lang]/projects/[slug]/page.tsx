@@ -64,10 +64,7 @@ export default async function CaseStudyPage({
   const content = siteContent[lang];
   const study = caseStudies[lang][slug];
   const projectsId = lang === "es" ? "proyectos" : "projects";
-  const contactSubject =
-    lang === "es"
-      ? `Consulta relacionada con ${study.title}`
-      : `Inquiry related to ${study.title}`;
+
   const secondaryHref =
     slug === "firetrack"
       ? "https://firetrackcr.com"
@@ -296,14 +293,12 @@ export default async function CaseStudyPage({
             </p>
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:mt-9 sm:flex-row">
-              <a
-                href={`mailto:jarce-s03@hotmail.com?subject=${encodeURIComponent(
-                  contactSubject,
-                )}`}
+              <Link
+                href={`/${lang}#${lang === "es" ? "contacto" : "contact"}`}
                 className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-slate-950 transition hover:bg-cyan-50"
               >
                 {study.cta.primaryAction}
-              </a>
+              </Link>
 
               {secondaryExternal ? (
                 <a
