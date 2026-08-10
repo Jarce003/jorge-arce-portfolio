@@ -140,12 +140,12 @@ export const siteContent = {
       availability:
         "Disponible para proyectos freelance, contratos y oportunidades remotas",
       title:
-        "Construyo aplicaciones web que convierten procesos complejos en soluciones claras y confiables.",
+        "Convierto procesos complejos en soluciones digitales claras, eficientes y confiables.",
       description:
-        "Soy Ingeniero en Sistemas y desarrollador Full Stack. Diseño productos digitales desde el análisis de la necesidad hasta la arquitectura, implementación, validación y despliegue.",
+        "Combino análisis de procesos, lógica de negocio y desarrollo Full Stack para identificar oportunidades de mejora, diseñar flujos más eficientes y construir soluciones que funcionen en la operación real.",
       primaryAction: "Explorar proyectos",
       secondaryAction: "Hablemos de su proyecto",
-      technologiesLabel: "Stack principal",
+      technologiesLabel: "Tecnologías principales",
       technologies: [
         "Next.js",
         "React",
@@ -162,9 +162,9 @@ export const siteContent = {
     },
     projectsSection: {
       eyebrow: "Trabajo seleccionado",
-      title: "Productos construidos para operaciones reales",
+      title: "De problemas operativos a productos digitales",
       description:
-        "Proyectos en los que he participado de extremo a extremo: definición funcional, arquitectura, desarrollo, pruebas, seguridad y despliegue.",
+        "Casos donde analizo necesidades reales, estructuro procesos y reglas de negocio, y llevo la solución hasta desarrollo, pruebas, seguridad y despliegue.",
       projects: [
         {
           slug: "firetrack",
@@ -172,11 +172,11 @@ export const siteContent = {
           title: "FireTrack",
           status: "En producción",
           description:
-            "Plataforma SaaS multiempresa para gestionar inventario, inspecciones, mantenimiento y trazabilidad de extintores.",
+            "Solución SaaS creada al identificar oportunidades para mejorar la gestión tradicional de inventario, inspecciones, mantenimiento y trazabilidad de extintores.",
           highlights: [
-            "Arquitectura multiempresa con autenticación, roles y aislamiento seguro de datos.",
-            "Códigos QR, reportes PDF, alertas, auditoría e importación desde Excel.",
-            "Aplicación desplegada y mantenida mediante entregas incrementales.",
+            "Análisis del flujo operativo y traducción de necesidades reales en reglas, permisos y procesos digitales.",
+            "Arquitectura multiempresa con autenticación, roles, aislamiento de datos y trazabilidad.",
+            "QR, reportes PDF, alertas, auditoría e importación Excel integrados al flujo diario.",
           ],
           technologies: [
             "Next.js",
@@ -224,9 +224,9 @@ export const siteContent = {
           title: "EvacuaPlan Studio",
           status: "En desarrollo activo",
           description:
-            "Editor web interactivo para crear croquis profesionales de emergencia y evacuación desde computadoras y dispositivos táctiles.",
+            "Herramienta web que traduce requisitos de planificación de emergencias en un flujo especializado para crear croquis profesionales.",
           highlights: [
-            "Herramientas para paredes, puertas, ventanas, áreas, textos y símbolos.",
+            "Conversión de requisitos técnicos y operativos en herramientas específicas de edición.",
             "Selección, rotación, agrupación, bloqueo, copia y edición avanzada de objetos.",
             "Interacción con mouse, pantallas táctiles, iPad y Apple Pencil.",
           ],
@@ -271,30 +271,30 @@ export const siteContent = {
     },
     servicesSection: {
       eyebrow: "Servicios",
-      title: "Cómo puedo aportar a un proyecto",
+      title: "Análisis, mejora e implementación",
       description:
-        "Trabajo principalmente en productos web, sistemas empresariales y aplicaciones que requieren flujos, datos y reglas de negocio bien definidos.",
+        "Puedo intervenir desde la comprensión del proceso hasta la construcción y validación de la solución, combinando visión operativa y capacidad técnica.",
       services: [
         {
           number: "01",
-          title: "Desarrollo de productos web",
+          title: "Análisis y mejora de procesos",
           description:
-            "Aplicaciones empresariales, plataformas SaaS, dashboards y herramientas internas.",
+            "Reviso flujos actuales, necesidades de usuarios, cuellos de botella, riesgos y oportunidades de simplificación o automatización.",
           details:
-            "Next.js · React · TypeScript · Node.js · PostgreSQL",
+            "Análisis · Requerimientos · Flujos · Reglas de negocio",
         },
         {
           number: "02",
-          title: "Mejoras e integraciones",
+          title: "Automatización y soluciones a medida",
           description:
-            "Nuevas funcionalidades, APIs, autenticación, roles, reportes y corrección de problemas.",
-          details: "REST APIs · Supabase · SQL · PDF · Correo · QR",
+            "Convierto procesos definidos en herramientas internas, aplicaciones web, integraciones y flujos basados en datos.",
+          details: "Next.js · TypeScript · Node.js · REST APIs · PostgreSQL",
         },
         {
           number: "03",
-          title: "QA y validación funcional",
+          title: "Validación y mejora continua",
           description:
-            "Pruebas de flujos, reproducción de errores y validación responsive y de regresión.",
+            "Pruebo flujos, reproduzco errores, valido reglas y ajusto la solución a partir del comportamiento real de usuarios y operación.",
           details: "Web · Móvil · iPad · Roles · Permisos · UX",
         },
       ],
@@ -303,57 +303,57 @@ export const siteContent = {
       eyebrow: "Forma de trabajo",
       title: "De una necesidad operativa a una solución funcional",
       description:
-        "Un proceso claro permite reducir incertidumbre, controlar el alcance y validar cada avance antes de continuar.",
+        "Primero entiendo cómo funciona el proceso hoy; después identifico dónde pierde eficiencia y defino una mejora antes de decidir qué tecnología conviene.",
       steps: [
         {
           number: "01",
           title: "Comprender",
           description:
-            "Analizo el problema, los usuarios, las reglas de negocio y el resultado esperado.",
+            "Entiendo cómo funciona el proceso hoy, quién lo ejecuta, qué reglas aplica y qué resultado necesita.",
         },
         {
           number: "02",
-          title: "Planificar",
+          title: "Diagnosticar",
           description:
-            "Defino alcance, flujos, estructura de datos, riesgos y una implementación por etapas.",
+            "Identifico cuellos de botella, duplicaciones, riesgos, pérdidas de información y oportunidades de simplificación o automatización.",
         },
         {
           number: "03",
-          title: "Construir",
+          title: "Diseñar e implementar",
           description:
-            "Desarrollo funcionalidades mantenibles mediante cambios controlados y checkpoints.",
+            "Defino el flujo mejorado y construyo la solución técnica cuando la tecnología aporta valor.",
         },
         {
           number: "04",
-          title: "Verificar",
+          title: "Validar y mejorar",
           description:
-            "Pruebo los flujos, valido la seguridad y reviso el comportamiento antes del despliegue.",
+            "Pruebo escenarios reales, verifico seguridad y usabilidad, y ajusto el proceso según los resultados.",
         },
       ],
     },
     valueSection: {
       eyebrow: "Valor profesional",
-      title: "Más que escribir código",
+      title: "Entender el problema antes de construir la solución",
       items: [
         {
-          title: "Visión integral",
+          title: "Mentalidad de mejora",
           description:
-            "Puedo trabajar en requerimientos, interfaz, backend, base de datos, seguridad, pruebas y despliegue.",
+            "Busco comprender por qué existe cada paso, qué valor aporta y dónde el proceso puede ser más simple, claro o eficiente.",
         },
         {
-          title: "Comprensión operativa",
+          title: "Puente entre operación y tecnología",
           description:
-            "Mi trayectoria técnica me ayuda a comprender procesos reales, riesgos y necesidades de usuarios no técnicos.",
+            "Traduzco necesidades de usuarios y negocio en flujos, reglas de datos y decisiones técnicas comprensibles.",
         },
         {
-          title: "Mentalidad de calidad",
+          title: "Capacidad de ejecución",
           description:
-            "Valido los cambios mediante pruebas funcionales, builds, revisión visual y verificación posterior al despliegue.",
+            "No me quedo en la recomendación: puedo llevar la solución a interfaz, backend, base de datos, pruebas y despliegue.",
         },
         {
-          title: "Comunicación clara",
+          title: "Trabajo colaborativo",
           description:
-            "Traduzco necesidades empresariales en decisiones técnicas comprensibles y trazables.",
+            "Construyo relaciones de confianza para que las personas comuniquen problemas reales y participen en soluciones que puedan adoptar.",
         },
       ],
     },
@@ -378,11 +378,11 @@ export const siteContent = {
     },
     aboutSection: {
       eyebrow: "Sobre mí",
-      title: "Desarrollo software con criterio técnico y comprensión de procesos reales",
+      title: "Ingeniería, operación y mejora de procesos en un mismo perfil",
       paragraphs: [
         "Soy Jorge Arce, Ingeniero en Sistemas graduado de la Universidad Autónoma de Centro América con la distinción Summa Cum Laude Probatus.",
-        "Además del desarrollo de software, trabajo en atención de emergencias desde 2014 y tengo experiencia como instructor y coordinador de proyectos de capacitación.",
-        "Esta combinación fortaleció mi disciplina, liderazgo, comunicación y capacidad para analizar necesidades reales y convertirlas en soluciones confiables.",
+        "Además del desarrollo de software, trabajo en atención de emergencias desde 2014 y he asumido responsabilidades de coordinación, instrucción y mejora de flujos en entornos donde la claridad, el cumplimiento y la toma de decisiones son importantes.",
+        "FireTrack resume bien mi forma de trabajar: identifiqué oportunidades de mejora en un proceso operativo, estructuré sus reglas y necesidades, y las convertí en una solución SaaS en producción.",
       ],
       facts: [
         "Costa Rica",
@@ -402,7 +402,7 @@ export const siteContent = {
     },
     footer: {
       description:
-        "Full Stack Software Engineer enfocado en aplicaciones SaaS y soluciones empresariales.",
+        "Systems Engineer y Full Stack Developer enfocado en mejora de procesos, automatización y soluciones digitales.",
       rights: "Todos los derechos reservados.",
     },
   },
@@ -426,12 +426,12 @@ export const siteContent = {
       availability:
         "Available for freelance projects, contracts and remote opportunities",
       title:
-        "I build web applications that turn complex processes into clear and reliable solutions.",
+        "I turn complex processes into clear, efficient and reliable digital solutions.",
       description:
-        "I am a Systems Engineer and Full Stack Developer. I design digital products from requirements analysis through architecture, implementation, validation and deployment.",
+        "I combine process analysis, business logic and Full Stack development to identify improvement opportunities, design more efficient workflows and build solutions that work in real operations.",
       primaryAction: "Explore projects",
       secondaryAction: "Let’s discuss your project",
-      technologiesLabel: "Core stack",
+      technologiesLabel: "Technical stack",
       technologies: [
         "Next.js",
         "React",
@@ -448,9 +448,9 @@ export const siteContent = {
     },
     projectsSection: {
       eyebrow: "Selected work",
-      title: "Products built for real operations",
+      title: "From operational problems to digital products",
       description:
-        "Projects where I have contributed across the full lifecycle: functional definition, architecture, development, testing, security and deployment.",
+        "Cases where I analyze real needs, structure processes and business rules, and take the solution through development, testing, security and deployment.",
       projects: [
         {
           slug: "firetrack",
@@ -458,11 +458,11 @@ export const siteContent = {
           title: "FireTrack",
           status: "In production",
           description:
-            "Multi-tenant SaaS platform for fire extinguisher inventory, inspections, maintenance and operational traceability.",
+            "A SaaS solution created after identifying opportunities to improve traditional fire-extinguisher inventory, inspection, maintenance and traceability processes.",
           highlights: [
-            "Multi-company architecture with authentication, roles and secure data isolation.",
-            "QR workflows, PDF reporting, alerts, audit records and Excel imports.",
-            "Deployed application maintained through controlled incremental releases.",
+            "Analysis of the operational workflow and translation of real needs into rules, permissions and digital processes.",
+            "Multi-company architecture with authentication, roles, data isolation and traceability.",
+            "QR, PDF reporting, alerts, audit records and Excel imports integrated into the daily workflow.",
           ],
           technologies: [
             "Next.js",
@@ -510,9 +510,9 @@ export const siteContent = {
           title: "EvacuaPlan Studio",
           status: "Active development",
           description:
-            "Interactive web editor for creating professional emergency and evacuation plans on desktop and touch devices.",
+            "A web tool that translates emergency-planning requirements into a specialized workflow for creating professional evacuation plans.",
           highlights: [
-            "Tools for walls, doors, windows, areas, text and emergency symbols.",
+            "Translation of technical and operational requirements into specialized editing tools.",
             "Selection, rotation, grouping, locking, copying and advanced object editing.",
             "Mouse, touchscreen, iPad and Apple Pencil interaction.",
           ],
@@ -557,30 +557,30 @@ export const siteContent = {
     },
     servicesSection: {
       eyebrow: "Services",
-      title: "How I can contribute",
+      title: "Analysis, improvement and implementation",
       description:
-        "I focus on web products, business systems and applications that depend on well-defined workflows, data and business rules.",
+        "I can contribute from understanding the process through building and validating the solution, combining operational perspective with technical execution.",
       services: [
         {
           number: "01",
-          title: "Web product development",
+          title: "Process analysis and improvement",
           description:
-            "Business applications, SaaS platforms, dashboards and internal tools.",
+            "I review current workflows, user needs, bottlenecks, risks and opportunities for simplification or automation.",
           details:
-            "Next.js · React · TypeScript · Node.js · PostgreSQL",
+            "Process analysis · Requirements · Workflow design · Business rules",
         },
         {
           number: "02",
-          title: "Improvements and integrations",
+          title: "Automation and custom solutions",
           description:
-            "New features, APIs, authentication, roles, reports and application troubleshooting.",
-          details: "REST APIs · Supabase · SQL · PDF · Email · QR",
+            "I turn defined processes into internal tools, web applications, integrations and data-driven workflows.",
+          details: "Next.js · TypeScript · Node.js · REST APIs · PostgreSQL",
         },
         {
           number: "03",
-          title: "Functional QA and validation",
+          title: "Validation and continuous improvement",
           description:
-            "User-flow testing, defect reproduction, responsive validation and regression testing.",
+            "I test workflows, reproduce defects, validate rules and refine solutions based on real user and operational behavior.",
           details: "Web · Mobile · iPad · Roles · Permissions · UX",
         },
       ],
@@ -589,57 +589,57 @@ export const siteContent = {
       eyebrow: "Working process",
       title: "From an operational need to a functional solution",
       description:
-        "A clear process reduces uncertainty, controls scope and validates each stage before moving forward.",
+        "I first understand how the process works today, then identify where it loses efficiency and define an improvement before deciding which technology makes sense.",
       steps: [
         {
           number: "01",
           title: "Understand",
           description:
-            "I analyze the problem, users, business rules and expected outcome.",
+            "I understand how the process works today, who performs it, which rules apply and what outcome is needed.",
         },
         {
           number: "02",
-          title: "Plan",
+          title: "Diagnose",
           description:
-            "I define scope, workflows, data structure, risks and an incremental implementation.",
+            "I identify bottlenecks, duplicated effort, risks, information gaps and opportunities for simplification or automation.",
         },
         {
           number: "03",
-          title: "Build",
+          title: "Design and implement",
           description:
-            "I develop maintainable features through controlled changes and checkpoints.",
+            "I define the improved workflow and build the technical solution when technology adds real value.",
         },
         {
           number: "04",
-          title: "Verify",
+          title: "Validate and improve",
           description:
-            "I test workflows, validate security and review behavior before deployment.",
+            "I test real scenarios, verify security and usability, and refine the process based on results.",
         },
       ],
     },
     valueSection: {
       eyebrow: "Professional value",
-      title: "More than writing code",
+      title: "Understand the problem before building the solution",
       items: [
         {
-          title: "End-to-end perspective",
+          title: "Improvement mindset",
           description:
-            "I can contribute to requirements, frontend, backend, databases, security, testing and deployment.",
+            "I look at why each step exists, what value it adds and where a process can become simpler, clearer or more efficient.",
         },
         {
-          title: "Operational understanding",
+          title: "Bridge between operations and technology",
           description:
-            "My technical background helps me understand real processes, risks and the needs of non-technical users.",
+            "I translate user and business needs into workflows, data rules and understandable technical decisions.",
         },
         {
-          title: "Quality mindset",
+          title: "Execution capability",
           description:
-            "I validate changes through functional testing, builds, visual review and post-deployment verification.",
+            "I do not stop at recommendations: I can take a solution through frontend, backend, databases, testing and deployment.",
         },
         {
-          title: "Clear communication",
+          title: "Collaborative work",
           description:
-            "I translate business requirements into understandable and traceable technical decisions.",
+            "I build trust so people can communicate real problems openly and contribute to solutions they can actually adopt.",
         },
       ],
     },
@@ -664,11 +664,11 @@ export const siteContent = {
     },
     aboutSection: {
       eyebrow: "About me",
-      title: "I build software with technical judgment and real-world process understanding",
+      title: "Engineering, operations and process improvement in one profile",
       paragraphs: [
         "I am Jorge Arce, a Systems Engineer who graduated from Universidad Autónoma de Centro América with the Summa Cum Laude Probatus distinction.",
-        "Alongside software development, I have worked in emergency response since 2014 and have experience as a technical instructor and training-project coordinator.",
-        "This combination strengthened my discipline, leadership, communication and ability to convert real operational needs into reliable solutions.",
+        "Alongside software development, I have worked in emergency response since 2014, taking on responsibilities in coordination, instruction and workflow improvement in environments where clarity, compliance and decision-making matter.",
+        "FireTrack summarizes how I work: I identified opportunities to improve an operational process, structured its rules and requirements, and turned them into a production SaaS solution.",
       ],
       facts: [
         "Costa Rica",
@@ -688,7 +688,7 @@ export const siteContent = {
     },
     footer: {
       description:
-        "Full Stack Software Engineer focused on SaaS applications and business solutions.",
+        "Systems Engineer and Full Stack Developer focused on process improvement, automation and digital solutions.",
       rights: "All rights reserved.",
     },
   },
