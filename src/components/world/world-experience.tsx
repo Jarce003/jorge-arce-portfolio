@@ -67,6 +67,7 @@ const stationCopy: Record<Language, StationCopy[]> = {
       problem: "Consultar la ubicación y características de hidrantes sobre el terreno.",
       answer: "Una aplicación con mapa público accesible mediante QR y gestión privada de ubicaciones.",
       technology: "Next.js · Supabase · Geolocalización",
+      slug: "hidrantes-app",
     },
   ],
   en: [
@@ -108,6 +109,7 @@ const stationCopy: Record<Language, StationCopy[]> = {
       problem: "Finding the location and characteristics of hydrants while working in the field.",
       answer: "A public QR-accessible map with a private location management module.",
       technology: "Next.js · Supabase · Geolocation",
+      slug: "hidrantes-app",
     },
   ],
 };
