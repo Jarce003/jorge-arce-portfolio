@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:encoding": "node scripts/check-encoding.mjs",
-    "check:projects": "node scripts/check-projects.mjs"
+    "check:projects": "node scripts/check-projects.mjs",
+    "test:demo": "node --test scripts/test-sample-demo.mjs"
   },
   "dependencies": {
     "next": "16.2.12",
