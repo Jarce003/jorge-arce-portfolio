@@ -49,15 +49,15 @@ export default async function HomePage({ params }: HomePageProps) {
       <SiteHeader lang={lang} content={content} />
 
       <main>
-        <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50">
+        <section className="relative isolate overflow-hidden border-b border-slate-800 bg-[#090f1f] text-white">
           <div
-            className="pointer-events-none absolute inset-0 surface-grid opacity-65"
+            className="pointer-events-none absolute inset-0 surface-grid opacity-20"
             aria-hidden="true"
           />
 
-          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-14 lg:px-10 lg:py-32">
+          <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-10 lg:py-36">
             <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[0.7rem] font-semibold leading-5 text-emerald-800 sm:px-4 sm:text-xs">
+              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-[0.7rem] font-semibold leading-5 text-emerald-200 sm:px-4 sm:text-xs">
                 <span
                   className="h-2 w-2 shrink-0 rounded-full bg-emerald-500"
                   aria-hidden="true"
@@ -65,18 +65,18 @@ export default async function HomePage({ params }: HomePageProps) {
                 {content.hero.availability}
               </div>
 
-              <h1 className="max-w-4xl text-balance text-[2.35rem] font-semibold leading-[1.04] tracking-[-0.045em] text-slate-950 sm:text-5xl lg:text-[4.25rem] lg:leading-[1.04]">
+              <h1 className="max-w-4xl text-balance text-[2.8rem] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:text-6xl lg:text-[4.65rem] lg:leading-[1.03]">
                 {content.hero.title}
               </h1>
 
-              <p className="mt-6 max-w-2xl text-pretty text-base leading-7 text-slate-600 sm:mt-7 sm:text-lg sm:leading-8">
+              <p className="mt-7 max-w-2xl text-pretty text-base leading-7 text-slate-300 sm:mt-8 sm:text-lg sm:leading-8">
                 {content.hero.description}
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row">
                 <Link
                   href={`/${lang}#${sectionIds.projects}`}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-950 px-6 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-violet-400 px-6 text-sm font-semibold text-slate-950 shadow-lg shadow-violet-500/15 transition hover:bg-violet-300"
                 >
                   {content.hero.primaryAction}
                   <span className="ml-2" aria-hidden="true">
@@ -86,14 +86,14 @@ export default async function HomePage({ params }: HomePageProps) {
 
                 <a
                   href={`/${lang}#${lang === "es" ? "contacto" : "contact"}`}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:border-slate-950"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-600 bg-white/5 px-6 text-sm font-semibold text-white transition hover:border-violet-300 hover:bg-white/10"
                 >
                   {content.hero.secondaryAction}
                 </a>
               </div>
 
-              <div className="mt-9 border-t border-slate-200 pt-6 sm:mt-11 sm:pt-7">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="mt-10 border-t border-slate-700/70 pt-6 sm:mt-12 sm:pt-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   {content.hero.technologiesLabel}
                 </p>
 
@@ -101,7 +101,7 @@ export default async function HomePage({ params }: HomePageProps) {
                   {content.hero.technologies.map((technology) => (
                     <span
                       key={technology}
-                      className="text-sm font-semibold text-slate-700"
+                      className="text-sm font-semibold text-slate-300"
                     >
                       {technology}
                     </span>
@@ -112,7 +112,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
             <div className="relative">
               <div
-                className="absolute -inset-5 rounded-[2.4rem] bg-cyan-200/35 blur-3xl"
+                className="absolute -inset-5 rounded-[2.4rem] bg-violet-500/25 blur-3xl"
                 aria-hidden="true"
               />
 
@@ -122,19 +122,19 @@ export default async function HomePage({ params }: HomePageProps) {
             </div>
           </div>
 
-          <div className="relative mx-auto max-w-7xl border-t border-slate-200 px-4 sm:px-8 lg:px-10">
+          <div className="relative mx-auto max-w-7xl border-t border-slate-800 px-4 sm:px-8 lg:px-10">
             <div className="grid grid-cols-3">
               {content.hero.metrics.map((metric, index) => (
                 <div
                   key={metric.label}
                   className={`px-2 py-5 text-center sm:px-6 sm:py-7 sm:text-left ${
-                    index > 0 ? "border-l border-slate-200" : ""
+                    index > 0 ? "border-l border-slate-800" : ""
                   }`}
                 >
-                  <p className="text-base font-bold leading-tight text-slate-950 sm:text-xl">
+                  <p className="text-base font-bold leading-tight text-white sm:text-xl">
                     {metric.value}
                   </p>
-                  <p className="mt-1 text-[0.68rem] leading-4 text-slate-500 sm:text-sm">
+                  <p className="mt-1 text-[0.68rem] leading-4 text-slate-400 sm:text-sm">
                     {metric.label}
                   </p>
                 </div>
@@ -145,7 +145,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
         <section
           id={sectionIds.projects}
-          className="scroll-mt-24 bg-white py-20 sm:py-28 lg:py-32"
+          className="scroll-mt-24 bg-[#f8f9fc] py-20 sm:py-28 lg:py-32"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-10">
             <div className="max-w-3xl">
@@ -158,11 +158,11 @@ export default async function HomePage({ params }: HomePageProps) {
               </p>
             </div>
 
-            <div className="mt-12 space-y-16 sm:mt-16 sm:space-y-20">
+            <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
               {content.projectsSection.projects.map((project, index) => (
                 <article
                   key={project.title}
-                  className="grid min-w-0 max-w-full items-center gap-8 lg:grid-cols-2 lg:gap-16"
+                  className="grid min-w-0 max-w-full items-center gap-8 rounded-[2rem] border border-slate-200/90 bg-white p-5 shadow-xl shadow-slate-200/45 sm:p-8 lg:grid-cols-2 lg:gap-14 lg:p-10"
                 >
                   <div
                     className={`min-w-0 max-w-full ${
@@ -179,7 +179,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
                   <div>
                     <div className="mb-4 flex flex-wrap items-center gap-3 sm:mb-5">
-                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-800">
+                      <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-violet-700">
                         {project.status}
                       </span>
 
