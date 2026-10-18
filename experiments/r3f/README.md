@@ -12,31 +12,43 @@ Se puede alternar entre:
 
 Comparación local: mundo actual en `http://localhost:3000/es` y laboratorio en `http://localhost:4174`.
 
-## Primer uso desde Windows
+## Primer uso desde Windows — dos carpetas independientes
 
-Con tu proyecto Git limpio y el servidor anterior de la prueba detenido o abierto en otro PowerShell:
+**No cambies de rama en la carpeta estable**: mientras pruebas React Three Fiber, conserva JarceDev 3.0 funcionando en `localhost:3000`. Crea una segunda carpeta mediante `git worktree`, que reutiliza el mismo repositorio Git pero mantiene archivos, paquetes y compilaciones independientes:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$repo = 'C:\Users\jarce\nodeJsProyects\Ejercicios python\jorge-arce-portfolio'
-Set-Location -LiteralPath $repo
-if (git status --porcelain) { throw 'Revisa los cambios locales antes de continuar.' }
+$stable = 'C:\Users\jarce\nodeJsProyects\Ejercicios python\jorge-arce-portfolio'
+$lab = 'C:\Users\jarce\nodeJsProyects\Ejercicios python\jorge-arce-portfolio-r3f'
+Set-Location -LiteralPath $stable
+
 git fetch origin
 if ($LASTEXITCODE -ne 0) { throw 'Falló git fetch' }
-git switch experiment/jarcedev-blender-r3f-pilot
-if ($LASTEXITCODE -ne 0) { throw 'Falló git switch' }
-git pull --ff-only origin experiment/jarcedev-blender-r3f-pilot
-if ($LASTEXITCODE -ne 0) { throw 'Falló git pull' }
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\scripts\pilot-3d-local.ps1'
+
+if (-not (Test-Path -LiteralPath $lab)) {
+    $branch = 'experiment/jarcedev-blender-r3f-pilot'
+    git show-ref --verify --quiet "refs/heads/$branch"
+    if ($LASTEXITCODE -eq 0) {
+        git worktree add "$lab" "$branch"
+    } else {
+        git worktree add -b "$branch" "$lab" "origin/$branch"
+    }
+    if ($LASTEXITCODE -ne 0) { throw 'Falló git worktree add' }
+} else {
+    $actual = (& git -C "$lab" rev-parse --show-toplevel).Trim()
+    if ($LASTEXITCODE -ne 0 -or $actual -ne $lab) {
+        throw 'La carpeta del laboratorio existe pero no es el worktree esperado.'
+    }
+    git -C "$lab" pull --ff-only origin experiment/jarcedev-blender-r3f-pilot
+    if ($LASTEXITCODE -ne 0) { throw 'No se pudo actualizar la carpeta R3F.' }
+}
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$lab\scripts\pilot-3d-local.ps1"
 ```
 
-El script busca Blender (opcional), genera activos si lo encuentra, instala dependencias **solo en experiments/r3f**, valida TypeScript, compila y deja el servidor escuchando exclusivamente en 127.0.0.1:4174. No abre el navegador. No ejecuta npm ci en la app Next.js ni modifica Vercel.
+El script detecta Blender (opcional), crea los GLB si está disponible, instala dependencias **solo en `jorge-arce-portfolio-r3f\experiments\r3f`**, valida TypeScript y levanta Vite en `127.0.0.1:4174`. No abre el navegador, no despliega ni modifica la carpeta principal.
 
-La primera instalación crea `experiments/r3f/package-lock.json` localmente. Revísalo antes de cualquier commit. Para pruebas posteriores puedes usar:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\scripts\pilot-3d-local.ps1' -SkipInstall
-```
+En el primer uso, npm crea `experiments/r3f/package-lock.json` solo en el laboratorio. Para futuras pruebas añade `-SkipInstall` a su script si no han cambiado las dependencias.
 
 ## Blender 4+ / 5+
 
