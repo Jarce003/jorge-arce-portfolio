@@ -81,6 +81,12 @@ Acreditaciones includes a private assistant based on AI query compilation and a 
 
 A floating “Hablemos / Let's talk” action opens a focused dialog. Visitors choose an inquiry type, optionally describe the situation and then select either a prefilled WhatsApp handoff or the existing protected email form with Cloudflare Turnstile. Nothing is submitted automatically.
 
+## Discovery firefighting sequence (local preview)
+
+Four stylized fires appear at undiscovered project stations. When the ladder truck reaches one and the visitor presses **Discover / E**, it sprays a lightweight animated water jet from its ladder, the fire fades and the concise project panel opens. A small progress badge tracks recovered stations. **R** resets the rescue and allows replay. Reduced-motion users skip the animated sequence, with full access to all projects.
+
+Fire and water are fictional, simplified game visuals, not a realistic firefighting simulation. The sequence has deterministic regression tests (`npm run test:world`) and still requires browser/mobile appearance review.
+
 ## JarceDev 3.0 architecture and new projects
 
 All projects now live in `src/content/projects.ts`. That one catalog controls the 3D station, visual thumbnail, short text, bilingual direct link and sitemap. The renderer provides reusable structure templates (including a generic template) and a daytime/nighttime switch using the `N` key. A future React Three Fiber v9 engine can reuse `src/components/world/world-contract.ts` without changing the catalog or driving UI.
