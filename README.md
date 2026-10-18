@@ -44,11 +44,20 @@ The website itself is built with Next.js 16, React 19, TypeScript and Tailwind C
 - Protected contact form and links to professional profiles
 - CV downloads, Open Graph tags, sitemap and accessible navigation
 
-### Proposed 3D exploration
+### Interactive exploration world (preview)
 
-An optional, original interactive 3D world inspired by the experience of [Bruno Simon](https://bruno-simon.com/), but tailored to process improvement and JarceDev's cases.
+A **playable, original 3D portfolio world** is now implemented on the redesign feature branch. It is inspired by the exploratory interaction pattern of [Bruno Simon](https://bruno-simon.com/) while remaining visually distinct and focused on process improvement.
 
-Read the **[3D concept and technical plan](docs/jarcedev-3d-concept.md)**. This is currently a proposal, **not an implemented site feature**.
+- Drive an **American-style aerial ladder fire truck** through four project-themed stations.
+- Custom lightweight WebGL 2 renderer, without additional runtime packages.
+- Perspective camera with an overhead toggle, dedicated touch controls and keyboard driving (WASD or arrow keys).
+- Floating station markers, accessible project directory and bilingual project narratives.
+- Protected source code and records from private systems never appear in the demo.
+- GitHub Actions validates encoding, TypeScript and production builds.
+
+The present world is a **functional geometric prototype**, not the final art-directed edition. Polished custom 3D models, additional collision handling, performance profiling and browser-based gameplay tests are still on the roadmap.
+
+Read the [world concept and development roadmap](docs/jarcedev-3d-concept.md). Production remains unchanged until the preview is approved.
 
 ## Development
 
