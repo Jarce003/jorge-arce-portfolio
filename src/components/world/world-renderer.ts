@@ -376,19 +376,126 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       cylinder(st.x, .34, st.z, 12.1, .06, 12.1, "#172b3f");
     }
   }
-  function drawCar(position: WorldPosition, heading: number, elapsed: number, reducedMotion: boolean) {
-    const x=position.x,z=position.z;
-    const bounce=reducedMotion ? 0 : Math.sin(elapsed*2.3)*.025;
-    box(x, .12, z, 2.1, .04, 2.7, "#0b1525", heading);
-    draw("cube", x, .63 + bounce, z, 1.45, .55, 2.0, palette.purple, heading);
-    draw("cube", x, 1.04 + bounce, z-.16, 1.16, .47, 1.00, "#d8ecff", heading);
-    draw("cube", x, 1.31+bounce, z-.16, 1.20, .12, 1.04, "#7b70cb", heading);
-    for(const dx of [-.77,.77]) for(const dz of [-.63,.63]){
-      draw("cylinder",x+Math.cos(heading)*dx+Math.sin(heading)*dz,.34,
-        z-Math.sin(heading)*dx+Math.cos(heading)*dz,.38,.50,.38,"#0b1624");
+  /**
+   * Original, deliberately generic US-style aerial ladder truck.
+   * Long cab-over cab, three axles, roof-mounted extendable ladder,
+   * side equipment doors and warning beacons. No third-party livery.
+   */
+  function drawLadderTruck(position: WorldPosition, heading: number, elapsed: number, reducedMotion: boolean) {
+    const { x, z } = position;
+    const bob = reducedMotion ? 0 : Math.sin(elapsed * 2.1) * .015;
+
+    // Local-to-world conversion preserves the vehicle's heading.
+    // Front of the truck is negative local Z.
+    function local(xOffset: number, zOffset: number): [number, number] {
+      return [
+        x + Math.cos(heading) * xOffset + Math.sin(heading) * zOffset,
+        z - Math.sin(heading) * xOffset + Math.cos(heading) * zOffset,
+      ];
     }
-    draw("cube", x, .64+bounce, z+1.05, .78, .13, .10, palette.gold, heading);
-    draw("cube", x, .64+bounce, z-1.05, .92, .11, .11, "#e3f6ff", heading);
+
+    function part(
+      xOffset: number, y: number, zOffset: number,
+      width: number, height: number, length: number,
+      color: string,
+    ) {
+      const [px,pz] = local(xOffset,zOffset);
+      box(px, y + bob, pz, width,height,length,color,heading);
+    }
+
+    function roundPart(
+      xOffset: number, y: number, zOffset: number,
+      radius: number, length: number, color: string,
+    ) {
+      const [px,pz] = local(xOffset,zOffset);
+      // Wheels use a simplified, low-poly cylinder representation.
+      cylinder(px, y + bob, pz, radius * 2, length, radius * 2, color);
+    }
+
+    // Undercarriage and long red body.
+    part(0,.38,0,2.0,.25,5.95,"#172131");
+    part(0,.83,.25,2.18,.88,4.95,"#c83541");
+    part(0,1.39,1.06,2.18,.30,3.25,"#f2f4f7");
+
+    // Four-wheel rear tandem axle + front steering axle.
+    for(const wheelZ of [-1.95, .9, 2.05]) {
+      for(const wheelX of [-1.10,1.10]) {
+        roundPart(wheelX,.45,wheelZ,.58,.39,"#0d1929");
+        roundPart(wheelX,.47,wheelZ,.29,.41,"#99a6b5");
+      }
+    }
+    // Tail end carries utility deck and warning reflectors.
+    part(0,.73,2.78,2.18,.42,.30,"#29384a");
+    part(-.72,.84,2.98,.39,.17,.09,"#ffb482");
+    part(.72,.84,2.98,.39,.17,.09,"#ffb482");
+
+    // Wide American forward cab, windshield, upper white roof.
+    part(0,1.51,-1.89,2.20,1.52,1.73,"#e8464f");
+    part(0,2.34,-1.88,2.29,.20,1.87,"#f5f7fc");
+    part(0,1.76,-2.79,1.83,.62,.09,"#92c9df");
+    part(0,1.48,-2.85,2.03,.13,.15,"#e8f0f8");
+    // Silver chrome grille and heavy-duty front bumper.
+    part(0,.84,-2.96,1.54,.39,.12,"#9faec0");
+    for(let i=-2;i<=2;i++) part(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
+    part(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
+    for(const side of [-1,1]) {
+      part(side*.78,1.11,-2.97,.36,.24,.09,"#f6e7aa");
+      part(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
+      part(side*1.11,1.10,-1.86,.11,.08,1.55,"#f1eee8");
+      // Fold-out mirror arm and housing.
+      part(side*1.29,1.85,-2.46,.37,.08,.07,"#bdcbd6");
+      part(side*1.48,1.79,-2.46,.21,.29,.15,"#c7d7e6");
+    }
+    part(0,1.39,-2.97,.18,.24,.07,"#202a38");
+    // Emergency warning light bar: generic red / blue.
+    part(0,2.50,-2.16,1.30,.12,.30,"#c5d0df");
+    part(-.38,2.61,-2.16,.43,.19,.32,"#ec4b58");
+    part(.38,2.61,-2.16,.43,.19,.32,"#57b9e6");
+
+    // Bright horizontal emergency-apparatus reflectors.
+    for(const side of [-1,1]) {
+      part(side*1.11,1.27,.98,.055,.12,3.03,"#f3edca");
+      part(side*1.12,.91,1.04,.07,.10,3.00,"#f7ca65");
+      // Equipment compartment outlines, handles and recessed panels.
+      for(const compartment of [-.15,.77,1.69]) {
+        part(side*1.13,1.10,compartment,.075,.50,.72,"#cbd7dc");
+        part(side*1.19,1.11,compartment,.078,.38,.59,"#a2b0bf");
+        part(side*1.24,1.25,compartment,.035,.04,.23,"#36465b");
+      }
+    }
+
+    // Aerial turntable at the rear, structurally distinct from pumper body.
+    roundPart(0,1.62,1.52,.88,.33,"#e6eef4");
+    part(0,1.85,1.48,1.52,.23,1.65,"#cbd8e0");
+    part(0,2.03,1.48,1.62,.21,1.61,"#8ea1b1");
+
+    // Silver nested aerial ladder raised just above the body. Side rails
+    // and regularly spaced cross-rungs create a recognizable silhouette.
+    for(const side of [-.58,.58]) {
+      part(side,2.38,.04,.12,.16,5.48,"#f0f5f8");
+      part(side,2.20,.04,.13,.14,5.48,"#98a9bd");
+      for(let index=0;index<11;index++) {
+        const rungZ=-2.47+index*.49;
+        part(side,2.30,rungZ,.10,.23,.10,"#dfe9f4");
+      }
+    }
+    for(let index=0;index<13;index++) {
+      part(0,2.32,-2.50+index*.42,1.20,.075,.105,"#cbdde8");
+    }
+    // Telescoping inner section, slightly shorter and raised.
+    for(const side of [-.39,.39]) {
+      part(side,2.58,-.41,.08,.10,3.86,"#aabccf");
+    }
+    for(let index=0;index<9;index++) {
+      part(0,2.60,-2.12+index*.39,.82,.052,.10,"#ebf1f5");
+    }
+    // Tip, small working platform and final marker lights.
+    part(0,2.44,-2.68,1.53,.13,.21,"#d7e3e9");
+    part(-.68,2.50,-2.68,.17,.18,.19,"#f7c66d");
+    part(.68,2.50,-2.68,.17,.18,.19,"#f7c66d");
+
+    // Distinctive white roof-mounted rescue rack.
+    part(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
   }
 
   return {
@@ -418,7 +525,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       evacuaStation();
       accreditationStation();
       hydrantsStation();
-      drawCar(position, heading, elapsed, reducedMotion);
+      drawLadderTruck(position, heading, elapsed, reducedMotion);
     },
     dispose() {
       for(const shape of shapes.values()) gl.deleteBuffer(shape.buffer);
