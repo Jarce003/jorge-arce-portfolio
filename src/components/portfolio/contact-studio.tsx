@@ -48,7 +48,7 @@ const ui = {
   },
 } as const;
 
-export function ContactStudio({ lang, siteKey }: { lang: Locale; siteKey: string }) {
+export function ContactStudio({ lang, siteKey, worldLauncher = false }: { lang: Locale; siteKey: string; worldLauncher?: boolean }) {
   const t = ui[lang];
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -74,7 +74,7 @@ export function ContactStudio({ lang, siteKey }: { lang: Locale; siteKey: string
 
   return (
     <>
-      <section id={lang === "es" ? "contacto" : "contact"} className="scroll-mt-24 bg-[#0b1628] px-4 py-8 text-white sm:px-8 sm:py-10">
+      {!worldLauncher && <section id={lang === "es" ? "contacto" : "contact"} className="scroll-mt-24 bg-[#0b1628] px-4 py-8 text-white sm:px-8 sm:py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-[.65rem] font-bold tracking-[.17em] text-violet-300">{t.eyebrow}</p>
@@ -84,9 +84,9 @@ export function ContactStudio({ lang, siteKey }: { lang: Locale; siteKey: string
             <span aria-hidden="true">✉</span> {t.cta} <span aria-hidden="true">↗</span>
           </button>
         </div>
-      </section>
+      </section>}
 
-      <button type="button" onClick={open} className="fixed bottom-[max(12px,env(safe-area-inset-bottom))] right-3 z-40 flex min-h-11 items-center gap-2 rounded-full border border-violet-200/40 bg-[#141f3b]/95 px-4 text-xs font-bold text-white shadow-[0_7px_32px_rgba(12,15,30,.45)] backdrop-blur-md transition-colors hover:bg-[#29345c] sm:bottom-6 sm:right-6" aria-label={t.cta}>
+      <button type="button" onClick={open} className={"fixed right-3 z-40 flex min-h-11 items-center gap-2 rounded-full border border-violet-200/40 bg-[#141f3b]/95 px-4 text-xs font-bold text-white shadow-[0_7px_32px_rgba(12,15,30,.45)] backdrop-blur-md transition-colors hover:bg-[#29345c] sm:right-6 " + (worldLauncher ? "bottom-[max(170px,calc(160px+env(safe-area-inset-bottom)))] lg:bottom-6" : "bottom-[max(12px,env(safe-area-inset-bottom))] sm:bottom-6")} aria-label={t.cta}>
         <span aria-hidden="true">✉</span> {t.cta}
       </button>
 
