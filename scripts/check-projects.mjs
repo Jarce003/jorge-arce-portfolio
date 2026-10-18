@@ -69,5 +69,10 @@ for (const item of entries) {
   await access(path.join(root, "public", preview.slice(1)));
   const svg = await readFile(path.join(root, "public", preview.slice(1)), "utf8");
   assert(svg.includes('viewBox="0 0 1200 720"'), "Illustration dimensions differ: " + slug);
+  // Even a valid path and matching dimensions are not enough: a bare '&'
+  // in text invalidates the XML and causes a silent missing image in browsers.
+  const bareAmpersand = /&(?!(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);)/;
+  assert(!bareAmpersand.test(svg), "Unescaped XML entity in preview: " + slug);
+  assert(svg.includes("<svg ") && svg.includes("</svg>"), "Invalid SVG root: " + slug);
 }
 console.log("Validated", entries.length, "unique project records, stations, locales and visual assets.");
