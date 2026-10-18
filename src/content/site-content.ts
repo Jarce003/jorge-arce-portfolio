@@ -1,4 +1,4 @@
-import { getProjects, type ProjectView } from "@/content/projects";
+import { getProjects, projectDefinitions, type ProjectView } from "@/content/projects";
 import type { Locale } from "@/lib/i18n";
 
 export type ProjectVisualVariant = "firetrack" | "evacuaplan";
@@ -145,7 +145,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "4", label: "productos desarrollados" },
+        { value: String(projectDefinitions.length), label: "productos desarrollados" },
         { value: "De idea a producto", label: "definición, pruebas y evolución" },
         { value: "C1", label: "nivel de inglés" },
       ],
@@ -314,7 +314,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "4", label: "developed projects" },
+        { value: String(projectDefinitions.length), label: "developed projects" },
         { value: "Idea to product", label: "definition, testing and evolution" },
         { value: "C1", label: "English proficiency" },
       ],
