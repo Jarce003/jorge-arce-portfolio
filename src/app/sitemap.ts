@@ -7,6 +7,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   return [
+    ...(["es", "en"] as const).map((lang) => ({
+      url: `${siteUrl}/${lang}/projects/hidrantes-app`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+      alternates: {
+        languages: {
+          es: `${siteUrl}/es/projects/hidrantes-app`,
+          en: `${siteUrl}/en/projects/hidrantes-app`,
+        },
+      },
+    })),
     {
       url: `${siteUrl}/es/portfolio`,
       lastModified: now,

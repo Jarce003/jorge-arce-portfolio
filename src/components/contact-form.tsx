@@ -16,6 +16,7 @@ declare global {
 type ContactFormProps = {
   lang: Locale;
   siteKey: string;
+  initialMessage?: string;
 };
 
 type SubmitStatus = "idle" | "sending" | "success" | "error";
@@ -81,7 +82,7 @@ const formCopy = {
   }
 >;
 
-export function ContactForm({ lang, siteKey }: ContactFormProps) {
+export function ContactForm({ lang, siteKey, initialMessage = "" }: ContactFormProps) {
   const labels = formCopy[lang];
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -205,6 +206,7 @@ export function ContactForm({ lang, siteKey }: ContactFormProps) {
           <textarea
             id="contact-message"
             name="message"
+            defaultValue={initialMessage}
             required
             minLength={10}
             maxLength={3000}

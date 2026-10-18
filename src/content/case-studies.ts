@@ -1,7 +1,7 @@
 import type { ProjectGalleryItem } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
-export const caseStudySlugs = ["firetrack", "evacuaplan-studio", "acreditaciones-app"] as const;
+export const caseStudySlugs = ["firetrack", "evacuaplan-studio", "acreditaciones-app", "hidrantes-app"] as const;
 
 export type CaseStudySlug = (typeof caseStudySlugs)[number];
 
@@ -69,6 +69,16 @@ export type CaseStudy = {
 };
 
 const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
+  "hidrantes-app": [
+  {
+    "id": "map",
+    "label": "Mapa conceptual",
+    "title": "Consulta de hidrantes",
+    "description": "Ilustración con ubicaciones inventadas; no contiene coordenadas operativas.",
+    "src": "/projects/hidrantes/overview.svg",
+    "alt": "Mapa conceptual de hidrantes con ubicaciones ficticias"
+  }
+],
   "acreditaciones-app": [{ id: "overview", label: "Demo", title: "Accreditation analytics", description: "Synthetic portfolio illustration", src: "/projects/acreditaciones/overview.svg", alt: "Conceptual accreditation dashboard using fictional records" }],
   firetrack: [
     {
@@ -592,6 +602,140 @@ export const caseStudies = {
     "secondaryAction": "Ver FireTrack"
   }
 },
+    "hidrantes-app": {
+      "slug": "hidrantes-app",
+      "metadata": {
+        "title": "Hidrantes | Caso de estudio",
+        "description": "Aplicación web de consulta de hidrantes por QR, geolocalización opcional y editor protegido."
+      },
+      "breadcrumb": "Volver a proyectos",
+      "status": "Aplicación desarrollada · despliegue no confirmado",
+      "title": "Hidrantes",
+      "subtitle": "Información operativa de hidrantes disponible desde el móvil.",
+      "introduction": "Aplicación concebida para consultar hidrantes en campo mediante un mapa y QR, con una interfaz pública y edición restringida. Se presenta el diseño funcional; la disponibilidad pública del despliegue aún no está verificada.",
+      "facts": [
+        {
+          "label": "Mi rol",
+          "value": "Definición de necesidades, reglas y validación funcional"
+        },
+        {
+          "label": "Año",
+          "value": "2026"
+        },
+        {
+          "label": "Acceso",
+          "value": "Consulta pública por QR y gestión privada"
+        },
+        {
+          "label": "Estado",
+          "value": "Implementación en desarrollo, despliegue por verificar"
+        }
+      ],
+      "gallery": [
+        {
+          "id": "map",
+          "label": "Concepto",
+          "title": "Mapa de hidrantes",
+          "description": "Datos de demostración inventados.",
+          "src": "/projects/hidrantes/overview.svg",
+          "alt": "Mapa conceptual de hidrantes con ubicaciones ficticias"
+        }
+      ],
+      "problem": {
+        "eyebrow": "La oportunidad",
+        "title": "Consultar recursos en campo sin buscar registros dispersos",
+        "paragraphs": [
+          "En operaciones móviles se necesita localizar hidrantes y consultar su capacidad de forma directa.",
+          "Abrir un documento o solicitar información a otra persona introduce pasos innecesarios."
+        ]
+      },
+      "solution": {
+        "eyebrow": "La solución",
+        "title": "Mapa público directo y editor privado",
+        "paragraphs": [
+          "Definí que el QR abra el mapa sin pedir una cuenta y permita solicitar permiso para ubicar el teléfono.",
+          "Un usuario autorizado administra puntos, tipo primario/secundario, coordenadas y GPM, sin exponer el módulo de escritura."
+        ]
+      },
+      "role": {
+        "eyebrow": "Mi aporte",
+        "title": "Proceso, reglas y experiencia de campo",
+        "description": "Identifiqué el caso de uso, definí los permisos y los flujos móviles, coordiné el desarrollo asistido por IA y evalué las pantallas. No atribuyo a mi autoría manual el código generado por IA.",
+        "areas": [
+          "Acceso público sin sesión",
+          "Diferenciación entre hidrantes primarios y secundarios",
+          "Ubicación del dispositivo con consentimiento",
+          "Edición protegida de datos",
+          "Validación de uso en teléfonos"
+        ]
+      },
+      "decisions": {
+        "eyebrow": "Decisiones",
+        "title": "Eliminar barreras para consultar; proteger la edición",
+        "description": "Las herramientas se eligieron por el problema operativo, no por preferencia de lenguaje.",
+        "items": [
+          {
+            "title": "Next.js y React",
+            "description": "Una interfaz móvil para consulta y administración."
+          },
+          {
+            "title": "Leaflet",
+            "description": "Visualización de ubicaciones en un mapa interactivo."
+          },
+          {
+            "title": "Supabase y RLS",
+            "description": "Persistencia y restricción de modificaciones a usuarios autorizados."
+          },
+          {
+            "title": "QR y geolocalización",
+            "description": "Acceso directo y ubicación opcional solicitando permiso."
+          }
+        ]
+      },
+      "capabilities": {
+        "eyebrow": "Funciones",
+        "title": "Lo necesario para consultar sobre el terreno",
+        "items": [
+          {
+            "title": "Mapa público",
+            "description": "Consulta sin autenticación."
+          },
+          {
+            "title": "Datos útiles",
+            "description": "Tipo de hidrante y GPM."
+          },
+          {
+            "title": "Navegación",
+            "description": "Abrir una ruta en Google Maps o Waze."
+          },
+          {
+            "title": "Editor privado",
+            "description": "Alta, edición, traslado o eliminación de puntos."
+          }
+        ]
+      },
+      "outcome": {
+        "eyebrow": "Resultado",
+        "title": "Un flujo más directo de consulta",
+        "paragraphs": [
+          "El prototipo implementa una separación clara entre acceso público y mantenimiento privado.",
+          "La imagen del portafolio utiliza ubicaciones ficticias. No se publica información operacional de hidrantes."
+        ],
+        "signals": [
+          "Acceso por QR",
+          "Mapa Leaflet",
+          "GPM por punto",
+          "Editor protegido",
+          "Demo ilustrativa"
+        ]
+      },
+      "cta": {
+        "title": "¿Tienes datos que serían más útiles sobre un mapa?",
+        "description": "Exploramos dónde surge la necesidad y diseñamos una forma rápida de resolverla.",
+        "primaryAction": "Hablemos",
+        "secondaryAction": "Ver FireTrack"
+      }
+    },
   },
   en: {
     firetrack: {
@@ -1099,5 +1243,139 @@ export const caseStudies = {
     "secondaryAction": "View FireTrack"
   }
 },
+    "hidrantes-app": {
+      "slug": "hidrantes-app",
+      "metadata": {
+        "title": "Hydrants | Case study",
+        "description": "QR-accessible hydrant map, optional device location and protected map editing."
+      },
+      "breadcrumb": "Back to projects",
+      "status": "Developed app · deployment not confirmed",
+      "title": "Hydrants",
+      "subtitle": "Operational hydrant information directly from a phone.",
+      "introduction": "A map-first application for consulting hydrants in the field through a QR code. Public lookup and protected editing are separated. Public deployment availability has not been independently verified.",
+      "facts": [
+        {
+          "label": "My role",
+          "value": "Requirements, workflows and functional validation"
+        },
+        {
+          "label": "Year",
+          "value": "2026"
+        },
+        {
+          "label": "Access",
+          "value": "Public QR lookup and private map editing"
+        },
+        {
+          "label": "Status",
+          "value": "Implemented app; deployment unverified"
+        }
+      ],
+      "gallery": [
+        {
+          "id": "map",
+          "label": "Concept",
+          "title": "Hydrant map",
+          "description": "Fictional preview data.",
+          "src": "/projects/hidrantes/overview.svg",
+          "alt": "Mapa conceptual de hidrantes con ubicaciones ficticias"
+        }
+      ],
+      "problem": {
+        "eyebrow": "The opportunity",
+        "title": "Finding field resources without scattered records",
+        "paragraphs": [
+          "Field teams need a straightforward way to locate hydrants and check their reported flow.",
+          "Searching documents or requesting information adds friction in a mobile workflow."
+        ]
+      },
+      "solution": {
+        "eyebrow": "The approach",
+        "title": "Public map, private editor",
+        "paragraphs": [
+          "A QR code opens a map without sign-in, with optional permission-based device location.",
+          "A single authorized editor manages hydrant type, position and flow data separately from public lookup."
+        ]
+      },
+      "role": {
+        "eyebrow": "My contribution",
+        "title": "Field workflows, requirements and validation",
+        "description": "I defined the field use case, mobile flows and access roles, directed AI-assisted implementation and reviewed the interfaces. Coding performed by AI is not presented as manually authored.",
+        "areas": [
+          "Public lookup without sign-in",
+          "Primary vs secondary hydrant types",
+          "Consent-based device location",
+          "Protected data management",
+          "Mobile usability validation"
+        ]
+      },
+      "decisions": {
+        "eyebrow": "Decisions",
+        "title": "Remove lookup friction; protect edits",
+        "description": "The stack followed operational requirements rather than a language preference.",
+        "items": [
+          {
+            "title": "Next.js and React",
+            "description": "Responsive interface for lookup and administration."
+          },
+          {
+            "title": "Leaflet",
+            "description": "Interactive display of geographic points."
+          },
+          {
+            "title": "Supabase and RLS",
+            "description": "Data storage with protected edits."
+          },
+          {
+            "title": "QR and geolocation",
+            "description": "Direct access and optional location with user permission."
+          }
+        ]
+      },
+      "capabilities": {
+        "eyebrow": "Capabilities",
+        "title": "Focused field features",
+        "items": [
+          {
+            "title": "Public map",
+            "description": "No authentication required."
+          },
+          {
+            "title": "Key information",
+            "description": "Hydrant type and flow."
+          },
+          {
+            "title": "Navigation",
+            "description": "Open routes in Google Maps or Waze."
+          },
+          {
+            "title": "Private editor",
+            "description": "Add, move, edit or remove points."
+          }
+        ]
+      },
+      "outcome": {
+        "eyebrow": "Outcome",
+        "title": "A more direct lookup flow",
+        "paragraphs": [
+          "The implemented application separates public discovery and protected maintenance.",
+          "The portfolio image uses fictional points and does not disclose operational hydrant information."
+        ],
+        "signals": [
+          "QR access",
+          "Leaflet map",
+          "Per-point flow",
+          "Protected editor",
+          "Illustrative demo"
+        ]
+      },
+      "cta": {
+        "title": "Would your data be more useful on a map?",
+        "description": "We can explore the real workflow and design a more useful way to access information.",
+        "primaryAction": "Let's talk",
+        "secondaryAction": "View FireTrack"
+      }
+    },
   },
 } satisfies Record<Locale, Record<CaseStudySlug, CaseStudy>>;

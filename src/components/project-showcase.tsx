@@ -12,7 +12,8 @@ import type { Locale } from "@/lib/i18n";
 type ProjectSlug =
   | "firetrack"
   | "evacuaplan-studio"
-  | "acreditaciones-app";
+  | "acreditaciones-app"
+  | "hidrantes-app";
 
 type ProjectShowcaseProps = {
   items: ProjectGalleryItem[];
