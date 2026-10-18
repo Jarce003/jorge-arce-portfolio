@@ -17,7 +17,7 @@ type NavigationItem = {
 };
 
 type Project = {
-  slug: "firetrack" | "evacuaplan-studio" | "acreditaciones-app";
+  slug: "firetrack" | "evacuaplan-studio" | "acreditaciones-app" | "hidrantes-app";
   caseStudyLabel: string;
   title: string;
   status: string;
@@ -129,9 +129,9 @@ export const siteContent = {
     navigation: [
       { label: "Mundo 3D", href: "#mundo" },
       { label: "Proyectos", href: "#proyectos" },
-      { label: "Servicios", href: "#servicios" },
-      { label: "Proceso", href: "#proceso" },
-      { label: "Sobre mí", href: "#sobre-mi" },
+      { label: "Enfoque", href: "#servicios" },
+      { label: "Mi método", href: "#proceso" },
+      { label: "Perfil", href: "#sobre-mi" },
     ],
     header: {
       role: "Ingeniero en Sistemas · Soluciones digitales",
@@ -157,7 +157,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "3", label: "productos destacados" },
+        { value: "4", label: "productos desarrollados" },
         { value: "De idea a producto", label: "definición, pruebas y evolución" },
         { value: "C1", label: "nivel de inglés" },
       ],
@@ -288,6 +288,27 @@ export const siteContent = {
             description: "Visualización ilustrativa creada para el portafolio, sin datos de participantes reales.",
             src: "/projects/acreditaciones/overview.svg",
             alt: "Ilustración conceptual del sistema de acreditaciones sin datos reales",
+          }],
+        },
+        {
+          slug: "hidrantes-app",
+          caseStudyLabel: "Ver caso de estudio",
+          title: "Hidrantes",
+          status: "Aplicación operativa · despliegue por verificar",
+          description: "Mapa público para localizar hidrantes, consultar su caudal y abrir rutas de navegación; incorpora un editor privado.",
+          highlights: [
+            "Acceso por QR sin iniciar sesión para la consulta pública.",
+            "Ubicación del dispositivo solo con permiso, datos de GPM y enlaces a mapas.",
+            "Mantenimiento de ubicaciones restringido a un editor autorizado.",
+          ],
+          technologies: ["Next.js", "React", "TypeScript", "Leaflet", "Supabase", "Geolocalización"],
+          gallery: [{
+            id: "overview",
+            label: "Mapa conceptual",
+            title: "Consulta operativa sobre mapa",
+            description: "Ilustración con ubicaciones ficticias; no representa hidrantes reales.",
+            src: "/projects/hidrantes/overview.svg",
+            alt: "Mapa conceptual con hidrantes primarios y secundarios y puntos inventados",
           }],
         },
       ],
@@ -423,9 +444,9 @@ export const siteContent = {
     navigation: [
       { label: "3D World", href: "#mundo" },
       { label: "Projects", href: "#projects" },
-      { label: "Services", href: "#services" },
-      { label: "Process", href: "#process" },
-      { label: "About", href: "#about" },
+      { label: "Expertise", href: "#services" },
+      { label: "My method", href: "#process" },
+      { label: "Profile", href: "#about" },
     ],
     header: {
       role: "Systems Engineer · Digital Solutions",
@@ -451,7 +472,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "3", label: "featured products" },
+        { value: "4", label: "developed projects" },
         { value: "Idea to product", label: "definition, testing and evolution" },
         { value: "C1", label: "English proficiency" },
       ],
@@ -582,6 +603,27 @@ export const siteContent = {
             description: "Illustrative portfolio preview created without real participant data.",
             src: "/projects/acreditaciones/overview.svg",
             alt: "Conceptual view of the accreditation system using synthetic data",
+          }],
+        },
+        {
+          slug: "hidrantes-app",
+          caseStudyLabel: "View case study",
+          title: "Hydrants",
+          status: "Operational app · deployment unverified",
+          description: "Public QR-accessible map to locate hydrants, inspect flow-rate records and open navigation; includes a private editing area.",
+          highlights: [
+            "QR-based public access without requiring a sign-in.",
+            "Permission-based device location, flow readings and map navigation links.",
+            "Location management restricted to an authorized editor.",
+          ],
+          technologies: ["Next.js", "React", "TypeScript", "Leaflet", "Supabase", "Geolocation"],
+          gallery: [{
+            id: "overview",
+            label: "Concept map",
+            title: "Operational hydrant lookup",
+            description: "Illustration with fictional locations; does not represent actual hydrants.",
+            src: "/projects/hidrantes/overview.svg",
+            alt: "Conceptual hydrant map with invented primary and secondary points",
           }],
         },
       ],
