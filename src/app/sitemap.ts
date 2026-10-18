@@ -8,6 +8,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
+      url: `${siteUrl}/es/portfolio`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+      alternates: {
+        languages: {
+          es: `${siteUrl}/es/portfolio`,
+          en: `${siteUrl}/en/portfolio`,
+        },
+      },
+    },
+    {
+      url: `${siteUrl}/en/portfolio`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+      alternates: {
+        languages: {
+          es: `${siteUrl}/es/portfolio`,
+          en: `${siteUrl}/en/portfolio`,
+        },
+      },
+    },
+    {
       url: `${siteUrl}/es`,
       lastModified: now,
       changeFrequency: "monthly",
