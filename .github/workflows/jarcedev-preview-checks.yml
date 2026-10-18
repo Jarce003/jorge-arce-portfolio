@@ -30,6 +30,8 @@ jobs:
         run: npm run check:encoding
       - name: Project catalog and artwork validation
         run: npm run check:projects
+      - name: Validate SVG XML previews
+        run: python3 scripts/check-svg-xml.py
       - name: TypeScript validation
         run: npx tsc --noEmit
       - name: Production build
