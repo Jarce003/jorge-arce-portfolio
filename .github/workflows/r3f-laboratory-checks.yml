@@ -1,0 +1,41 @@
+name: JarceDev R3F Laboratory Checks
+
+on:
+  pull_request:
+    paths:
+      - "experiments/r3f/**"
+      - "tools/blender/**"
+      - "scripts/pilot-3d-local.ps1"
+      - "tsconfig.json"
+      - ".github/workflows/r3f-laboratory-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  experimental-scene:
+    name: Experimental R3F scene (does not deploy)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: experiments/r3f
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static Blender Python syntax check
+        working-directory: .
+        run: python3 -m py_compile tools/blender/build_assets.py
+      - name: Install only sandbox dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check and build isolated R3F scene
+        run: npm run build
+      - name: Verify existing Next.js package is unchanged
+        working-directory: .
+        run: |
+          git diff --exit-code -- package.json package-lock.json
+          test -f src/components/world/world-renderer.ts
