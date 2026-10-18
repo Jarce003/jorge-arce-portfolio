@@ -39,3 +39,31 @@ jobs:
         run: |
           git diff --exit-code -- package.json package-lock.json
           test -f src/components/world/world-renderer.ts
+
+  blender-model-export:
+    name: Generate and validate actual Blender GLB assets (no deployment)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Blender 4 from Ubuntu repositories
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender
+          blender --version | head -1
+      - name: Export original ladder truck and FireTrack station
+        run: |
+          blender --background --factory-startup --python tools/blender/build_assets.py
+      - name: Validate generated GLB signatures, parts and mobile budgets
+        run: |
+          node tools/blender/verify_glb.mjs public/models/jarcedev/v1/ladder-truck.glb public/models/jarcedev/v1/firetrack-station.glb
+      - name: Archive reviewable Blender and GLB assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarcedev-blender-models
+          path: |
+            public/models/jarcedev/v1/*.glb
+            tools/blender/output/*.blend
+          retention-days: 7
+          if-no-files-found: error
