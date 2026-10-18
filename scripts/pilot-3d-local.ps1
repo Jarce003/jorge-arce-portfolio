@@ -37,7 +37,7 @@ try {
   $models = Join-Path $root "public\models\jarcedev\v1"
   $generator = Join-Path $root "tools\blender\build_assets.py"
 
-  Write-Host "JarceDev — Laboratorio Blender + React Three Fiber" -ForegroundColor Green
+  Write-Host "JarceDev - Laboratorio Blender + React Three Fiber" -ForegroundColor Green
   Write-Host "Este procedimiento solo crea y ejecuta recursos LOCALES." -ForegroundColor DarkGray
   Set-Location -LiteralPath $root
 
@@ -82,7 +82,7 @@ try {
           throw "Falta el archivo esperado en el ZIP: $entryName"
         }
         if ($entry.Length -lt 1000 -or $entry.Length -gt 5000000) {
-          throw "Tamaño de modelo inesperado: $entryName"
+          throw "Tamano de modelo inesperado: $entryName"
         }
         $destination = Join-Path $root ($entryName.Replace("/", "\"))
         $parent = Split-Path -Parent $destination
@@ -116,11 +116,11 @@ try {
   $truckGLB = Join-Path $models "ladder-truck.glb"
   $stationGLB = Join-Path $models "firetrack-station.glb"
   if ((Test-Path -LiteralPath $truckGLB) -and (Test-Path -LiteralPath $stationGLB)) {
-    Checked "Validar tamaño, materiales y estructura animable de los dos GLB" {
+    Checked "Validar tamano, materiales y estructura animable de los dos GLB" {
       & node (Join-Path $root "tools\blender\verify_glb.mjs") $truckGLB $stationGLB
     }
   } else {
-    Write-Host "No hay dos GLB todavía. Se utilizaran los modelos geometricos del laboratorio." -ForegroundColor Yellow
+    Write-Host "No hay dos GLB todavia. Se utilizaran los modelos geometricos del laboratorio." -ForegroundColor Yellow
   }
 
   Set-Location -LiteralPath $experiment
