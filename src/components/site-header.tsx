@@ -15,7 +15,10 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ lang, content, variant = "default" }: SiteHeaderProps) {
   const world = variant === "world";
-  const contactHref = `/${lang}#${lang === "es" ? "contacto" : "contact"}`;
+  const contactHref = `/${lang}/portfolio#${lang === "es" ? "contacto" : "contact"}`;
+  const routeToSection = (hash: string) => hash === "#mundo"
+    ? `/${lang}#mundo`
+    : `/${lang}/portfolio${hash}`;
 
   return (
     <header className={`sticky top-0 z-50 border-b backdrop-blur-xl ${world ? "border-white/10 bg-[#081525]/95 text-white" : "border-slate-200/80 bg-slate-50/90"}`}>
@@ -52,7 +55,7 @@ export function SiteHeader({ lang, content, variant = "default" }: SiteHeaderPro
           {content.navigation.map((item) => (
             <Link
               key={item.href}
-              href={`/${lang}${item.href}`}
+              href={routeToSection(item.href)}
               className={`text-sm font-medium transition ${world ? "text-slate-200 hover:text-violet-200" : "text-slate-600 hover:text-slate-950"}`}
             >
               {item.label}
