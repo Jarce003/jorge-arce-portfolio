@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ProjectPanel } from "@/components/projects/project-panel";
+import { ProjectArtwork } from "@/components/projects/project-artwork";
 import { getProjects, type ProjectId } from "@/content/projects";
 import type { Locale } from "@/lib/i18n";
 
@@ -84,7 +85,7 @@ export function CompactPortfolio({ lang }: { lang: Locale }) {
                   className={"group overflow-hidden rounded-xl border text-left transition-all duration-200 " +
                     (active ? "border-violet-300 bg-violet-300/15 shadow-lg shadow-violet-950/20" : "border-white/10 bg-white/[.04] hover:border-violet-300/50")}>
                   <div className="relative h-24 overflow-hidden bg-[#071323] sm:h-28">
-                    <Image src={project.preview} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-1.5 transition-transform duration-200 group-hover:scale-[1.04]" />
+                    <ProjectArtwork key={project.slug} project={project} decorative sizes="(max-width: 640px) 50vw, 25vw" className="transition-transform duration-200 group-hover:scale-[1.04]" />
                   </div>
                   <div className="flex min-h-14 items-center gap-2 px-3 py-2.5">
                     <div className="min-w-0 flex-1">
