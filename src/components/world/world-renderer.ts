@@ -374,6 +374,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     cylinder(x+3.95, 1.3, z-2.6, .45, 2.6, .45, palette.fire);
     cylinder(x+3.95, 2.75, z-2.6, .70, .35, .70, palette.gold);
+    // Workshop gantry, tool cabinets and a distinct operational beacon.
+    box(x, 3.85, z-1.3, 3.9, .25, 3.0, "#f9fafb");
+    for(const side of [-1,1]) {
+      box(x+side*2.6, 1.25, z+3.55, 1.2, 1.95, .5, "#b9cad8");
+      box(x+side*2.6, 2.1, z+3.85, .9, .15, .10, accent);
+    }
+    box(x, .48, z+3.75, 3.4, .15, 2.1, "#263f57");
+    box(x, .59, z+3.75, 2.75, .08, 1.55, "#4f7188");
+    box(x+3.68, 3.4, z-1.95, .2, 1.0, .2, "#f3f8fc");
+    draw("cone",x+3.68,4.04,z-1.95,.7,.55,.7,accent,0,0,1);
   }
   function evacuaStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -389,6 +399,19 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     box(x+1, .8, z+2.1, .2, 1.4, 2.3, "#83cee0");
     cylinder(x-1.9, .65, z+3.3, .46, 1.3, .46, palette.mint);
     draw("cone", x-1.9, 1.5, z+3.3, .92, .75, .92, palette.white);
+    // Transparent drafting studio and large model table.
+    box(x, 2.75, z-1.6, 6.7, .19, 4.4, "#a6dce7");
+    box(x, 3.06, z-1.6, 5.8, .25, 3.55, "#daedf3");
+    for(const side of [-1,1]) {
+      box(x+side*3.25,1.45,z-1.5,.10,2.5,3.25,accent);
+    }
+    box(x-.30,.62,z+3.05,3.4,.16,1.75,"#d6edf4");
+    box(x-.30,.73,z+3.05,2.85,.07,1.2,"#5486a4");
+    for(let i=0;i<4;i++){
+      box(x-1.5+i*.75,.80,z+3.1,.12,.10,.9,"#bedee8");
+    }
+    box(x+1.90,2.85,z+1.05,.15,.9,.15,accent);
+    cylinder(x+1.90,3.38,z+1.05,.6,.22,.6,"#f4f8fd");
   }
   function accreditationStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -401,6 +424,15 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     for(let i=0;i<3;i+=1){
       box(x-2.0+i*2, .55 + i*.35, z+3.45, 1.5, 1 + i*.7, 1.5, ["#6c60ad","#8b74c9","#b69df0"][i]);
       cylinder(x-2.0+i*2, 1.2+i*.7, z+3.45, .62, .10, .62, palette.gold);
+    }
+    // A data-analytics tower makes the Academy recognizable at a distance.
+    cylinder(x,3.85,z-1.45,1.05,.95,1.05,"#e0daff");
+    cylinder(x,4.32,z-1.45,1.50,.12,1.50,accent);
+    draw("cone",x,5.04,z-1.45,1.5,1.45,1.5,"#9f89d5");
+    cylinder(x,5.70,z-1.45,.18,.70,.18,"#f7f3ff");
+    for(const side of [-2.35,2.35]) {
+      box(x+side,2.05,z+1.1,.48,1.2,.14,"#e9e4ff");
+      box(x+side,2.46,z+1.24,.30,.18,.07,accent);
     }
   }
   function hydrantsStation(x: number, z: number, accent: string) {
@@ -415,6 +447,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       cylinder(x-3.4+i*2.3, .25, z+3.7, .42, .5, .42, "#4ea29c");
     }
     box(x, 2.05, z-2.2, 7.8, .40, 2.8, "#4ad3b5");
+    // Elevated tank and mapping mast distinguish the hydrant location.
+    cylinder(x+3.25,1.8,z-2.1,.25,3.2,.25,"#b2c8d3");
+    cylinder(x+3.25,3.2,z-2.1,1.45,1.0,1.45,"#74d8bf");
+    cylinder(x+3.25,3.76,z-2.1,1.7,.18,1.7,"#e5faf7");
+    draw("cone",x+3.25,4.1,z-2.1,1.65,.45,1.65,"#4ea995");
+    box(x-2.1,1.6,z-1.1,.18,2.05,1.8,"#90aebe");
+    box(x-2.1,2.32,z-1.0,.25,.28,1.3,accent);
+    for(let i=0;i<3;i++) {
+      cylinder(x-2.1+i*2.15,.11,z+4.25,.50,.12,.50,"#378b77");
+    }
   }
   // Additional projects use a reusable structure template without new renderer code.
   function genericStation(x: number, z: number, accent: string) {
