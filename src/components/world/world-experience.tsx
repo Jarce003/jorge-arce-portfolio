@@ -8,6 +8,7 @@ import {
   worldStations,
   type WorldPosition,
 } from "./world-renderer";
+import { MobileDriveControls } from "./mobile-drive-controls";
 
 type Language = "es" | "en";
 type StationId = (typeof worldStations)[number]["id"];
@@ -204,6 +205,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const vehicleRef = useRef({ x: 0, z: 0, heading: 0, speed: 0 });
   const inputRef = useRef(new Set<ControlKey>());
+  const touchSteeringRef = useRef(0);
   const nearbyRef = useRef<StationId | null>(null);
   const stationMarkerRefs = useRef<Partial<Record<StationId, HTMLButtonElement | null>>>({});
   const cameraModeRef = useRef<"chase" | "overview">("chase");
@@ -217,6 +219,15 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const [visited, setVisited] = useState<StationId[]>([]);
   const [cameraMode, setCameraMode] = useState<"chase" | "overview">("chase");
 
+  const setMobileSteering = useCallback((value: number) => {
+    touchSteeringRef.current = value;
+  }, []);
+
+  const setMobilePedal = useCallback((pedal: "forward" | "reverse", pressed: boolean) => {
+    if (pressed) inputRef.current.add(pedal);
+    else inputRef.current.delete(pedal);
+  }, []);
+
   const toggleCamera = useCallback(() => {
     cameraModeRef.current = cameraModeRef.current === "chase" ? "overview" : "chase";
     setCameraMode(cameraModeRef.current);
@@ -224,7 +235,10 @@ export function WorldExperience({ lang }: { lang: Language }) {
 
   useEffect(() => {
     overlayOpenRef.current = Boolean(activeStation) || guideOpen;
-    if (overlayOpenRef.current) inputRef.current.clear();
+    if (overlayOpenRef.current) {
+      inputRef.current.clear();
+      touchSteeringRef.current = 0;
+    }
   }, [activeStation, guideOpen]);
 
   const activeCopy = stations.find((station) => station.id === activeStation);
@@ -244,6 +258,8 @@ export function WorldExperience({ lang }: { lang: Language }) {
     vehicle.z = location.z + (location.z < 0 ? 7 : -7);
     vehicle.heading = location.z < 0 ? 0 : Math.PI;
     vehicle.speed = 0;
+    touchSteeringRef.current = 0;
+    inputRef.current.clear();
     nearbyRef.current = id;
     setNearby(id);
     setActiveStation(null);
@@ -269,14 +285,32 @@ export function WorldExperience({ lang }: { lang: Language }) {
     let running = true;
     let raf = 0;
     let previousTime = 0;
+    let lastPaint = 0;
+    let sceneIsVisible = true;
     const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const observer = new IntersectionObserver(([entry]) => {
+      sceneIsVisible = entry.isIntersecting;
+      if (!sceneIsVisible) {
+        inputRef.current.clear();
+        touchSteeringRef.current = 0;
+        vehicleRef.current.speed = 0;
+      }
+    }, { rootMargin: "50px" });
+    observer.observe(canvasElement);
 
     function frame(time: number) {
       if (!running) return;
+      // Limit drawing on narrow mobile screens, and stop using the GPU when
+      // the visitor scrolls down to detailed case studies.
+      if (canvasElement.clientWidth < 640 && time - lastPaint < 30) {
+        raf = window.requestAnimationFrame(frame);
+        return;
+      }
+      lastPaint = time;
       const dt = previousTime ? Math.min((time - previousTime) / 1000, .055) : .016;
       previousTime = time;
 
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && sceneIsVisible) {
         const v = vehicleRef.current;
         const input = inputRef.current;
         const acceptingControls = !overlayOpenRef.current;
@@ -284,7 +318,8 @@ export function WorldExperience({ lang }: { lang: Language }) {
         const reversing = acceptingControls && input.has("reverse") ? 1 : 0;
         const direction = accelerating - reversing;
         const steer = acceptingControls
-          ? (input.has("left") ? 1 : 0) - (input.has("right") ? 1 : 0)
+          ? Math.max(-1, Math.min(1,
+              (input.has("left") ? 1 : 0) - (input.has("right") ? 1 : 0) + touchSteeringRef.current))
           : 0;
 
         if (direction) v.speed += direction * 13 * dt;
@@ -308,7 +343,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
           const element = stationMarkerRefs.current[station.id];
           if (!element) continue;
           const point = renderer.project(station, 5.9);
-          const visible = point.visible;
+          const visible = point.visible && canvasElement.clientWidth >= 640;
           element.style.display = visible ? "flex" : "none";
           element.style.transform = "translate3d(" + point.x + "px," + point.y + "px,0) translate(-50%,-100%)";
           element.tabIndex = visible ? 0 : -1;
@@ -319,7 +354,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
 
     function keydown(event: KeyboardEvent) {
       const target = event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target.tagName))) return;
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
       if (key === "escape") {
@@ -362,7 +397,10 @@ export function WorldExperience({ lang }: { lang: Language }) {
       };
       if (key in mapping) inputRef.current.delete(mapping[key]);
     }
-    function blur() { inputRef.current.clear(); }
+    function blur() {
+      inputRef.current.clear();
+      touchSteeringRef.current = 0;
+    }
 
     window.addEventListener("keydown", keydown);
     window.addEventListener("keyup", keyup);
@@ -375,35 +413,19 @@ export function WorldExperience({ lang }: { lang: Language }) {
       window.removeEventListener("keydown", keydown);
       window.removeEventListener("keyup", keyup);
       window.removeEventListener("blur", blur);
+      observer.disconnect();
+      touchSteeringRef.current = 0;
       renderer.dispose();
     };
   }, [mode, openStation, toggleCamera]);
 
-  function touchButton(key: ControlKey, symbol: string, label: string) {
-    return (
-      <button
-        type="button"
-        aria-label={label}
-        onPointerDown={(event) => {
-          event.currentTarget.setPointerCapture(event.pointerId);
-          inputRef.current.add(key);
-        }}
-        onPointerUp={() => inputRef.current.delete(key)}
-        onPointerCancel={() => inputRef.current.delete(key)}
-        onLostPointerCapture={() => inputRef.current.delete(key)}
-        onContextMenu={(event) => event.preventDefault()}
-        className="flex size-12 touch-none select-none items-center justify-center rounded-2xl border border-white/25 bg-slate-950/70 text-lg text-white shadow-lg backdrop-blur transition active:bg-violet-500/60"
-      >
-        {symbol}
-      </button>
-    );
-  }
 
   return (
     <section
       id="mundo"
       aria-label={lang === "es" ? "Mundo interactivo de JarceDev" : "JarceDev interactive world"}
-      className="relative isolate flex min-h-[min(860px,calc(100svh-4.5rem))] flex-col overflow-hidden bg-[#071221] text-white sm:min-h-[min(950px,calc(100svh-5rem))]"
+      className="relative isolate flex min-h-[max(620px,calc(100svh-4.5rem))] flex-col overflow-hidden bg-[#071221] text-white sm:min-h-[min(950px,calc(100svh-5rem))]"
+      style={{ scrollMarginTop: "4.5rem" }}
     >
       {mode === "world" ? (
         <>
@@ -436,34 +458,34 @@ export function WorldExperience({ lang }: { lang: Language }) {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_45%_25%,#302c58_0%,#101d35_42%,#071221_85%)]" />
       )}
 
-      <div className="relative z-10 flex grow flex-col px-4 pb-6 pt-7 sm:px-8 sm:pt-11 lg:px-12">
-        <div className="flex items-start justify-between gap-4">
+      <div className="relative z-10 flex grow flex-col px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-3 sm:px-8 sm:pb-6 sm:pt-11 lg:px-12">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:gap-4">
           <div className="max-w-2xl">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-4">
               <span className="rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1.5 text-[.64rem] font-bold tracking-[.16em] text-violet-200">{t.eyebrow}</span>
-              <span className="text-[.66rem] text-slate-400">{t.experimental}</span>
+              <span className="hidden text-[.66rem] text-slate-400 sm:inline">{t.experimental}</span>
             </div>
-            <h1 className="max-w-xl text-balance text-[2rem] font-semibold leading-[1.05] tracking-[-.052em] sm:text-[3.15rem] lg:text-[3.8rem]">
+            <h1 className="max-w-xl text-balance text-[clamp(1.45rem,6vw,2.1rem)] font-semibold leading-[1.08] tracking-[-.052em] sm:text-[3.15rem] lg:text-[3.8rem]">
               {mode === "world" ? t.headline : t.directoryHeadline}
             </h1>
-            <p className="mt-3 max-w-xl text-pretty text-sm leading-6 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
+            <p className="mt-1.5 max-w-xl text-pretty text-xs leading-5 text-slate-300 sm:mt-5 sm:text-base sm:leading-7">
               {mode === "world" ? t.description : t.directoryDescription}
             </p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-2">
+          <div className="flex w-full shrink-0 flex-row flex-wrap items-center justify-between gap-1.5 sm:w-auto sm:flex-col sm:items-end sm:gap-2">
             <button
               type="button"
               onClick={() => { setMode(mode === "world" ? "directory" : "world"); setActiveStation(null); }}
-              className="inline-flex min-h-11 items-center rounded-full border border-white/25 bg-white/10 px-3.5 text-xs font-semibold text-white shadow-lg backdrop-blur hover:bg-white/20 sm:px-5 sm:text-sm"
+              className="inline-flex min-h-10 items-center rounded-full border border-white/25 bg-white/10 px-3 text-[.7rem] font-semibold text-white shadow-lg backdrop-blur hover:bg-white/20 sm:min-h-11 sm:px-5 sm:text-sm"
             >
               {mode === "world" ? t.directory : t.explore}
             </button>
             {mode === "world" && (
               <>
-                <button type="button" onClick={toggleCamera} className="min-h-10 rounded-full border border-white/20 bg-slate-950/50 px-3.5 text-xs font-semibold text-violet-100 hover:bg-slate-900">
-                  ◈ {t.camera}: {cameraMode === "chase" ? t.cameraChase : t.cameraOverview}
+                <button type="button" onClick={toggleCamera} className="min-h-10 rounded-full border border-white/20 bg-slate-950/50 px-3 text-[.7rem] font-semibold text-violet-100 hover:bg-slate-900 sm:px-3.5 sm:text-xs">
+                  ◈ <span className="hidden sm:inline">{t.camera}: </span>{cameraMode === "chase" ? t.cameraChase : t.cameraOverview}
                 </button>
-                <button type="button" onClick={() => setGuideOpen(true)} className="min-h-10 rounded-full px-3.5 text-xs font-semibold text-violet-200 hover:text-white">
+                <button type="button" onClick={() => setGuideOpen(true)} className="min-h-10 rounded-full px-2 text-xs font-semibold text-violet-200 hover:text-white sm:px-3.5">
                   ? {t.guide}
                 </button>
               </>
@@ -497,46 +519,36 @@ export function WorldExperience({ lang }: { lang: Language }) {
                 </div>
               )}
 
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-xl">
-                  <div className="hidden gap-3 text-xs font-medium text-slate-300 md:flex">
+                  <div className="hidden flex-wrap gap-2 text-xs font-medium text-slate-300 lg:flex">
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.controls}</span>
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.keyboard}</span>
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.reset}</span>
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">C · {t.camera}</span>
                   </div>
-                  <p className="mt-3 max-w-lg text-xs leading-5 text-slate-400">{t.context}</p>
+                  <p className="hidden max-w-lg text-xs leading-5 text-slate-400 lg:mt-3 lg:block">{t.context}</p>
                 </div>
-                <div className="flex items-center justify-between gap-3 lg:justify-end">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-center text-[.58rem] font-semibold uppercase tracking-wide text-slate-400">{t.steer}</span>
-                    <div className="flex gap-1.5">
-                      {touchButton("left", "←", t.steer + " izquierda")}
-                      {touchButton("right", "→", t.steer + " derecha")}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-center text-[.58rem] font-semibold uppercase tracking-wide text-slate-400">{t.accelerate}</span>
-                    <div className="flex gap-1.5">
-                      {touchButton("forward", "↑", t.accelerate)}
-                      {touchButton("reverse", "↓", t.reverse)}
-                    </div>
-                  </div>
-                </div>
+                <MobileDriveControls
+                  lang={lang}
+                  onSteer={setMobileSteering}
+                  onPedal={setMobilePedal}
+                  disabled={sceneStatus !== "ready" || Boolean(activeStation) || guideOpen}
+                />
               </div>
 
-              <div className="mt-5 border-t border-white/15 pt-3">
+              <div className="mt-2 border-t border-white/15 pt-2 sm:mt-5 sm:pt-3">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-[.65rem] font-semibold uppercase tracking-[.16em] text-slate-400">{t.orientation}</p>
-                  <p className="text-[.68rem] text-slate-500">{t.hint}</p>
+                  <p className="hidden text-[.68rem] text-slate-500 sm:block">{t.hint}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={t.orientation}>
+                <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0" aria-label={t.orientation}>
                   {stations.map((station) => (
                     <button
                       key={station.id}
                       type="button"
                       onClick={() => travelTo(station.id)}
-                      className="group flex min-h-12 items-center justify-start gap-2 rounded-xl border border-white/15 bg-slate-950/65 px-3 py-2.5 text-left shadow-md backdrop-blur transition hover:border-violet-300/60 hover:bg-slate-900/90 focus-visible:outline-violet-300"
+                      className="group flex min-h-11 min-w-[145px] snap-start items-center justify-start gap-2 rounded-xl border border-white/15 bg-slate-950/75 px-3 py-2 text-left shadow-md backdrop-blur transition hover:border-violet-300/60 hover:bg-slate-900/90 focus-visible:outline-violet-300 sm:min-h-12 sm:min-w-0 sm:py-2.5"
                     >
                       <span className="text-lg" aria-hidden="true">{station.icon}</span>
                       <span className="min-w-0 flex-1 truncate text-xs font-semibold sm:text-sm">{station.name}</span>
@@ -548,9 +560,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
             </div>
           </>
         ) : (
-          <div className="my-10 grid grow gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="my-5 grid grow content-start gap-3 sm:my-10 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {stations.map((station) => (
-              <article key={station.id} className="flex flex-col rounded-3xl border border-white/15 bg-white/[.06] p-5 backdrop-blur">
+              <article key={station.id} className="flex flex-col rounded-2xl border border-white/15 bg-white/[.06] p-4 backdrop-blur sm:rounded-3xl sm:p-5">
                 <span className="text-3xl" aria-hidden="true">{station.icon}</span>
                 <h2 className="mt-5 text-xl font-bold">{station.name}</h2>
                 <p className="mt-2 text-sm text-violet-200">{station.type}</p>
