@@ -82,7 +82,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bbadff; outline-offs
   .tools { top: 70px; right: 9px; left: 9px; max-width: none; gap: 5px; justify-content: center; }
   .tools button, .mini-state { padding: 7px 8px; font-size: 10px; min-height: 35px; }
   .mini-state { display: none; }
-  .overview { top: 120px; left: 9px; max-width: 222px; padding: 9px 10px; }
+  /* Phone/tablet view stays immersive: detailed benchmark panel is desktop-only. */
+  .overview { display: none; }
   .overview h1 { font-size: 16px; margin: 5px 0; }
   .overview p, .overview .key-hint { display: none; }
   .eyebrow { font-size: 9px; }
