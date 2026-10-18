@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 import { AcreditacionesDemo } from "@/components/project-demo/acreditaciones-demo";
+import { ProjectArtwork } from "@/components/projects/project-artwork";
 import type { ProjectView } from "@/content/projects";
 import type { Locale } from "@/lib/i18n";
 
@@ -93,7 +93,7 @@ export function ProjectPanel({
           </div>
         </div>
         <div className="relative min-h-44 overflow-hidden border-t border-white/10 bg-[#0a1528] sm:min-h-[250px] lg:min-h-64 lg:border-l lg:border-t-0">
-          <Image src={project.preview} fill sizes="(max-width:1024px) 100vw, 55vw" alt={project.previewAlt} className="object-contain p-2 sm:p-3" priority={project.slug === "acreditaciones-app" && !compact} />
+          <ProjectArtwork key={project.slug} project={project} sizes="(max-width:1024px) 100vw, 55vw" priority={project.slug === "acreditaciones-app" && !compact} />
           <span className="absolute bottom-2 left-3 rounded-full border border-white/10 bg-[#101b30]/90 px-2.5 py-1 text-[.62rem] text-slate-300 backdrop-blur">{t.synthetic}</span>
         </div>
       </div>
