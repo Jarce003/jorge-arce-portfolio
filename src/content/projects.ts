@@ -161,6 +161,12 @@ export type ProjectView = {
   solution: string;
   status: string;
   previewAlt: string;
+  description: string;
+  highlights: string[];
+  gallery: { id: string; label: string; title: string; description: string; src: string; alt: string }[];
+  caseStudyLabel: string;
+  externalUrl?: string;
+  externalLabel?: string;
 };
 
 export function getProjects(lang: Locale): ProjectView[] {
@@ -173,6 +179,21 @@ export function getProjects(lang: Locale): ProjectView[] {
     technologies: project.technologies,
     demo: "demo" in project && project.demo === "acreditaciones-ai" ? "acreditaciones-ai" : undefined,
     ...project.locale[lang],
+    description: project.locale[lang].solution,
+    highlights: [project.locale[lang].problem, project.locale[lang].solution],
+    gallery: [{
+      id: "overview",
+      label: lang === "es" ? "Vista ilustrativa" : "Illustration",
+      title: project.locale[lang].title,
+      description: project.locale[lang].solution,
+      src: project.preview,
+      alt: project.locale[lang].previewAlt,
+    }],
+    caseStudyLabel: lang === "es" ? "Ver proyecto" : "View project",
+    externalUrl: project.slug === "firetrack" ? "https://firetrackcr.com" : undefined,
+    externalLabel: project.slug === "firetrack"
+      ? (lang === "es" ? "Abrir FireTrack" : "Open FireTrack")
+      : undefined,
   }));
 }
 
