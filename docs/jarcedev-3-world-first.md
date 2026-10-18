@@ -45,6 +45,15 @@ La misma entrada aparece en las tarjetas, estación, panel, URL compartible y si
 
 El escenario base está diseñado para una plaza y cuatro barrios; añadir estaciones fuera del perímetro o demasiadas estaciones requiere ampliar el trazado de carreteras, la cámara, el límite de conducción y las pruebas. El catálogo es extensible; **la expansión ilimitada del terreno no está implementada**.
 
+## Juego visual: incendios y rescates
+
+- Cada estación aparece con llamas estilizadas mientras no haya sido descubierta.
+- Cuando el camión se acerca y se pulsa **Descubrir** (o **E**), se detiene y lanza un arco animado de agua desde el extremo de la escalera hacia el edificio, con salpicaduras; las llamas se apagan progresivamente y se abre la ficha visual del proyecto.
+- El recorrido conserva un contador de estaciones recuperadas; **R** o **Reiniciar rescate** restablecen el recorrido y los incendios.
+- Para accesibilidad, los visitantes también pueden seleccionar una estación en el directorio; si hace falta, el camión se coloca junto al proyecto antes de la animación.
+- Los usuarios con **reducir movimiento** activado ven el proyecto sin fuego animado ni descarga de agua. La interacción no requiere audio.
+- Es una metáfora de juego, **no una demostración de tácticas reales de extinción** ni de efectividad de chorros de agua. Las pruebas automatizadas verifican los tiempos y estados; la apariencia y fluidez aún deben revisarse en el navegador móvil.
+
 ## Día y noche
 
 - Control visual y tecla **N** para cambiar ambiente.
