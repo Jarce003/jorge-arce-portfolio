@@ -59,6 +59,16 @@ The present world is a **functional geometric prototype**, not the final art-dir
 
 Read the [world concept and development roadmap](docs/jarcedev-3d-concept.md). Production remains unchanged until the preview is approved.
 
+## Primary homepage & mobile controls
+
+The explorable world is now **the first screen** on both language homepages. Visiting `/` resolves to the Spanish world (`/es`); `/en` remains accessible using the language switcher. Traditional project details remain below the world and via dedicated case-study links.
+
+**Phones and tablets** have a dedicated two-thumb steering control, an accelerator pedal and a reverse pedal. These controls support simultaneous multi-touch and cancel safely when a dialog opens. On narrow screens the header, call-to-actions and project navigation adapt to portrait layouts; floating 3D markers are replaced with a horizontal touch-friendly station list. An optional directory works without WebGL 2.
+
+Mobile rendering uses a lower pixel budget, simplified background geometry, a moderate frame cap, and pauses when the world is not visible. Desktop retains WASD/arrow driving plus E to inspect a station, R to reset and C to change camera.
+
+The implementation is responsive in code and passes TypeScript/build checks; **device-level visual and interaction QA should still be completed on representative iOS and Android devices before considering the 3D world visually final**.
+
 ## Development
 
 ```bash
