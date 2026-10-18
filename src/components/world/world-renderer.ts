@@ -1,3 +1,5 @@
+import { getWorldStations, type StructureType } from "@/content/projects";
+
 /**
  * JarceDev exploration world — dependency-free WebGL2 prototype.
  *
@@ -20,6 +22,7 @@ export type WorldRenderer = {
     reducedMotion: boolean,
     cameraMode?: "chase" | "overview",
     lightsOn?: boolean,
+    timeOfDay?: "day" | "night",
   ) => void;
   project: (position: WorldPosition, elevation?: number) => { x: number; y: number; visible: boolean };
   dispose: () => void;
@@ -39,12 +42,7 @@ const palette = {
   white: "#e8f0ff",
 };
 
-export const worldStations = [
-  { id: "firetrack", x: -14, z: -12, color: palette.fire },
-  { id: "evacuaplan", x: 14, z: -12, color: palette.cyan },
-  { id: "acreditaciones", x: -14, z: 12, color: palette.purple },
-  { id: "hidrantes", x: 14, z: 12, color: palette.mint },
-] as const;
+export const worldStations = getWorldStations();
 
 function hexColor(hex: string): Vec3 {
   return [
@@ -212,13 +210,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     "uniform vec3 uColor;",
     "uniform float uEmissive;",
     "uniform float uOpacity;",
+    "uniform float uDaylight;",
     "in float vLight;",
     "in float vDepth;",
     "out vec4 outColor;",
     "void main(){",
-    " vec3 color = uColor * mix(vLight, 1.85, clamp(uEmissive, 0.0, 1.0));",
-    " float fog = smoothstep(28.0, 85.0, vDepth) * .30 * (1.0 - clamp(uEmissive, 0.0, 1.0));",
-    " outColor = vec4(mix(color, vec3(0.07, 0.12, 0.20), fog), uOpacity);",
+    " float ambient = mix(0.80, 1.23, uDaylight);",
+    " vec3 color = uColor * mix(vLight * ambient, 1.75, clamp(uEmissive, 0.0, 1.0));",
+    " float fog = smoothstep(28.0, 85.0, vDepth) * .24 * (1.0 - clamp(uEmissive, 0.0, 1.0));",
+    " vec3 horizon = mix(vec3(0.06, 0.11, 0.19), vec3(0.61, 0.73, 0.78), uDaylight);",
+    " outColor = vec4(mix(color, horizon, fog), uOpacity);",
     "}",
   ].join("\n"));
 
@@ -238,6 +239,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   const colorUniform = gl.getUniformLocation(program, "uColor");
   const emissiveUniform = gl.getUniformLocation(program, "uEmissive");
   const opacityUniform = gl.getUniformLocation(program, "uOpacity");
+  const daylightUniform = gl.getUniformLocation(program, "uDaylight");
   const shapes = new Map<ObjectShape, Geometry>();
   for (const [shape, vertices] of [
     ["cube", makeCube()],
@@ -259,6 +261,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   let cameraZ = 10;
   let latestVP: Mat4 = new Float32Array(16);
   let lastShape: ObjectShape | null = null;
+  let daylight = 0;
+  let daylightTarget = 0;
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
     if (!colors.has(hex)) colors.set(hex, hexColor(hex));
@@ -291,6 +295,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     gl.uniform3fv(colorUniform, tint(color));
     gl.uniform1f(emissiveUniform, emissive);
     gl.uniform1f(opacityUniform, opacity);
+    gl.uniform1f(daylightUniform, daylight);
     if (opacity < 1) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -334,7 +339,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     cylinder(x, .25, z, .36, .42, .36, "#485c70");
     cylinder(x, 1.75, z, .105, 3.2, .105, "#aebfd0");
     cylinder(x, 3.30, z, .48, .15, .48, "#d4dae3");
-    draw("cone", x, 3.10, z, .70, .28, .70, "#ffc77d");
+    draw("cone", x, 3.10, z, .70, .28, .70, daylightTarget > .5 ? "#8bafbd" : "#ffc77d", 0, 0, daylightTarget > .5 ? 0 : 1);
     cylinder(x, .037, z, 1.55, .025, 1.55, "#405a65");
   }
   function skyline() {
@@ -355,9 +360,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       }
     }
   }
-  function fireStation() {
-    const x = -14, z = -12;
-    plot(x,z,palette.fire);
+  function fireStation(x: number, z: number, accent: string) {
+    plot(x,z,accent);
     box(x, 1.6, z - 1.15, 5.8, 3.2, 4.2, "#dce0e8");
     box(x, 3.45, z - 1.15, 6.35, .45, 4.7, palette.fire);
     for (let i = 0; i < 3; i += 1) {
@@ -371,9 +375,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     cylinder(x+3.95, 1.3, z-2.6, .45, 2.6, .45, palette.fire);
     cylinder(x+3.95, 2.75, z-2.6, .70, .35, .70, palette.gold);
   }
-  function evacuaStation() {
-    const x = 14, z = -12;
-    plot(x,z,palette.cyan);
+  function evacuaStation(x: number, z: number, accent: string) {
+    plot(x,z,accent);
     box(x, 1.25, z - 1.6, 6.0, 2.5, 3.5, "#cadde4");
     box(x - 2.7, 1.3, z + 1.4, .34, 2.6, 4, "#70b7cb");
     box(x + 2.7, 1.3, z + 1.4, .34, 2.6, 4, "#70b7cb");
@@ -387,9 +390,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     cylinder(x-1.9, .65, z+3.3, .46, 1.3, .46, palette.mint);
     draw("cone", x-1.9, 1.5, z+3.3, .92, .75, .92, palette.white);
   }
-  function accreditationStation() {
-    const x = -14, z = 12;
-    plot(x,z,palette.purple);
+  function accreditationStation(x: number, z: number, accent: string) {
+    plot(x,z,accent);
     box(x, 1.4, z-1.4, 6.5, 2.8, 4.2, "#d2cde8");
     for(let i=-2; i<=2; i+=1) {
       cylinder(x+i*1.1, 1.25, z+1.05, .27, 2.5, .27, "#a48dd8");
@@ -401,9 +403,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       cylinder(x-2.0+i*2, 1.2+i*.7, z+3.45, .62, .10, .62, palette.gold);
     }
   }
-  function hydrantsStation() {
-    const x = 14, z = 12;
-    plot(x,z,palette.mint);
+  function hydrantsStation(x: number, z: number, accent: string) {
+    plot(x,z,accent);
     box(x, .65, z-2.2, 7.1, 1.3, 2.0, "#69879b");
     for(let i=0;i<3;i+=1) {
       cylinder(x-2.5+i*2.5, 1.0, z + 1, .58, 1.8, .58, i===1 ? palette.fire : palette.mint);
@@ -415,11 +416,33 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     box(x, 2.05, z-2.2, 7.8, .40, 2.8, "#4ad3b5");
   }
+  // Additional projects use a reusable structure template without new renderer code.
+  function genericStation(x: number, z: number, accent: string) {
+    plot(x, z, accent);
+    box(x, 1.1, z - 1.3, 6.4, 2.2, 4.4, "#d1dee5");
+    box(x, 2.45, z - 1.3, 7.1, .35, 5.0, accent);
+    box(x, 1.45, z + 1.0, 3.5, 1.4, .12, "#507b9e");
+    cylinder(x, 3.0, z - 1.3, 1.2, 1.2, 1.2, accent);
+    for (const offset of [-2.35, 2.35]) {
+      box(x + offset, 1.35, z + 1.0, .45, 1.65, .18, "#b1d7e6");
+    }
+  }
+
+  function drawStation(structure: StructureType, x: number, z: number, accent: string) {
+    switch (structure) {
+      case "operations": fireStation(x, z, accent); break;
+      case "design-studio": evacuaStation(x, z, accent); break;
+      case "academy": accreditationStation(x, z, accent); break;
+      case "mapping-hub": hydrantsStation(x, z, accent); break;
+      default: genericStation(x, z, accent);
+    }
+  }
+
   function drawRoadNetwork(lowDetail = false) {
-    box(0, -.05, 0, 94, .14, 94, palette.ground);
-    box(0, -.047, 0, 66, .016, 66, "#162b3c");
-    box(0, .035, 0, 7, .08, 53, palette.road);
-    box(0, .041, 0, 53, .08, 7, palette.road);
+    box(0, -.05, 0, 94, .14, 94, daylightTarget > .5 ? "#91bcb4" : palette.ground);
+    box(0, -.047, 0, 66, .016, 66, daylightTarget > .5 ? "#79a6a4" : "#162b3c");
+    box(0, .035, 0, 7, .08, 53, daylightTarget > .5 ? "#748fa6" : palette.road);
+    box(0, .041, 0, 53, .08, 7, daylightTarget > .5 ? "#748fa6" : palette.road);
     // Reflective curbs edge the cross-shaped road.
     for (const side of [-1, 1]) {
       box(side * 3.67, .07, 0, .18, .17, 50.5, "#42576c");
@@ -457,7 +480,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     // Each site gets its own colored perimeter, with the structural plot above it.
     for(const st of worldStations) {
       cylinder(st.x, .015, st.z, 12.9, .065, 12.9, st.color);
-      cylinder(st.x, .060, st.z, 12.2, .06, 12.2, "#172b3f");
+      cylinder(st.x, .060, st.z, 12.2, .06, 12.2, daylightTarget > .5 ? "#c4d5d3" : "#172b3f");
     }
     const lamps = lowDetail
       ? [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2]]
@@ -644,7 +667,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false) {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night") {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const lowDetail = width < 640;
@@ -658,6 +681,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         canvas.height = rh;
       }
       gl.viewport(0, 0, rw, rh);
+      daylightTarget = timeOfDay === "day" ? 1 : 0;
+      daylight += (daylightTarget - daylight) * (reducedMotion ? 1 : .085);
+      gl.clearColor(.035 + .55 * daylight, .065 + .68 * daylight, .12 + .72 * daylight, 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       const overview = cameraMode === "overview";
       const desiredX = position.x + (overview ? 5.5 : Math.sin(heading) * 10.5);
@@ -672,10 +698,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.uniformMatrix4fv(vpUniform, false, latestVP);
       lastShape = null;
       drawRoadNetwork(lowDetail);
-      fireStation();
-      evacuaStation();
-      accreditationStation();
-      hydrantsStation();
+      for (const station of worldStations) {
+        drawStation(station.structure, station.x, station.z, station.color);
+      }
       drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
     },
     project(position, elevation = 5.2) {
