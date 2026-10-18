@@ -6,6 +6,20 @@
  * visitors who request reduced motion see the effect end immediately.
  */
 export const FIRE_FADE_SECONDS = 0.9;
+export const WATER_REACHES_FIRE_SECONDS = 0.58;
+export const RESCUE_DURATION_SECONDS = 2.35;
+
+export function rescueIsFinished(elapsedSeconds: number, startedAt: number): boolean {
+  return elapsedSeconds - startedAt >= RESCUE_DURATION_SECONDS;
+}
+
+export function waterStreamStrength(elapsedSeconds: number, startedAt: number): number {
+  const age = elapsedSeconds - startedAt;
+  if (age < 0 || age > RESCUE_DURATION_SECONDS) return 0;
+  const ramp = Math.max(0, Math.min(1, (age - .12) / .34));
+  const tail = Math.max(0, Math.min(1, (RESCUE_DURATION_SECONDS - age) / .28));
+  return Math.min(ramp, tail);
+}
 
 export function stationFireStrength(
   extinguished: boolean,
