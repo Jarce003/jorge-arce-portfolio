@@ -483,7 +483,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 2.1) * .015;
     const alternating = reducedMotion ? true : Math.floor(elapsed * 3.3) % 2 === 0;
     const redBright = lightsOn && alternating;
-    const blueBright = lightsOn && (reducedMotion || !alternating);
+    const rightBright = lightsOn && (reducedMotion || !alternating);
 
     // Local-to-world conversion preserves the vehicle's heading.
     // Front of the truck is negative local Z.
@@ -566,16 +566,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     // Emergency warning light bar: generic red / blue.
     part(0,2.50,-2.16,1.30,.12,.30,"#c5d0df");
     part(-.38,2.61,-2.16,.43,.19,.32,redBright ? "#ff243b" : "#7c3443",redBright ? 1 : 0);
-    part(.38,2.61,-2.16,.43,.19,.32,blueBright ? "#48bfff" : "#315e83",blueBright ? 1 : 0);
+    part(.38,2.61,-2.16,.43,.19,.32,rightBright ? "#ff3447" : "#71303a",rightBright ? 1 : 0);
     // Additional side and rear flashers keep the light toggle visible from
     // the default chase camera, which looks at the truck's back end.
     for (const side of [-1, 1]) {
       part(side * 1.13, 1.76, 1.60, .09, .30, .38,
-        side === -1 ? (redBright ? "#ff3447" : "#6c3440") : (blueBright ? "#4bd2ff" : "#365772"),
-        side === -1 ? Number(redBright) : Number(blueBright));
+        side === -1 ? (redBright ? "#ff3447" : "#6c3440") : (rightBright ? "#ff3447" : "#6c3440"),
+        side === -1 ? Number(redBright) : Number(rightBright));
       part(side * .78, 1.34, 2.99, .32, .25, .12,
-        side === -1 ? (redBright ? "#ff263a" : "#632c37") : (blueBright ? "#4ac8ff" : "#2a506d"),
-        side === -1 ? Number(redBright) : Number(blueBright));
+        side === -1 ? (redBright ? "#ff263a" : "#632c37") : (rightBright ? "#ff263a" : "#632c37"),
+        side === -1 ? Number(redBright) : Number(rightBright));
     }
 
     // Bright horizontal emergency-apparatus reflectors.
@@ -635,10 +635,10 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         const [rx,rz] = local(-.38,-2.16);
         draw("cylinder",rx,2.64+bob,rz,.78,.08,.78,"#ff3d63",0,0,1,.23);
       }
-      if (blueBright) {
-        halo(1.6, 2.96, "#49c8ff", .9);
+      if (rightBright) {
+        halo(1.6, 2.96, "#ff294b", .9);
         const [bx,bz] = local(.38,-2.16);
-        draw("cylinder",bx,2.64+bob,bz,.78,.08,.78,"#4cc8ff",0,0,1,.23);
+        draw("cylinder",bx,2.64+bob,bz,.78,.08,.78,"#ff3d63",0,0,1,.23);
       }
     }
   }
