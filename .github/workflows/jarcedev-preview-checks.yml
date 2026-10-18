@@ -3,7 +3,7 @@ name: JarceDev Preview Checks
 on:
   push:
     branches:
-      - feature/jarcedev-2026-redesign-acreditaciones
+      - "feature/**"
   pull_request:
     branches:
       - main

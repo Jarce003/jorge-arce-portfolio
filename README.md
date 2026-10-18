@@ -44,30 +44,26 @@ The website itself is built with Next.js 16, React 19, TypeScript and Tailwind C
 - Protected contact form and links to professional profiles
 - CV downloads, Open Graph tags, sitemap and accessible navigation
 
-### Interactive exploration world (preview)
+### Immersive 3D world: primary homepage
 
-A **playable, original 3D portfolio world** is now implemented on the redesign feature branch. It is inspired by the exploratory interaction pattern of [Bruno Simon](https://bruno-simon.com/) while remaining visually distinct and focused on process improvement.
+The JarceDev homepage at `/es` and `/en` is now **exclusively the playable 3D world**, featuring an original American-style aerial ladder truck. Visiting `/` redirects to `/es`.
 
-- Drive an **American-style aerial ladder fire truck** through four project-themed stations.
-- Custom lightweight WebGL 2 renderer, without additional runtime packages.
-- Perspective camera with an overhead toggle, dedicated touch controls and keyboard driving (WASD or arrow keys).
-- Floating station markers, accessible project directory and bilingual project narratives.
-- Protected source code and records from private systems never appear in the demo.
-- GitHub Actions validates encoding, TypeScript and production builds.
+The extended information previously appearing below the world has been **relocated and condensed** to dedicated bilingual routes, `/es/portfolio` and `/en/portfolio`, with stand-alone case studies at `/[lang]/projects/[slug]`. The navigation menu and contact links now point to those routes, so accessibility and search discovery remain available without entering WebGL.
 
-The present world is a **functional geometric prototype**, not the final art-directed edition. Polished custom 3D models, additional collision handling, performance profiling and browser-based gameplay tests are still on the roadmap.
+**Minimal mobile HUD:** the immersive world takes the entire available viewport beneath the global navigation. The long hero text, description, main action row and persistent project strip are gone on phones. The visible controls are:
+- 🚨 **Luces / Lights** toggles working headlights, alternating red/blue emergency beacons and their luminous reflections. Desktop shortcut: **L**. Motion-sensitive users see static lights without strobing.
+- ◈ **Vista / View** switches between truck-following and overhead cameras. Shortcut **C**.
+- ▦ **Estaciones / Stations** opens an optional project-selection drawer. Shortcut **M**.
+- ⓘ **Info** opens a short explanation, directions and the professional profile link.
+- Two-thumb touch steering and accelerator/reverse pedals stay at the bottom. On mobile, redundant control instructions are visually hidden and retained as accessible names.
 
-Read the [world concept and development roadmap](docs/jarcedev-3d-concept.md). Production remains unchanged until the preview is approved.
+Keyboard driving uses **WASD or arrow keys**, **E** for nearby stations and **R** to reset. WebGL 2 failures offer a usable directory of projects rather than a broken scene.
 
-## Primary homepage & mobile controls
+The original lightweight WebGL2 renderer dynamically lowers the mobile pixel ratio and detail. Content remains in HTML routes and is not locked inside 3D canvases. The 3D truck and surroundings are still **original geometric prototypes**, not finished production-quality custom 3D artwork.
 
-The explorable world is now **the first screen** on both language homepages. Visiting `/` resolves to the Spanish world (`/es`); `/en` remains accessible using the language switcher. Traditional project details remain below the world and via dedicated case-study links.
+GitHub Actions checks encoding, TypeScript and production builds, and Vercel provides isolated preview deployments. Real-device appearance, glare/brightness and two-thumb comfort still need visual testing before we call the experience final.
 
-**Phones and tablets** have a dedicated two-thumb steering control, an accelerator pedal and a reverse pedal. These controls support simultaneous multi-touch and cancel safely when a dialog opens. On narrow screens the header, call-to-actions and project navigation adapt to portrait layouts; floating 3D markers are replaced with a horizontal touch-friendly station list. An optional directory works without WebGL 2.
-
-Mobile rendering uses a lower pixel budget, simplified background geometry, a moderate frame cap, and pauses when the world is not visible. Desktop retains WASD/arrow driving plus E to inspect a station, R to reset and C to change camera.
-
-The implementation is responsive in code and passes TypeScript/build checks; **device-level visual and interaction QA should still be completed on representative iOS and Android devices before considering the 3D world visually final**.
+Read the [3D concept and development roadmap](docs/jarcedev-3d-concept.md).
 
 ## Development
 

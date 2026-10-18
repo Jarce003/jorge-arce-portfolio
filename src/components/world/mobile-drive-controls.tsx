@@ -110,8 +110,8 @@ export function MobileDriveControls({
       aria-label={t.region}
       style={{ touchAction: "pan-y" }}
     >
-      <div className="flex flex-col items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-200">
+      <div className="flex flex-col items-center gap-0 sm:gap-1.5">
+        <span className="sr-only sm:not-sr-only sm:text-[10px] sm:font-bold sm:uppercase sm:tracking-[.16em] sm:text-slate-200">
           {t.direction}
         </span>
         <button
@@ -119,7 +119,7 @@ export function MobileDriveControls({
           type="button"
           disabled={disabled}
           aria-label={t.wheel}
-          className="relative flex size-[94px] touch-none select-none items-center justify-center rounded-full border-2 border-white/40 bg-[#102743]/90 shadow-[0_0_30px_rgba(0,0,0,.35)] backdrop-blur focus-visible:outline-offset-4 active:border-violet-300 sm:size-[114px]"
+          className="relative flex size-[84px] touch-none select-none items-center justify-center rounded-full border-2 border-white/40 bg-[#102743]/90 shadow-[0_0_30px_rgba(0,0,0,.35)] backdrop-blur focus-visible:outline-offset-4 active:border-violet-300 sm:size-[114px]"
           onPointerDown={(event) => {
             if (disabled) return;
             event.preventDefault();
@@ -152,7 +152,7 @@ export function MobileDriveControls({
           <span className="pointer-events-none absolute inset-2 rounded-full border border-dashed border-white/35" />
           <span
             aria-hidden="true"
-            className="pointer-events-none relative flex size-[55px] items-center justify-center rounded-full border-2 border-violet-200/70 bg-violet-400/20 text-2xl text-white shadow-inner shadow-black/30 transition-transform duration-75 sm:size-[70px]"
+            className="pointer-events-none relative flex size-[49px] items-center justify-center rounded-full border-2 border-violet-200/70 bg-violet-400/20 text-2xl text-white shadow-inner shadow-black/30 transition-transform duration-75 sm:size-[70px]"
             style={{ transform: `translateX(${wheelOffset}px)` }}
           >
             <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.6" className="size-10" aria-hidden="true">
@@ -162,7 +162,7 @@ export function MobileDriveControls({
             </svg>
           </span>
         </button>
-        <span className="text-[10px] text-slate-300">{t.steer}</span>
+        <span className="sr-only sm:not-sr-only sm:text-[10px] sm:text-slate-300">{t.steer}</span>
       </div>
 
       <div className="flex items-end gap-2 sm:gap-3">
@@ -178,7 +178,7 @@ export function MobileDriveControls({
           onKeyDown={(event) => pedalKey(event, "reverse", true)}
           onKeyUp={(event) => pedalKey(event, "reverse", false)}
           onBlur={() => releasePedal("reverse")}
-          className="flex h-[78px] w-[62px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-amber-200/40 bg-amber-400/15 text-white shadow-lg backdrop-blur active:bg-amber-400/40 disabled:opacity-50 sm:h-[96px] sm:w-[76px]"
+          className="flex h-[70px] w-[58px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-amber-200/40 bg-amber-400/15 text-white shadow-lg backdrop-blur active:bg-amber-400/40 disabled:opacity-50 sm:h-[96px] sm:w-[76px]"
         >
           <span aria-hidden="true" className="text-xl font-black">↓</span>
           <span className="text-[10px] font-semibold">{t.brake}</span>
@@ -195,7 +195,7 @@ export function MobileDriveControls({
           onKeyDown={(event) => pedalKey(event, "forward", true)}
           onKeyUp={(event) => pedalKey(event, "forward", false)}
           onBlur={() => releasePedal("forward")}
-          className="flex h-[104px] w-[76px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-emerald-200/50 bg-emerald-400/25 text-white shadow-lg backdrop-blur active:bg-emerald-400/45 disabled:opacity-50 sm:h-[120px] sm:w-[88px]"
+          className="flex h-[92px] w-[72px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-emerald-200/50 bg-emerald-400/25 text-white shadow-lg backdrop-blur active:bg-emerald-400/45 disabled:opacity-50 sm:h-[120px] sm:w-[88px]"
         >
           <span aria-hidden="true" className="text-3xl font-black">↑</span>
           <span className="text-[11px] font-bold">{t.throttle}</span>
