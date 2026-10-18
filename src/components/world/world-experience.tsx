@@ -11,8 +11,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createWorldRenderer,
   worldStations,
-  type WorldPosition,
 } from "./world-renderer";
+import type { WorldPosition } from "./world-contract";
 import { MobileDriveControls } from "./mobile-drive-controls";
 
 type Language = "es" | "en";
