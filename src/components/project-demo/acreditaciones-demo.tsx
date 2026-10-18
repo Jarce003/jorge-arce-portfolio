@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { matchSampleQuestion } from "@/lib/sample-demo-queries";
 
 type Props = { lang: "es" | "en"; compact?: boolean };
 type ScenarioId = "priority" | "capacity" | "performance" | "validity";
@@ -163,13 +164,7 @@ const content: Record<"es" | "en", {
 const ids: ScenarioId[] = ["priority", "capacity", "performance", "validity"];
 
 function detectScenario(text: string, lang: Props["lang"]): ScenarioId | null {
-  // The public portfolio contains a four-question synthetic showcase, not a
-  // generative AI endpoint. Never answer unrelated free-form requests by
-  // guessing an intent and substituting a canned number.
-  const normalize = (value: string) =>
-    value.toLocaleLowerCase(lang).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?!.]/g, "").replace(/\s+/g, " ").trim();
-  const normalized = normalize(text);
-  return ids.find((id) => normalized === normalize(content[lang].cases[id].prompt)) ?? null;
+  return matchSampleQuestion(text, lang, content[lang].cases);
 }
 
 export function AcreditacionesDemo({ lang, compact = false }: Props) {
