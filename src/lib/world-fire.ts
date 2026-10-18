@@ -10,7 +10,7 @@ export const WATER_REACHES_FIRE_SECONDS = 0.58;
 export const RESCUE_DURATION_SECONDS = 2.35;
 
 export function rescueIsFinished(elapsedSeconds: number, startedAt: number): boolean {
-  return elapsedSeconds - startedAt >= RESCUE_DURATION_SECONDS;
+  return elapsedSeconds - startedAt >= RESCUE_DURATION_SECONDS - 1e-6;
 }
 
 export function waterStreamStrength(elapsedSeconds: number, startedAt: number): number {
