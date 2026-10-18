@@ -96,7 +96,8 @@ def cube(name: str, location, dimensions, mat, target, parent=None, bevel=0):
         mod = ob.modifiers.new("Single-segment hard edge", "BEVEL")
         mod.width = bevel
         mod.segments = 1
-        mod.affect = "EDGES" if hasattr(mod, "affect") else None
+        if hasattr(mod, "affect"):
+            mod.affect = "EDGES"
         # Avoid version-specific bevel arguments; keep stylized hard normals.
         bpy.context.view_layer.objects.active = ob
         bpy.ops.object.modifier_apply(modifier=mod.name)
