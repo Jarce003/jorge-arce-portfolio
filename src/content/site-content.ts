@@ -129,9 +129,7 @@ export const siteContent = {
     navigation: [
       { label: "Mundo 3D", href: "#mundo" },
       { label: "Proyectos", href: "#proyectos" },
-      { label: "Enfoque", href: "#servicios" },
       { label: "Mi método", href: "#proceso" },
-      { label: "Perfil", href: "#sobre-mi" },
     ],
     header: {
       role: "Ingeniero en Sistemas · Soluciones digitales",
@@ -444,9 +442,7 @@ export const siteContent = {
     navigation: [
       { label: "3D World", href: "#mundo" },
       { label: "Projects", href: "#projects" },
-      { label: "Expertise", href: "#services" },
       { label: "My method", href: "#process" },
-      { label: "Profile", href: "#about" },
     ],
     header: {
       role: "Systems Engineer · Digital Solutions",
