@@ -10,6 +10,11 @@ export type WorldPosition = { x: number; z: number };
 export type WorldCamera = "chase" | "overview";
 export type WorldTime = "day" | "night";
 
+export type WorldRescueEffect = {
+  stationId: string;
+  startedAt: number;
+};
+
 export type WorldRenderer = {
   render: (
     position: WorldPosition,
@@ -20,6 +25,7 @@ export type WorldRenderer = {
     lightsOn?: boolean,
     timeOfDay?: WorldTime,
     extinguishedStations?: ReadonlySet<string>,
+    rescue?: WorldRescueEffect | null,
   ) => void;
   project: (
     position: WorldPosition,
