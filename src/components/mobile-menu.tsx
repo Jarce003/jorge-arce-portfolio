@@ -13,11 +13,13 @@ import type { Locale } from "@/lib/i18n";
 type MobileMenuProps = {
   lang: Locale;
   content: SiteContent;
+  variant?: "default" | "world";
 };
 
 export function MobileMenu({
   lang,
   content,
+  variant = "default",
 }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -134,7 +136,7 @@ export function MobileMenu({
       <button
         ref={triggerRef}
         type="button"
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2"
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2 ${variant === "world" ? "border-white/25 bg-white/10 text-white hover:border-violet-200" : "border-slate-300 bg-white text-slate-900 hover:border-slate-950"}`}
         aria-expanded={isOpen}
         aria-controls={menuId}
         aria-label={
