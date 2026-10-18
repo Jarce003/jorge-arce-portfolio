@@ -53,9 +53,9 @@ const stationCopy: Record<Language, StationCopy[]> = {
       id: "acreditaciones",
       name: "Acreditaciones",
       icon: "🎓",
-      type: "Reglas y planificación",
+      type: "Asistente IA · Planificación",
       problem: "Históricos extensos y reglas distintas para calcular ciclos, vigencias y prioridades.",
-      answer: "Un sistema privado con controles de acreditación y servicios especializados de análisis y planificación.",
+      answer: "Consultas en lenguaje natural con IA, cálculos verificados y planificación sobre reglas de acreditación. La demostración usa datos ficticios.",
       technology: "Python · FastAPI · DuckDB · OR-Tools",
       slug: "acreditaciones-app",
     },
@@ -95,9 +95,9 @@ const stationCopy: Record<Language, StationCopy[]> = {
       id: "acreditaciones",
       name: "Accreditations",
       icon: "🎓",
-      type: "Rules and planning",
+      type: "AI assistant · Planning",
       problem: "Extensive historical records and multiple rules for calculating validity, cycles and priorities.",
-      answer: "A private system for accreditation control with dedicated analytics and optimization services.",
+      answer: "Natural-language queries with AI, validated calculations and planning based on accreditation rules. The public preview uses fictional data.",
       technology: "Python · FastAPI · DuckDB · OR-Tools",
       slug: "acreditaciones-app",
     },
@@ -686,7 +686,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
             <div className="mt-6 flex flex-wrap gap-2">
               {activeCopy.slug ? (
                 <Link href={"/" + lang + "/projects/" + activeCopy.slug} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950 hover:bg-violet-200">
-                  {t.caseStudy} ↗
+                  {activeCopy.id === "acreditaciones" ? (lang === "es" ? "Probar asistente IA" : "Try AI assistant") : t.caseStudy} ↗
                 </Link>
               ) : (
                 <Link href={"/" + lang + "/portfolio#"+(lang==="es"?"proyectos":"projects")} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950">{t.moreProjects} ↗</Link>
