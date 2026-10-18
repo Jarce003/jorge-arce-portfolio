@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { getProjects } from "@/content/projects";
 import { ProjectPanel } from "@/components/projects/project-panel";
+import { ContactStudio } from "@/components/portfolio/contact-studio";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -146,7 +147,7 @@ function closestStation(position: WorldPosition): StationId | null {
   return close?.distance < 7.3 ? close.id : null;
 }
 
-export function WorldExperience({ lang }: { lang: Language }) {
+export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKey?: string }) {
   const t = copy[lang];
   // All station panels and navigation labels come from the shared project manifest.
   const stations = getProjects(lang).map((project) => ({
@@ -624,6 +625,8 @@ export function WorldExperience({ lang }: { lang: Language }) {
           </div>
         </div>
       )}
+
+      <ContactStudio lang={lang} siteKey={siteKey} worldLauncher />
 
       {guideOpen && (
         <div className="absolute inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="world-guide-title">
