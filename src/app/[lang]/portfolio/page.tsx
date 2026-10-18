@@ -36,7 +36,7 @@ export default async function PortfolioPage({ params }: Props) {
     <>
       <SiteHeader lang={lang} content={content} />
       <main>
-        <CompactPortfolio lang={lang} content={content} />
+        <CompactPortfolio lang={lang} />
         <ContactStudio lang={lang} siteKey={siteKey} />
       </main>
       <footer className="bg-[#081222] px-4 py-7 text-center text-xs text-slate-400">
