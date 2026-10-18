@@ -108,12 +108,16 @@ function modelMatrix(
   sy: number,
   sz: number,
   angle: number,
+  roll = 0,
 ): Mat4 {
   const s = Math.sin(angle);
   const c = Math.cos(angle);
+  const cr = Math.cos(roll);
+  const sr = Math.sin(roll);
+  // R_y(heading) * R_z(roll) * scale: wheels can rotate around their axle.
   return new Float32Array([
-    c * sx, 0, -s * sx, 0,
-    0, sy, 0, 0,
+    c * cr * sx, sr * sx, -s * cr * sx, 0,
+    -c * sr * sy, cr * sy, s * sr * sy, 0,
     s * sz, 0, c * sz, 0,
     x, y, z, 1,
   ]);
@@ -238,8 +242,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   gl.depthFunc(gl.LEQUAL);
   gl.clearColor(.035, .065, .12, 1);
 
-  let cameraX = -7;
-  let cameraZ = -10;
+  let cameraX = 0;
+  let cameraZ = 10;
   let lastShape: ObjectShape | null = null;
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
@@ -256,6 +260,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     sz: number,
     color: string,
     angle = 0,
+    roll = 0,
   ) {
     const mesh = shapes.get(shape)!;
     if (lastShape !== shape) {
@@ -266,7 +271,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.vertexAttribPointer(normalAttrib, 3, gl.FLOAT, false, 24, 12);
       lastShape = shape;
     }
-    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle));
+    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll));
     gl.uniform3fv(colorUniform, tint(color));
     gl.drawArrays(gl.TRIANGLES, 0, mesh.vertices);
   }
@@ -405,12 +410,21 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       box(px, y + bob, pz, width,height,length,color,heading);
     }
 
+    function wheel(xOffset: number, zOffset: number) {
+      const [px, pz] = local(xOffset, zOffset);
+      // Correct wheel orientation: circular sidewall faces horizontally out.
+      draw("cylinder", px, .48 + bob, pz, 1.12, .35, 1.12, "#101923", heading, Math.PI / 2);
+      const side = Math.sign(xOffset);
+      const [hx, hz] = local(xOffset + side * .22, zOffset);
+      draw("cylinder", hx, .48 + bob, hz, .65, .035, .65, "#a9bbcb", heading, Math.PI / 2);
+      const [ax, az] = local(xOffset + side * .246, zOffset);
+      draw("cylinder", ax, .48 + bob, az, .27, .045, .27, "#e6ebf0", heading, Math.PI / 2);
+    }
     function roundPart(
       xOffset: number, y: number, zOffset: number,
       radius: number, length: number, color: string,
     ) {
       const [px,pz] = local(xOffset,zOffset);
-      // Wheels use a simplified, low-poly cylinder representation.
       cylinder(px, y + bob, pz, radius * 2, length, radius * 2, color);
     }
 
@@ -422,8 +436,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     // Four-wheel rear tandem axle + front steering axle.
     for(const wheelZ of [-1.95, .9, 2.05]) {
       for(const wheelX of [-1.10,1.10]) {
-        roundPart(wheelX,.45,wheelZ,.58,.39,"#0d1929");
-        roundPart(wheelX,.47,wheelZ,.29,.41,"#99a6b5");
+        wheel(wheelX, wheelZ);
       }
     }
     // Tail end carries utility deck and warning reflectors.
