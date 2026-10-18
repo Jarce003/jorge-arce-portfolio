@@ -50,7 +50,7 @@ jobs:
       - name: Install Blender 4 from Ubuntu repositories
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender
+          sudo apt-get install -y -qq blender python3-numpy
           blender --version | head -1
       - name: Export original ladder truck and FireTrack station
         run: |
