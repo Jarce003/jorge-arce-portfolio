@@ -11,9 +11,9 @@ La experiencia 3D debe comunicar **cómo identifica y resuelve problemas**, no p
 
 ## Concepto: La ciudad de las soluciones
 
-Un mundo tridimensional en miniatura con una identidad original y reconocible. El visitante puede mover un pequeño vehículo explorador por zonas que representan retos operativos reales. Cada estación cuenta una historia **antes / decisión / resultado**.
+Un mundo tridimensional en miniatura con una identidad original y reconocible. El visitante conduce un **camión escalera de estilo americano** (American Aerial Ladder Truck) por zonas que representan retos operativos reales. La cabina, el cuerpo largo, los compartimentos y la escalera aérea forman parte del modelo propio, sin emblemas ni marcas de terceros. Cada estación cuenta una historia **antes / decisión / resultado**.
 
-- **Inicio — Observar:** una escena de trabajo con formularios, archivos dispersos y tareas repetitivas. Interacción guiada para mostrar dónde surge una oportunidad de mejora.
+- **Inicio — Observar:** una escena de trabajo con formularios, archivos dispersos y tareas repetitivas. El camión escalera inicia aquí y permite descubrir dónde surge una oportunidad de mejora.
 - **FireTrack — Control y trazabilidad:** inventario, inspección, QR, alertas y control por empresas representados mediante objetos y paneles.
 - **EvacuaPlan Studio — Herramientas especializadas:** un edificio estilizado cuyo plano puede explorarse visualmente; después, acceso a la demo real.
 - **Acreditaciones — Reglas y planificación:** una academia abstracta con tarjetas de bloques, ciclos, prioridades y motor analítico Python. Solo datos ficticios.
@@ -37,7 +37,7 @@ Evitar la estética de una ciudad exclusivamente bomberil: la metáfora debe fun
 - Next.js 16 + React 19 existentes; TypeScript, Tailwind CSS.
 - Three.js y React Three Fiber v9 para composición del mundo.
 - @react-three/drei para utilidades, control de cámara y GLTF según necesidades.
-- @react-three/rapier para física **solo si se aprueba conducción realista**. Para recorridos guiados, mover el personaje directamente simplifica implementación y rendimiento.
+- Conducción mediante cinemática propia en la etapa inicial, suficiente para el camión escalera y recorridos guiados. @react-three/rapier quedaría para una etapa de física avanzada si el comportamiento lo justifica.
 - Blender para diseñar objetos originales exportados a glTF/GLB; primero usar primitivas geométricas antes de producir activos costosos.
 - Zustand para estado de juego y elección de estación **solo cuando la complejidad lo exija**.
 - Howler.js para sonido opcional y accesible. Sin autoplay.
@@ -62,7 +62,7 @@ No incorporar Python, bases de datos o llamadas a servicios de IA en la experien
 Moodboard, paleta, guion del mundo, navegación HTML alternativa, zonas y reglas de interacción.
 
 ### Etapa B — Prototipo aislado
-Ruta de laboratorio o feature flag, mundo simple con 1 vehículo, 2 estaciones, controles móviles y navegación HTML completa.
+Ruta de laboratorio o feature flag, mundo original con un camión escalera estadounidense (cabina + escalera), 2 estaciones, controles móviles y navegación HTML completa.
 
 ### Etapa C — Mundo y portafolio
 Activos propios, casos de estudio integrados, estaciones restantes, transiciones, sonido opcional y acciones de contacto.
@@ -75,6 +75,7 @@ Pruebas de rendimiento/accesibilidad/funcionalidad, correcciones, vista 2D y apr
 - Puede entenderse quién es Jorge y qué aporta sin entrar al mundo.
 - Los proyectos y contacto son accesibles en menos pasos que el recorrido opcional.
 - El mundo ilustra **problema → decisión → solución**, no solo una estética llamativa.
+- El vehículo es inequívocamente un **camión escalera americano**, no un automóvil genérico.
 - Ningún texto atribuye programación manual de código generado por IA.
 - El recorrido funciona con táctil y teclado; incluye controles para detener movimiento y audio.
 - No aparecen registros reales ni secretos de los proyectos privados.
