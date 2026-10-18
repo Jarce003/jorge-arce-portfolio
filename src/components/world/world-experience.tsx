@@ -445,16 +445,12 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
 
       <div className="absolute inset-x-3 top-3 z-20 flex items-start justify-between gap-2 sm:inset-x-8 sm:top-7 lg:inset-x-12">
         <div className="min-w-0 max-w-lg">
-          <h1 className="inline-flex rounded-full border border-violet-300/30 bg-[#0a152b]/80 px-3 py-2 text-[10px] font-bold tracking-[.17em] text-violet-100 shadow-lg backdrop-blur-md sm:text-xs">
-            {t.brand}
+          <h1 className="inline-flex rounded-full border border-violet-300/30 bg-[#0a152b]/80 px-2.5 py-2 text-[10px] font-bold tracking-[.13em] text-violet-100 shadow-lg backdrop-blur-md sm:px-3 sm:text-xs">
+            <span className="sm:hidden">JD · 3D</span><span className="hidden sm:inline">{t.brand}</span>
           </h1>
-          <div className="hidden rounded-2xl border border-white/10 bg-slate-950/45 p-4 shadow-xl backdrop-blur-md md:mt-4 md:block lg:max-w-md lg:p-5">
-            <h2 className="max-w-md text-balance text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">{t.headline}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-200">{t.interaction}</p>
-            <Link href={"/" + lang + "/portfolio"} className="mt-4 inline-flex min-h-10 items-center rounded-full border border-violet-200/40 bg-violet-400/15 px-4 text-xs font-semibold text-white hover:bg-violet-400/25">
-              {t.profile} <span className="ml-2" aria-hidden="true">↗</span>
-            </Link>
-          </div>
+          <p className="mt-2 hidden max-w-xs rounded-xl bg-slate-950/50 px-3 py-2 text-xs text-slate-200 backdrop-blur lg:block">
+            {lang === "es" ? "Explora problemas convertidos en soluciones." : "Explore problems turned into solutions."}
+          </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2" role="group" aria-label={t.orientation}>
@@ -510,7 +506,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
             onClick={() => { setGuideOpen(true); setStationMenuOpen(false); }}
             aria-label={t.info}
             title={t.info}
-            className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
+            className="hidden sm:flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
           >
             <span aria-hidden="true" className="text-lg leading-5">ⓘ</span>
             <span className="text-[9px] font-semibold sm:text-[11px]">{lang === "es" ? "Info" : "Info"}</span>
@@ -611,7 +607,10 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
                 </button>
               ))}
             </div>
-            <Link href={"/" + lang + "/portfolio"} className="mt-4 inline-flex min-h-11 items-center rounded-full border border-violet-200/30 px-5 text-sm font-semibold text-white hover:bg-violet-400/10">{t.profile} ↗</Link>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href={"/" + lang + "/portfolio"} className="inline-flex min-h-11 items-center rounded-full border border-violet-200/30 px-5 text-sm font-semibold text-white hover:bg-violet-400/10">{t.profile} ↗</Link>
+              <button type="button" onClick={() => { setStationMenuOpen(false); setGuideOpen(true); }} className="inline-flex min-h-11 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-slate-200 hover:bg-white/10">ⓘ {t.guide}</button>
+            </div>
           </div>
         </div>
       )}
