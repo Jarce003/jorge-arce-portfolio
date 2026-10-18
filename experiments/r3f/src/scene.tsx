@@ -213,7 +213,9 @@ function LoadedStation() {
     });
     return instance;
   }, [scene]);
-  return <primitive object={clone} position={[0, 0, STATION_Z]} />;
+  // Blender garage faces -Z after glTF export; visitors approach from +Z.
+  // Rotate only the station so its actual garage doors face the driving lane.
+  return <primitive object={clone} position={[0, 0, STATION_Z]} rotation={[0, Math.PI, 0]} />;
 }
 
 function Fires({
