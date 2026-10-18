@@ -110,6 +110,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Node.js 22 on Windows
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install lab dependencies on Windows
+        working-directory: experiments/r3f
+        run: npm install --no-audit --no-fund
+      - name: Build lab with parent Next.js PostCSS config on Windows
+        working-directory: experiments/r3f
+        run: npm run build
       - name: Parse and verify ASCII-safe startup scripts
         shell: powershell
         run: |
