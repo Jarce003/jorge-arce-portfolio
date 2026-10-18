@@ -67,3 +67,38 @@ jobs:
             tools/blender/output/*.blend
           retention-days: 7
           if-no-files-found: error
+
+  interactive-browser:
+    name: Chromium driving and fire-rescue screenshots
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    needs: [experimental-scene, blender-model-export]
+    defaults:
+      run:
+        working-directory: experiments/r3f
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get generated original 3D models
+        uses: actions/download-artifact@v4
+        with:
+          name: jarcedev-blender-models
+          path: .
+      - name: Install isolated R3F and browser test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run pilot in headless Chromium
+        run: npm run test:browser
+      - name: Preserve screenshots for visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarcedev-r3f-browser-screenshots
+          path: experiments/r3f/test-artifacts/*.png
+          if-no-files-found: warn
+          retention-days: 7
