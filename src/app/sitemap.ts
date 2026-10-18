@@ -44,6 +44,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${siteUrl}/es/projects/acreditaciones-app`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+      alternates: {
+        languages: {
+          es: `${siteUrl}/es/projects/acreditaciones-app`,
+          en: `${siteUrl}/en/projects/acreditaciones-app`,
+        },
+      },
+    },
+    {
+      url: `${siteUrl}/en/projects/acreditaciones-app`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+      alternates: {
+        languages: {
+          es: `${siteUrl}/es/projects/acreditaciones-app`,
+          en: `${siteUrl}/en/projects/acreditaciones-app`,
+        },
+      },
+    },
+    {
       url: `${siteUrl}/es/projects/evacuaplan-studio`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -1,7 +1,7 @@
 import type { ProjectGalleryItem } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
-export const caseStudySlugs = ["firetrack", "evacuaplan-studio"] as const;
+export const caseStudySlugs = ["firetrack", "evacuaplan-studio", "acreditaciones-app"] as const;
 
 export type CaseStudySlug = (typeof caseStudySlugs)[number];
 
@@ -69,6 +69,7 @@ export type CaseStudy = {
 };
 
 const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
+  "acreditaciones-app": [{ id: "overview", label: "Demo", title: "Accreditation analytics", description: "Synthetic portfolio illustration", src: "/projects/acreditaciones/overview.svg", alt: "Conceptual accreditation dashboard using fictional records" }],
   firetrack: [
     {
       id: "dashboard",
@@ -159,7 +160,7 @@ export const caseStudies = {
       introduction:
         "FireTrack nació para convertir controles operativos dispersos en un sistema centralizado, seguro y trazable. El producto reúne inventario, inspecciones, mantenimiento, usuarios, reportes y acceso mediante QR en una sola aplicación web.",
       facts: [
-        { label: "Rol", value: "Diseño de producto y desarrollo Full Stack" },
+        { label: "Rol", value: "Diseño de producto y validación funcional" },
         { label: "Periodo", value: "2025–actualidad" },
         { label: "Plataforma", value: "Aplicación web responsive" },
         { label: "Estado", value: "Producción y mejora continua" },
@@ -185,14 +186,14 @@ export const caseStudies = {
         eyebrow: "Mi participación",
         title: "Responsabilidad de extremo a extremo",
         description:
-          "Lideré el producto desde la definición funcional hasta la implementación, validación y despliegue. Esto incluyó decisiones técnicas y de experiencia de usuario, además del mantenimiento continuo.",
+          "Identifiqué el problema operativo, definí requisitos y reglas, prioricé funcionalidades y coordiné la implementación asistida por IA. Después evalué el comportamiento, comprobé flujos y dirigí los cambios hasta su despliegue.",
         areas: [
           "Levantamiento y priorización de requerimientos",
-          "Arquitectura de aplicación y modelado de datos",
-          "Frontend, backend y rutas de servidor",
-          "Autenticación, roles, RLS y seguridad",
+          "Revisión de alternativas de arquitectura y modelos de datos",
+          "Definición de flujos y validación de interfaces y servicios",
+          "Especificación y revisión de roles, permisos y seguridad",
           "Pruebas funcionales y de regresión",
-          "Despliegue, monitoreo y correcciones",
+          "Coordinación de despliegues y seguimiento de incidencias",
         ],
       },
       decisions: {
@@ -274,7 +275,7 @@ export const caseStudies = {
         title: "Un producto desplegado y en evolución continua",
         paragraphs: [
           "FireTrack pasó de una necesidad operativa a una aplicación en producción con procesos completos, seguridad por empresa y herramientas para usuarios con responsabilidades distintas.",
-          "El proyecto demuestra mi capacidad para analizar un dominio, convertir reglas reales en software y mantener un producto después del lanzamiento.",
+          "El proyecto demuestra cómo puedo comprender un dominio, definir requisitos y mantener la evolución de una solución mediante desarrollo asistido por IA y validación funcional.",
         ],
         signals: [
           "Aplicación en producción",
@@ -307,7 +308,7 @@ export const caseStudies = {
       introduction:
         "EvacuaPlan Studio busca trasladar a la web un proceso que normalmente requiere herramientas gráficas generales o trabajo manual. El objetivo es ofrecer un editor especializado, comprensible y preparado para documentos imprimibles.",
       facts: [
-        { label: "Rol", value: "Diseño de producto y desarrollo Full Stack" },
+        { label: "Rol", value: "Diseño de producto y validación funcional" },
         { label: "Periodo", value: "2026–actualidad" },
         { label: "Plataforma", value: "Escritorio y tablet" },
         { label: "Estado", value: "Prototipo técnico funcional" },
@@ -333,11 +334,11 @@ export const caseStudies = {
         eyebrow: "Mi participación",
         title: "Producto, interacción y arquitectura del editor",
         description:
-          "Defino el comportamiento de las herramientas, convierto necesidades operativas en reglas de interacción y desarrollo la arquitectura técnica que mantiene objetos, geometría e historial de cambios.",
+          "Identifiqué las necesidades de edición, definí las herramientas y reglas de interacción, y coordiné con IA las alternativas de implementación. Pruebo el editor y dirijo los cambios según su utilidad, precisión y facilidad de uso.",
         areas: [
           "Definición funcional y experiencia de edición",
-          "Modelado de objetos y estado gráfico",
-          "Herramientas de dibujo y transformación",
+          "Definición funcional de objetos y su comportamiento",
+          "Requisitos de dibujo, selección y transformación",
           "Interacción con mouse, touch y Apple Pencil",
           "Pruebas visuales, funcionales y responsive",
           "Git, checkpoints y entregas incrementales",
@@ -440,6 +441,157 @@ export const caseStudies = {
         secondaryAction: "Ver FireTrack",
       },
     },
+    "acreditaciones-app": {
+  "slug": "acreditaciones-app",
+  "metadata": {
+    "title": "Acreditaciones | Caso de estudio",
+    "description": "Sistema de acreditaciones con lógica de vigencias, análisis de datos, motor Python y planificación con OR-Tools."
+  },
+  "breadcrumb": "Volver a proyectos",
+  "status": "Sistema privado en evolución",
+  "title": "Acreditaciones",
+  "subtitle": "Control de vigencias, historial de pruebas y planificación basada en datos.",
+  "introduction": "Aplicación privada para consultar, registrar y planificar acreditaciones de operadores. Su complejidad radica en conciliar registros históricos y aplicar reglas de vigencia distintas por modalidad y bloque.",
+  "facts": [
+    {
+      "label": "Rol",
+      "value": "Análisis de procesos y dirección funcional con IA"
+    },
+    {
+      "label": "Periodo",
+      "value": "2026"
+    },
+    {
+      "label": "Plataforma",
+      "value": "Web responsive + servicio analítico Python"
+    },
+    {
+      "label": "Acceso",
+      "value": "Privado; demo pública sintética"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "overview",
+      "label": "Demo",
+      "title": "Acreditaciones",
+      "description": "Aplicación privada para consultar, registrar y planificar acreditaciones de operadores. Su complejidad radica en conciliar registros históricos y aplicar reglas de vigencia distintas por modalidad y bloque.",
+      "src": "/projects/acreditaciones/overview.svg",
+      "alt": "Acreditaciones — synthetic conceptual illustration"
+    }
+  ],
+  "problem": {
+    "eyebrow": "El desafío",
+    "title": "Convertir registros históricos en decisiones confiables",
+    "paragraphs": [
+      "Los registros históricos requieren normalizar identidades, conservar aprobaciones y determinar cuándo un ciclo está vigente.",
+      "Las modalidades tienen reglas diferentes. Mostrar únicamente fechas aisladas no permite comprender la vigencia completa ni priorizar nuevas evaluaciones."
+    ]
+  },
+  "solution": {
+    "eyebrow": "La solución",
+    "title": "Un sistema con reglas explícitas y análisis especializado",
+    "paragraphs": [
+      "La aplicación centraliza personas, pruebas y aprobaciones; preserva el responsable y permite consultar estados por bloque y por acreditación.",
+      "Un servicio analítico en Python habilita el análisis con DuckDB y modelos de planificación mediante Google OR-Tools. La interfaz web incorpora un asistente para consultas contextualizadas."
+    ]
+  },
+  "role": {
+    "eyebrow": "Participación",
+    "title": "Desarrollo de extremo a extremo",
+    "description": "Identificación del problema, reglas de negocio, diseño funcional y validación; la IA asiste con arquitectura e implementación.",
+    "areas": [
+      "Normalización y conciliación de registros históricos",
+      "Diseño y pruebas de reglas de vigencia",
+      "Definición y validación de interfaz y autenticación",
+      "Consultas y persistencia con PostgreSQL",
+      "Evaluación y coordinación del motor analítico Python",
+      "Pruebas y evaluación del asistente de IA"
+    ]
+  },
+  "decisions": {
+    "eyebrow": "Decisiones técnicas",
+    "title": "Elegir cada herramienta según el problema",
+    "description": "La arquitectura combina distintas tecnologías en lugar de imponer una sola para todas las tareas.",
+    "items": [
+      {
+        "title": "Next.js y TypeScript",
+        "description": "Interfaz y lógica web para consulta, registro y administración."
+      },
+      {
+        "title": "PostgreSQL y Supabase",
+        "description": "Persistencia y control de acceso a registros privados."
+      },
+      {
+        "title": "Python y FastAPI",
+        "description": "Servicio analítico independiente con endpoints propios."
+      },
+      {
+        "title": "DuckDB",
+        "description": "Consultas analíticas eficientes sobre históricos."
+      },
+      {
+        "title": "Google OR-Tools",
+        "description": "Modelos de planificación y asignación bajo restricciones."
+      },
+      {
+        "title": "IA asistida",
+        "description": "Interfaz de preguntas y respuestas sobre el contexto operativo, sujeta a controles y pruebas."
+      }
+    ]
+  },
+  "capabilities": {
+    "eyebrow": "Funciones",
+    "title": "Operación, vigencia y planificación",
+    "items": [
+      {
+        "title": "Conciliación histórica",
+        "description": "Normalización y vinculación de registros relacionados."
+      },
+      {
+        "title": "Ciclos de vigencia",
+        "description": "Cálculo por modalidad, bloque y fecha base."
+      },
+      {
+        "title": "Historial y firma",
+        "description": "Registro de aprobaciones y responsable."
+      },
+      {
+        "title": "Análisis",
+        "description": "Consultas sobre resultados históricos y prioridades."
+      },
+      {
+        "title": "Planificación",
+        "description": "Modelos para preparar y optimizar evaluaciones."
+      },
+      {
+        "title": "Asistente",
+        "description": "Preguntas contextualizadas con evaluación de respuestas."
+      }
+    ]
+  },
+  "outcome": {
+    "eyebrow": "Resultado",
+    "title": "Una plataforma con una arquitectura ampliada",
+    "paragraphs": [
+      "El proyecto muestra una evolución técnica desde el desarrollo web hasta los servicios analíticos, la optimización matemática y la asistencia con IA.",
+      "La demo en JarceDev es independiente del sistema real y utiliza solamente datos ficticios."
+    ],
+    "signals": [
+      "Aplicación privada",
+      "Motor analítico Python",
+      "FastAPI + DuckDB + OR-Tools",
+      "Datos protegidos",
+      "Vista demostrativa sintética"
+    ]
+  },
+  "cta": {
+    "title": "¿Tu organización necesita digitalizar reglas complejas?",
+    "description": "Podemos traducir procesos históricos, validaciones y necesidades de análisis en software usable y seguro.",
+    "primaryAction": "Contactarme",
+    "secondaryAction": "Ver FireTrack"
+  }
+},
   },
   en: {
     firetrack: {
@@ -457,7 +609,7 @@ export const caseStudies = {
       introduction:
         "FireTrack was created to turn scattered operational controls into one centralized, secure and traceable system. The product brings inventory, inspections, maintenance, users, reporting and QR access into a single web application.",
       facts: [
-        { label: "Role", value: "Product design and Full Stack development" },
+        { label: "Role", value: "Product direction and functional validation" },
         { label: "Timeline", value: "2025–present" },
         { label: "Platform", value: "Responsive web application" },
         { label: "Status", value: "Production and continuous improvement" },
@@ -516,14 +668,14 @@ export const caseStudies = {
         eyebrow: "My role",
         title: "End-to-end ownership",
         description:
-          "I led the product from functional definition through implementation, validation and deployment. This included technical and UX decisions as well as ongoing maintenance.",
+          "I identified the operational problem, defined requirements and business rules, prioritized features and coordinated AI-assisted implementation. I then validated workflows and guided revisions through deployment.",
         areas: [
           "Requirements discovery and prioritization",
-          "Application architecture and data modeling",
-          "Frontend, backend and server routes",
-          "Authentication, roles, RLS and security",
+          "Reviewing architecture options and data models",
+          "Defining workflows and validating interfaces and services",
+          "Specifying and reviewing roles, permissions and security",
           "Functional and regression testing",
-          "Deployment, monitoring and fixes",
+          "Coordinating releases and following up on issues",
         ],
       },
       decisions: {
@@ -605,7 +757,7 @@ export const caseStudies = {
         title: "A deployed product under continuous development",
         paragraphs: [
           "FireTrack evolved from an operational need into a production application with complete workflows, company-level security and tools for users with different responsibilities.",
-          "The project demonstrates my ability to understand a domain, translate real rules into software and maintain a product after launch.",
+          "The project demonstrates how I understand a domain, define requirements and guide product evolution through AI-assisted development and functional validation.",
         ],
         signals: [
           "Production application",
@@ -638,7 +790,7 @@ export const caseStudies = {
       introduction:
         "EvacuaPlan Studio brings to the web a process that normally requires general-purpose design tools or manual work. The goal is to provide a specialized, understandable editor prepared for printable documents.",
       facts: [
-        { label: "Role", value: "Product design and Full Stack development" },
+        { label: "Role", value: "Product direction and functional validation" },
         { label: "Timeline", value: "2026–present" },
         { label: "Platform", value: "Desktop and tablet" },
         { label: "Status", value: "Functional technical prototype" },
@@ -689,11 +841,11 @@ export const caseStudies = {
         eyebrow: "My role",
         title: "Product, interaction and editor architecture",
         description:
-          "I define tool behavior, convert operational needs into interaction rules and develop the technical architecture that manages objects, geometry and change history.",
+          "I identified editing needs, defined tool behavior and interaction rules, and coordinated AI-assisted technical options. I test the editor and direct revisions based on utility, precision and ease of use.",
         areas: [
           "Functional definition and editing experience",
-          "Object modeling and graphical state",
-          "Drawing and transformation tools",
+          "Functional definition of objects and behavior",
+          "Drawing, selection and transformation requirements",
           "Mouse, touch and Apple Pencil interaction",
           "Visual, functional and responsive testing",
           "Git, checkpoints and incremental releases",
@@ -796,5 +948,156 @@ export const caseStudies = {
         secondaryAction: "View FireTrack",
       },
     },
+    "acreditaciones-app": {
+  "slug": "acreditaciones-app",
+  "metadata": {
+    "title": "Accreditations | Case study",
+    "description": "Accreditation management with validity rules, data analysis, Python analytics and OR-Tools scheduling."
+  },
+  "breadcrumb": "Back to projects",
+  "status": "Private system under development",
+  "title": "Accreditations",
+  "subtitle": "Validity cycles, test history and data-driven evaluation planning.",
+  "introduction": "Private application for querying, registering and planning operator accreditations. Its complexity lies in reconciling historical records and applying modality-specific validity rules.",
+  "facts": [
+    {
+      "label": "Role",
+      "value": "Process analysis and AI-assisted product direction"
+    },
+    {
+      "label": "Timeline",
+      "value": "2026"
+    },
+    {
+      "label": "Platform",
+      "value": "Responsive web + Python analytics service"
+    },
+    {
+      "label": "Access",
+      "value": "Private; synthetic public demo"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "overview",
+      "label": "Demo",
+      "title": "Accreditations",
+      "description": "Private application for querying, registering and planning operator accreditations. Its complexity lies in reconciling historical records and applying modality-specific validity rules.",
+      "src": "/projects/acreditaciones/overview.svg",
+      "alt": "Accreditations — synthetic conceptual illustration"
+    }
+  ],
+  "problem": {
+    "eyebrow": "The challenge",
+    "title": "Turning historical records into reliable decisions",
+    "paragraphs": [
+      "Historical data requires identity reconciliation and accurate records of assessments and approval dates.",
+      "Different modalities have different validity criteria. Isolated test dates do not reveal the full cycle status or evaluation priorities."
+    ]
+  },
+  "solution": {
+    "eyebrow": "The solution",
+    "title": "Explicit business rules with specialized analytics",
+    "paragraphs": [
+      "The application centralizes people, assessment blocks and approvals with traceability for the reviewer.",
+      "A Python service supports analysis with DuckDB and planning models via Google OR-Tools. A contextual AI assistant complements the web interface."
+    ]
+  },
+  "role": {
+    "eyebrow": "My contribution",
+    "title": "End-to-end implementation",
+    "description": "Problem framing, business rules, functional design and validation; AI assists with architecture and implementation.",
+    "areas": [
+      "Historical data normalization and reconciliation",
+      "Validity-cycle modeling and tests",
+      "Functional design and review of responsive UI and authentication",
+      "PostgreSQL querying and persistence",
+      "Scoping and validation of Python analytics engine",
+      "AI assistant regression and evaluation"
+    ]
+  },
+  "decisions": {
+    "eyebrow": "Engineering decisions",
+    "title": "Select each tool for its strengths",
+    "description": "Rather than forcing one language to solve everything, the architecture separates concerns.",
+    "items": [
+      {
+        "title": "Next.js and TypeScript",
+        "description": "Interactive web workflows and administration."
+      },
+      {
+        "title": "PostgreSQL and Supabase",
+        "description": "Data persistence and restricted access."
+      },
+      {
+        "title": "Python and FastAPI",
+        "description": "Dedicated analytics service and APIs."
+      },
+      {
+        "title": "DuckDB",
+        "description": "Efficient analytical queries over historical records."
+      },
+      {
+        "title": "Google OR-Tools",
+        "description": "Constraint-based planning and allocation."
+      },
+      {
+        "title": "AI assistant",
+        "description": "Contextual queries with guardrails and evaluation."
+      }
+    ]
+  },
+  "capabilities": {
+    "eyebrow": "Capabilities",
+    "title": "Operations, status and planning",
+    "items": [
+      {
+        "title": "Historical reconciliation",
+        "description": "Normalize and link related records."
+      },
+      {
+        "title": "Validity cycles",
+        "description": "Compute status per modality, block and baseline date."
+      },
+      {
+        "title": "Audit trail",
+        "description": "Track approvals and their reviewer."
+      },
+      {
+        "title": "Analytics",
+        "description": "Explore results and priorities from historic data."
+      },
+      {
+        "title": "Planning",
+        "description": "Schedule assessments with optimization models."
+      },
+      {
+        "title": "Assistant",
+        "description": "Contextual questions with response evaluation."
+      }
+    ]
+  },
+  "outcome": {
+    "eyebrow": "Outcome",
+    "title": "An evolving multi-technology platform",
+    "paragraphs": [
+      "The project demonstrates a progression from full-stack web engineering into analytical services, mathematical optimization and AI.",
+      "The JarceDev preview is separate from the production system and uses only synthetic data."
+    ],
+    "signals": [
+      "Private application",
+      "Python analytics service",
+      "FastAPI + DuckDB + OR-Tools",
+      "Protected participant data",
+      "Synthetic interactive preview"
+    ]
+  },
+  "cta": {
+    "title": "Need to turn complex rules into a usable system?",
+    "description": "Let's define practical and secure software around your requirements, records and planning needs.",
+    "primaryAction": "Contact me",
+    "secondaryAction": "View FireTrack"
+  }
+},
   },
 } satisfies Record<Locale, Record<CaseStudySlug, CaseStudy>>;

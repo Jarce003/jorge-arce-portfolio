@@ -75,7 +75,7 @@ export async function generateMetadata({
           url: "/og/portfolio-og-2026.png",
           width: 1200,
           height: 630,
-          alt: "Jorge Arce Solano — Full Stack Software Engineer",
+          alt: "Jorge Arce Solano — Digital Solutions & Process Improvement",
         },
       ],
     },

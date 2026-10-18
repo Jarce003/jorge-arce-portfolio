@@ -5,12 +5,14 @@ import { useState } from "react";
 
 import { EvacuaPlanDemo } from "@/components/project-demo/evacuaplan-demo";
 import { FireTrackDemo } from "@/components/project-demo/firetrack-demo";
+import { AcreditacionesDemo } from "@/components/project-demo/acreditaciones-demo";
 import type { ProjectGalleryItem } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
 type ProjectSlug =
   | "firetrack"
-  | "evacuaplan-studio";
+  | "evacuaplan-studio"
+  | "acreditaciones-app";
 
 type ProjectShowcaseProps = {
   items: ProjectGalleryItem[];
@@ -74,6 +76,10 @@ export function ProjectShowcase({
           description:
             "Try tools for placing symbols, moving elements, drawing routes and adding walls.",
         };
+
+  if (project === "acreditaciones-app") {
+    return <AcreditacionesDemo lang={resolvedLang} />;
+  }
 
   if (isFireTrackDemo) {
     return (

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 730" role="img" aria-labelledby="title desc">
+<title id="title">Accreditations — analytics dashboard concept</title>
+<desc id="desc">Portfolio illustration with synthetic metrics and fictional operator evaluation records. Not a screenshot of the live application.</desc>
+<defs>
+<linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1020"/><stop offset="1" stop-color="#17233e"/></linearGradient>
+<linearGradient id="panel" x2="0" y2="1"><stop stop-color="#1b2c4e"/><stop offset="1" stop-color="#141d33"/></linearGradient>
+<linearGradient id="bar"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
+</defs>
+<rect width="1200" height="730" fill="url(#bg)"/>
+<circle cx="1050" cy="25" r="350" fill="#8b5cf6" opacity=".07"/>
+<circle cx="90" cy="650" r="240" fill="#22d3ee" opacity=".05"/>
+<rect x="50" y="46" width="1100" height="638" rx="22" fill="#111c31" stroke="#33425f" stroke-width="2"/>
+<rect x="50" y="46" width="1100" height="64" rx="22" fill="#17243c"/>
+<rect x="50" y="88" width="1100" height="22" fill="#17243c"/>
+<circle cx="85" cy="77" r="7" fill="#f87171"/><circle cx="108" cy="77" r="7" fill="#fbbf24"/><circle cx="131" cy="77" r="7" fill="#34d399"/>
+<text x="165" y="84" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#f8fafc">Acreditaciones</text>
+<text x="1033" y="82" font-family="Arial,sans-serif" font-size="12" fill="#a5b4fc">DEMO · DATOS FICTICIOS</text>
+<text x="88" y="158" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#f8fafc">Panel de planificación</text>
+<text x="88" y="186" font-family="Arial,sans-serif" font-size="15" fill="#94a3b8">Seguimiento de ciclos y evaluaciones · ilustración conceptual</text>
+<g font-family="Arial,sans-serif">
+<rect x="88" y="221" width="310" height="153" rx="17" fill="url(#panel)" stroke="#334155"/>
+<text x="113" y="255" font-size="15" fill="#cbd5e1">Ciclos vigentes (ejemplo)</text><text x="113" y="324" font-size="53" font-weight="700" fill="#6ee7b7">72%</text>
+<rect x="113" y="341" width="260" height="7" rx="3" fill="#334155"/><rect x="113" y="341" width="187" height="7" rx="3" fill="#34d399"/>
+<rect x="419" y="221" width="310" height="153" rx="17" fill="url(#panel)" stroke="#334155"/>
+<text x="444" y="255" font-size="15" fill="#cbd5e1">Evaluaciones pendientes</text><text x="444" y="324" font-size="53" font-weight="700" fill="#fcd34d">28%</text>
+<rect x="444" y="341" width="260" height="7" rx="3" fill="#334155"/><rect x="444" y="341" width="73" height="7" rx="3" fill="#fbbf24"/>
+<rect x="750" y="221" width="362" height="153" rx="17" fill="url(#panel)" stroke="#334155"/>
+<text x="774" y="255" font-size="15" fill="#cbd5e1">Motor de análisis</text>
+<text x="774" y="301" font-size="19" font-weight="700" fill="#ddd6fe">Python · DuckDB</text><text x="774" y="331" font-size="16" fill="#67e8f9">Google OR-Tools</text>
+<rect x="88" y="398" width="1024" height="237" rx="18" fill="#162239" stroke="#334155"/>
+<text x="113" y="437" font-size="18" font-weight="700" fill="#f8fafc">Historial de evaluación · datos sintéticos</text>
+<rect x="113" y="461" width="974" height="37" rx="7" fill="#233450"/>
+<text x="130" y="484" font-size="13" fill="#cbd5e1">Participante</text><text x="560" y="484" font-size="13" fill="#cbd5e1">Bloques</text><text x="940" y="484" font-size="13" fill="#cbd5e1">Estado</text>
+<g font-size="15" fill="#e2e8f0">
+<text x="130" y="530">Alex Rivera · DEMO-001</text><text x="560" y="530">I  ·  II  ·  III</text><text x="945" y="530" fill="#6ee7b7">Vigente</text>
+<path d="M113 547H1087" stroke="#334155"/>
+<text x="130" y="580">Sam Vega · DEMO-002</text><text x="560" y="580">I  ·  II</text><text x="945" y="580" fill="#fcd34d">Pendiente</text>
+<path d="M113 596H1087" stroke="#334155"/>
+<text x="130" y="621">Taylor Mora · DEMO-003</text><text x="560" y="621">I  ·  III</text><text x="945" y="621" fill="#fcd34d">Pendiente</text>
+</g></g>
+</svg>

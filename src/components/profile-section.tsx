@@ -11,20 +11,20 @@ type ProfileSectionProps = {
 
 const profileLabels = {
   es: {
-    role: "Full Stack Software Engineer",
+    role: "Ingeniero en Sistemas · Soluciones digitales",
     whatsapp: "Escribirme por WhatsApp",
     resume: "Descargar CV",
     linkedin: "LinkedIn",
     github: "GitHub",
-    photoAlt: "Jorge Arce Solano, Full Stack Software Engineer",
+    photoAlt: "Retrato profesional de Jorge Arce Solano",
   },
   en: {
-    role: "Full Stack Software Engineer",
+    role: "Systems Engineer · Digital Solutions",
     whatsapp: "Message me on WhatsApp",
     resume: "Download resume",
     linkedin: "LinkedIn",
     github: "GitHub",
-    photoAlt: "Jorge Arce Solano, Full Stack Software Engineer",
+    photoAlt: "Retrato profesional de Jorge Arce Solano",
   },
 } satisfies Record<
   Locale,

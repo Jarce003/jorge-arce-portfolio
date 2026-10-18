@@ -115,6 +115,8 @@ export default async function CaseStudyPage({
 
               <ProjectShowcase
                 items={study.gallery}
+                project={slug}
+                lang={lang}
                 priority
               />
             </div>
