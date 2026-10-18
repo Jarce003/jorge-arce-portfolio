@@ -1,4 +1,5 @@
 import { getWorldStations, type StructureType } from "@/content/projects";
+import { stationFireStrength } from "@/lib/world-fire";
 
 import type { WorldPosition, WorldRenderer } from "./world-contract";
 
@@ -250,6 +251,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   let lastShape: ObjectShape | null = null;
   let daylight = 0;
   let daylightTarget = 0;
+  const fireFadeStart = new Map<string, number>();
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
     if (!colors.has(hex)) colors.set(hex, hexColor(hex));
@@ -548,6 +550,74 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
   }
 
+  /**
+   * Render inexpensive, deliberately stylized flames above each undiscovered
+   * project building. Each fire receives a brief fade after Discover; graphics
+   * have no audio and make no claims about real-world firefighting practice.
+   *
+   * A small fixed number of low-poly meshes keeps mobile drawing affordable.
+   */
+  function drawStationFire(
+    station: (typeof worldStations)[number],
+    elapsed: number,
+    lowDetail: boolean,
+    reducedMotion: boolean,
+    extinguished: boolean,
+  ) {
+    if (extinguished && !fireFadeStart.has(station.id)) {
+      fireFadeStart.set(station.id, elapsed);
+    } else if (!extinguished) {
+      fireFadeStart.delete(station.id);
+    }
+    const strength = stationFireStrength(
+      extinguished,
+      elapsed,
+      fireFadeStart.get(station.id),
+      reducedMotion,
+    );
+    if (strength <= 0.005) return;
+
+    const locations = lowDetail
+      ? [[-2.15, 1.55], [2.15, -1.80]]
+      : [[-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]];
+
+    for (let index = 0; index < locations.length; index++) {
+      const [offsetX, offsetZ] = locations[index];
+      const x = station.x + offsetX;
+      const z = station.z + offsetZ;
+      const motion = reducedMotion
+        ? 1
+        : 0.86 + Math.sin(elapsed * 4.1 + index * 1.53 + station.x) * 0.14;
+      const height = (1.65 + (index % 2) * .48) * motion * strength;
+      const baseHeight = index % 2 ? 4.05 : 3.36;
+      const y = baseHeight + height * 0.30;
+      // Broad ember-colored cone with a shorter luminous yellow core.
+      draw("cone", x, y, z, .94 * strength, height, .94 * strength,
+        "#ff6e30", 0, 0, 1);
+      draw("cone", x + .06, y - .10, z - .05, .49 * strength,
+        height * .68, .49 * strength, "#ffd16e", 0, 0, 1);
+      if (!lowDetail) {
+        draw("cone", x - .22, y - .20, z + .24, .39 * strength,
+          height * .52, .39 * strength, "#ff3f37", 0, 0, 1);
+      }
+      // The ground glow is deliberately subtle in daylight. At night it
+      // reads from both the chase and the overview camera.
+      draw("cylinder", x, baseHeight - .32, z,
+        1.50 * strength, .035, 1.50 * strength, "#ff8b45",
+        0, 0, 1, (daylightTarget > .5 ? .11 : .23) * strength);
+
+      if (!lowDetail) {
+        // A few low-opacity smoke puffs give the scene visual depth without
+        // particle engines, texture downloads or extra packages.
+        const rise = reducedMotion ? .65 : (elapsed * .72 + index * .31) % 1.3;
+        draw("cone", x + .16, baseHeight + 1.5 + rise,
+          z + .04, (1.05 + rise * .35) * strength, .48 * strength,
+          (1.05 + rise * .35) * strength, "#9da5b6",
+          0, 0, 0, .075 * strength);
+      }
+    }
+  }
+
   function drawRoadNetwork(lowDetail = false) {
     box(0, -.05, 0, 94, .14, 94, daylightTarget > .5 ? "#91bcb4" : palette.ground);
     box(0, -.047, 0, 66, .016, 66, daylightTarget > .5 ? "#79a6a4" : "#162b3c");
@@ -777,7 +847,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night") {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night", extinguishedStations: ReadonlySet<string> = new Set()) {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const lowDetail = width < 640;
@@ -810,6 +880,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       drawRoadNetwork(lowDetail);
       for (const station of worldStations) {
         drawStation(station.structure, station.x, station.z, station.color);
+        drawStationFire(station, elapsed, lowDetail, reducedMotion,
+          extinguishedStations.has(station.id));
       }
       drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
     },
