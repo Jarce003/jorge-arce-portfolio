@@ -102,7 +102,7 @@ const copy = {
     accelerate: "Accelerate",
     reverse: "Reverse",
     guide: "Guide",
-    guideText: "Drive near a station; you don’t have to touch the building. Press Discover to spray water, extinguish the flames and reveal the project. You can also use the station list."
+    guideText: "Drive near a station; you don’t have to touch the building. Press Discover to spray water, extinguish the flames and reveal the project. You can also use the station list.",
     close: "Close",
     discover: "Discover",
     visit: "Travel to station",
