@@ -393,9 +393,6 @@ export function WorldExperience({ lang }: { lang: Language }) {
     }
 
     function keydown(event: KeyboardEvent) {
-      const target = event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|A)$/.test(target.tagName))) return;
-      if (event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
       if (key === "escape") {
         setActiveStation(null);
@@ -403,6 +400,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
         setStationMenuOpen(false);
         return;
       }
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|A)$/.test(target.tagName))) return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
       if (overlayOpenRef.current) return;
       // Do not capture WASD or scroll keys after the visitor leaves this section.
       const rect = canvasElement.getBoundingClientRect();
@@ -658,7 +658,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
                     <span className="block truncate text-sm font-semibold">{station.name}</span>
                     <span className="block text-[11px] text-slate-400">{station.type}</span>
                   </span>
-                  <span aria-hidden="true" className="text-violet-300">↗</span>
+                  {visited.includes(station.id) ? <span className="text-xs font-bold text-emerald-300" aria-label={lang === "es" ? "Visitado" : "Visited"}>✓</span> : <span aria-hidden="true" className="text-violet-300">↗</span>}
                 </button>
               ))}
             </div>
