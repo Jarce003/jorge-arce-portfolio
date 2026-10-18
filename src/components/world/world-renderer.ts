@@ -1,5 +1,7 @@
 import { getWorldStations, type StructureType } from "@/content/projects";
 
+import type { WorldPosition, WorldRenderer } from "./world-contract";
+
 /**
  * JarceDev exploration world — dependency-free WebGL2 prototype.
  *
@@ -7,26 +9,11 @@ import { getWorldStations, type StructureType } from "@/content/projects";
  * It intentionally avoids downloading assets or collecting visitor data.
  * A later art-production phase can replace the primitive meshes with GLB.
  */
-export type WorldPosition = { x: number; z: number };
-
 type Vec3 = [number, number, number];
 type Mat4 = Float32Array;
 type Geometry = { buffer: WebGLBuffer; vertices: number };
 type ObjectShape = "cube" | "cone" | "cylinder";
 
-export type WorldRenderer = {
-  render: (
-    position: WorldPosition,
-    heading: number,
-    elapsed: number,
-    reducedMotion: boolean,
-    cameraMode?: "chase" | "overview",
-    lightsOn?: boolean,
-    timeOfDay?: "day" | "night",
-  ) => void;
-  project: (position: WorldPosition, elevation?: number) => { x: number; y: number; visible: boolean };
-  dispose: () => void;
-};
 
 const palette = {
   ground: "#101f30",
