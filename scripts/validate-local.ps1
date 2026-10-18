@@ -1,5 +1,6 @@
 param(
   [switch]$NoServer,
+  [switch]$SkipInstall,
   [int]$Port = 3000
 )
 
@@ -44,7 +45,14 @@ try {
   if ($nodeMajor -lt 22) { throw ("Se requiere Node.js 22 o superior. Encontrado: " + $nodeVersion) }
   Write-Host ("Node.js " + $nodeVersion) -ForegroundColor Green
 
-  Invoke-Checked "Instalar dependencias exactas" { npm.cmd ci }
+  if ($SkipInstall) {
+    if (-not (Test-Path -LiteralPath (Join-Path $root "node_modules\next"))) {
+      throw "No se encontraron dependencias instaladas. Ejecuta el script sin -SkipInstall."
+    }
+    Write-Host "Se omite npm ci para evitar reinstalar Lightning CSS con Windows." -ForegroundColor DarkGray
+  } else {
+    Invoke-Checked "Instalar dependencias exactas" { npm.cmd ci }
+  }
   Invoke-Checked "Verificar codificacion" { npm.cmd run check:encoding }
   Invoke-Checked "Verificar catalogo e ilustraciones" { npm.cmd run check:projects }
 
