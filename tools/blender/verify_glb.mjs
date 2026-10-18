@@ -23,7 +23,12 @@ function parseGLB(file) {
   assert.ok(gltf.meshes?.length > 5, "No meaningful mesh content");
   assert.ok(gltf.materials?.length >= 4, "Expected PBR material colors");
   assert.ok(gltf.nodes?.length >= 12, "Expected separately editable objects");
-  return { file, bytes: bytes.length, nodeNames: new Set(gltf.nodes.map((node) => node.name)) };
+  return {
+    file,
+    bytes: bytes.length,
+    meshes: gltf.meshes.length,
+    nodeNames: new Set(gltf.nodes.map((node) => node.name)),
+  };
 }
 
 const [truck, station] = args.map(parseGLB);
@@ -43,7 +48,9 @@ for (const name of [
 for (const name of ["FireTrack_ROOT", "RedCanopy", "DigitalSignScreen"]) {
   assert.ok(station.nodeNames.has(name), "Station is missing component: " + name);
 }
+assert.ok(truck.meshes <= 35, "Truck exports too many draw meshes: " + truck.meshes);
+assert.ok(station.meshes <= 18, "Station exports too many draw meshes: " + station.meshes);
 console.log("GLB assets verified.");
-console.log("Ladder truck: " + (truck.bytes / 1024).toFixed(1) + " KiB");
-console.log("FireTrack station: " + (station.bytes / 1024).toFixed(1) + " KiB");
+console.log("Ladder truck: " + (truck.bytes / 1024).toFixed(1) + " KiB / " + truck.meshes + " meshes");
+console.log("FireTrack station: " + (station.bytes / 1024).toFixed(1) + " KiB / " + station.meshes + " meshes");
 console.log("Wheel pivots, ladder pivot and important building objects preserved.");
