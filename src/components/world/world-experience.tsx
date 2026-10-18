@@ -308,7 +308,6 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
     let running = true;
     let raf = 0;
     let previousTime = 0;
-    let lastPaint = 0;
     let sceneIsVisible = true;
     const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
     const observer = new IntersectionObserver(([entry]) => {
@@ -323,14 +322,11 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
 
     function frame(time: number) {
       if (!running) return;
-      // Limit drawing on narrow mobile screens, and stop using the GPU when
-      // the visitor scrolls down to detailed case studies.
-      if (canvasElement.clientWidth < 640 && time - lastPaint < 30) {
-        raf = window.requestAnimationFrame(frame);
-        return;
-      }
-      lastPaint = time;
-      const dt = previousTime ? Math.min((time - previousTime) / 1000, .055) : .016;
+      // Draw on every available display refresh, including portrait mobile.
+      // The previous 30ms mobile throttle dropped alternating frames on
+      // 60Hz displays, visibly stepping the truck and its chase camera.
+      // Cap only unusually long background/frame stalls to avoid jumps.
+      const dt = previousTime ? Math.max(0, Math.min((time - previousTime) / 1000, .10)) : 1 / 60;
       previousTime = time;
 
       if (document.visibilityState === "visible" && sceneIsVisible) {
