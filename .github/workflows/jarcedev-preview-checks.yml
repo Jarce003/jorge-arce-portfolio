@@ -32,6 +32,8 @@ jobs:
         run: npm run check:projects
       - name: Validate SVG XML previews
         run: python3 scripts/check-svg-xml.py
+      - name: AI demo query regression tests
+        run: npm run test:demo
       - name: TypeScript validation
         run: npx tsc --noEmit
       - name: Production build
