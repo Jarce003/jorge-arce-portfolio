@@ -367,12 +367,15 @@ export function WorldScene({
       rescueStarted.current = null;
       onRescueComplete();
     }
+    const isPortrait = gl.domElement.clientWidth < 560;
     if (overview) cameraDesired.set(pose.x + 11, 19, pose.z + 11);
     else {
+      // Portrait devices need a wider chase view to see beyond the truck.
+      const followDistance = isPortrait ? 13.0 : 9.8;
       cameraDesired.set(
-        pose.x + Math.sin(pose.heading) * 9.8,
-        7.9,
-        pose.z + Math.cos(pose.heading) * 9.8,
+        pose.x + Math.sin(pose.heading) * followDistance,
+        isPortrait ? 9.15 : 7.9,
+        pose.z + Math.cos(pose.heading) * followDistance,
       );
     }
     camera.position.lerp(cameraDesired, damping(step, 7));
