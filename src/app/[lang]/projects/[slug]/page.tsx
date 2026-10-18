@@ -85,7 +85,7 @@ export default async function CaseStudyPage({
 
           <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
             <Link
-              href={`/${lang}#${projectsId}`}
+              href={`/${lang}/portfolio#${projectsId}`}
               className="inline-flex min-h-11 items-center text-sm font-bold text-slate-700 transition hover:text-slate-950"
             >
               <span className="mr-2" aria-hidden="true">
@@ -296,7 +296,7 @@ export default async function CaseStudyPage({
 
             <div className="mt-8 flex flex-col justify-center gap-3 sm:mt-9 sm:flex-row">
               <Link
-                href={`/${lang}#${lang === "es" ? "contacto" : "contact"}`}
+                href={`/${lang}/portfolio#${lang === "es" ? "contacto" : "contact"}`}
                 className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-slate-950 transition hover:bg-cyan-50"
               >
                 {study.cta.primaryAction}
