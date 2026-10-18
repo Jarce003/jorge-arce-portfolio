@@ -31,6 +31,7 @@ export function stationFireStrength(
   if (reducedMotion) return 0;
   if (extinguishedAt === undefined) return 0;
   const fraction = (elapsedSeconds - extinguishedAt) / FIRE_FADE_SECONDS;
+  if (fraction >= 1 - 1e-6) return 0;
   return Math.max(0, Math.min(1, 1 - fraction));
 }
 
