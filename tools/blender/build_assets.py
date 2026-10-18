@@ -264,6 +264,40 @@ def firetrack(mats):
     return target, root
 
 
+def merge_export_meshes(target, keep_names=()):
+    """Join same-material static meshes under a shared parent.
+
+    This only runs AFTER saving the fully editable .blend source. Exported
+    mesh count is dramatically smaller without touching independent wheel
+    pivots, ladder pivot, nozzle or named station elements. Merge only
+    objects already using the same parent and single material.
+    """
+    protected = set(keep_names)
+    groups = {}
+    for ob in list(target.objects):
+        if ob.type != "MESH" or ob.name in protected:
+            continue
+        if len(ob.data.materials) != 1 or ob.parent is None:
+            continue
+        material_id = ob.data.materials[0].name
+        key = (ob.parent.name, material_id)
+        groups.setdefault(key, []).append(ob)
+
+    joined_count = 0
+    for (parent_name, mat_name), items in groups.items():
+        if len(items) < 2:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in items:
+            ob.select_set(True)
+        active = items[0]
+        bpy.context.view_layer.objects.active = active
+        bpy.ops.object.join()
+        active.name = f"Batch_{parent_name}_{mat_name}"[:62]
+        joined_count += len(items) - 1
+    print(f"Optimized {target.name}: removed {joined_count} redundant draw objects")
+
+
 def export_collection(target, filepath):
     bpy.ops.object.select_all(action="DESELECT")
     for ob in target.all_objects:
@@ -307,14 +341,22 @@ def main():
     truck_collection, truck_root = truck(mats)
     station_collection, station_root = firetrack(mats)
 
-    export_collection(truck_collection, args.output / "ladder-truck.glb")
-    export_collection(station_collection, args.output / "firetrack-station.glb")
-
-    # Present the two original models side by side in the editable .blend.
+    # Save all *individual* parts in .blend before batching for WebGL.
+    # This keeps geometry easy to modify without incurring extra draw calls.
     station_root.location.x = 13.0
     bpy.ops.object.select_all(action="DESELECT")
     bpy.ops.wm.save_as_mainfile(filepath=str(args.blend), compress=True)
-    print("Saved editable source:", args.blend)
+    print("Saved editable source with unmerged parts:", args.blend)
+    station_root.location.x = 0.0
+
+    merge_export_meshes(truck_collection, keep_names={
+        "AerialLadder_Nozzle",
+    })
+    merge_export_meshes(station_collection, keep_names={
+        "RedCanopy", "DigitalSignScreen",
+    })
+    export_collection(truck_collection, args.output / "ladder-truck.glb")
+    export_collection(station_collection, args.output / "firetrack-station.glb")
 
 
 if __name__ == "__main__":
