@@ -81,16 +81,25 @@ try {
   // The truck starts 17 world units from the FireTrack building.
   // Driving in a straight line for a few seconds should enter the
   // 11.5-unit discovery range, without unrealistic teleportation.
+  const discoverButton = desktop.getByRole("button", { name: /Descubrir/ });
   await desktop.keyboard.down("w");
-  await desktop.waitForTimeout(2800);
+  let withinReach = false;
+  // Software Chromium may run at a fraction of real monitor FPS. Poll actual
+  // reach rather than assuming an equal distance after 2.8 wall-clock seconds.
+  for (let attempt = 0; attempt < 18; attempt++) {
+    await desktop.waitForTimeout(800);
+    if (await discoverButton.isEnabled()) {
+      withinReach = true;
+      break;
+    }
+  }
   await desktop.keyboard.up("w");
-  await desktop.getByRole("button", { name: /💧 Descubrir/ })
-    .waitFor({ state: "visible" });
-  await desktop.waitForFunction(() =>
-    [...document.querySelectorAll("button")].some((element) =>
-      element.textContent?.includes("Descubrir") && !element.disabled,
-    ), { timeout: 14_000 });
-  await desktop.getByRole("button", { name: /💧 Descubrir/ }).click();
+  await desktop.screenshot({ path: resolve(screenshots, "desktop-approach.png") });
+  if (!withinReach) {
+    const displayedZ = await desktop.locator(".indicators").innerText();
+    throw new Error("Truck failed to enter discovery radius. HUD: " + displayedZ);
+  }
+  await discoverButton.click();
   await desktop.waitForTimeout(750);
   await desktop.screenshot({ path: resolve(screenshots, "desktop-water-rescue.png") });
   await desktop.getByText("ESTACIÓN RECUPERADA").waitFor({ timeout: 12_000 });
