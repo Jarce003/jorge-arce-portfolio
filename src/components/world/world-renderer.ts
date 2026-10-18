@@ -252,7 +252,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   let cameraX = 0;
   let cameraY = 8.4;
   let cameraZ = 10;
-  let latestVP = new Float32Array(16);
+  let latestVP: Mat4 = new Float32Array(16);
   let lastShape: ObjectShape | null = null;
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
