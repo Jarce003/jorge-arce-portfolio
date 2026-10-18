@@ -397,7 +397,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     box(x, 2.05, z-2.2, 7.8, .40, 2.8, "#4ad3b5");
   }
-  function drawRoadNetwork() {
+  function drawRoadNetwork(lowDetail = false) {
     box(0, -.05, 0, 94, .14, 94, palette.ground);
     box(0, -.047, 0, 66, .016, 66, "#162b3c");
     box(0, .035, 0, 7, .08, 53, palette.road);
@@ -428,8 +428,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       const angle = i/16*Math.PI*2;
       cylinder(Math.cos(angle)*3.1, .38, Math.sin(angle)*3.1, .16, .12, .16, palette.purple);
     }
-    for(let x=-25;x<=25;x+=4.5){
-      for(let z=-25;z<=25;z+=4.5){
+    const treeSpacing = lowDetail ? 9 : 4.5;
+    for(let x=-25;x<=25;x+=treeSpacing){
+      for(let z=-25;z<=25;z+=treeSpacing){
         if((Math.abs(x)>22 || Math.abs(z)>22) && (Math.round(x*2+z)%3===0)){
           tree(x,z,.58+(Math.abs(x+z)%3)*.09);
         }
@@ -440,10 +441,13 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       cylinder(st.x, .015, st.z, 12.9, .065, 12.9, st.color);
       cylinder(st.x, .060, st.z, 12.2, .06, 12.2, "#172b3f");
     }
-    for(const location of [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2],[-9.2,-4.6],[-9.2,4.6],[9.2,-4.6],[9.2,4.6]]) {
+    const lamps = lowDetail
+      ? [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2]]
+      : [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2],[-9.2,-4.6],[-9.2,4.6],[9.2,-4.6],[9.2,4.6]];
+    for(const location of lamps) {
       streetLamp(location[0],location[1]);
     }
-    skyline();
+    if (!lowDetail) skyline();
   }
   /**
    * Original, deliberately generic US-style aerial ladder truck.
@@ -579,8 +583,10 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     render(position, heading, elapsed, reducedMotion, cameraMode = "chase") {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.45);
-      const cap = Math.min(1, Math.sqrt(1600000 / (width * height * dpr * dpr)));
+      const lowDetail = width < 640;
+      const dpr = Math.min(window.devicePixelRatio || 1, lowDetail ? 1.1 : 1.45);
+      const maxPixels = lowDetail ? 600000 : 1600000;
+      const cap = Math.min(1, Math.sqrt(maxPixels / (width * height * dpr * dpr)));
       const rw = Math.round(width * dpr * cap);
       const rh = Math.round(height * dpr * cap);
       if(canvas.width !== rw || canvas.height !== rh) {
@@ -601,7 +607,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       latestVP = multiply(perspective(rw / rh), view);
       gl.uniformMatrix4fv(vpUniform, false, latestVP);
       lastShape = null;
-      drawRoadNetwork();
+      drawRoadNetwork(lowDetail);
       fireStation();
       evacuaStation();
       accreditationStation();
