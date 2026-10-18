@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 type Props = { lang: "es" | "en"; compact?: boolean };
 type ScenarioId = "priority" | "capacity" | "performance" | "validity";
@@ -175,25 +175,71 @@ function detectScenario(text: string, lang: Props["lang"]): ScenarioId | null {
 export function AcreditacionesDemo({ lang, compact = false }: Props) {
   const t = content[lang];
   const [query, setQuery] = useState(t.cases.priority.prompt);
-  const [chosen, setChosen] = useState<ScenarioId>("priority");
+  const [result, setResult] = useState<{ id: ScenarioId; serial: number } | null>(null);
+  const [working, setWorking] = useState(false);
   const [error, setError] = useState(false);
-  const scenario = t.cases[chosen];
-  const max = Math.max(...scenario.stats.map((item) => item.value), 1);
-  const select = (id: ScenarioId) => {
-    setQuery(t.cases[id].prompt);
-    setChosen(id);
-    setError(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const responseRef = useRef<HTMLDivElement>(null);
+  const count = useRef(0);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  const resetPending = () => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    setWorking(false);
   };
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const next = detectScenario(query, lang);
-    if (!next) { setError(true); return; }
-    setChosen(next);
+
+  const select = (id: ScenarioId) => {
+    resetPending();
+    setQuery(t.cases[id].prompt);
+    setResult(null);
     setError(false);
   };
 
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    resetPending();
+    const next = detectScenario(query, lang);
+    setError(!next);
+    setResult(null);
+
+    if (!next) return;
+
+    // Simulate the interaction rhythm of the original product without
+    // suggesting an actual live AI/backend request or exposing private data.
+    setWorking(true);
+    const serial = ++count.current;
+    timer.current = setTimeout(() => {
+      setResult({ id: next, serial });
+      setWorking(false);
+      timer.current = null;
+      responseRef.current?.focus({ preventScroll: true });
+    }, 320);
+  };
+
+  const scenario = result ? t.cases[result.id] : null;
+  const max = scenario ? Math.max(...scenario.stats.map((item) => item.value), 1) : 1;
+  const selectedPrompt = detectScenario(query, lang);
+  const helper = lang === "es"
+    ? {
+        start: "Pulsa Consultar para generar una respuesta de demostración.",
+        processing: "Interpretando la consulta y aplicando reglas de muestra…",
+        finished: "Consulta respondida",
+      }
+    : {
+        start: "Press Ask to generate a sample answer.",
+        processing: "Interpreting the question and applying sample rules…",
+        finished: "Question answered",
+      };
+
   return (
-    <div className="overflow-hidden rounded-[1.35rem] border border-violet-400/30 bg-[#0a1427] text-white shadow-2xl shadow-slate-950/25">
+    <div className="overflow-hidden rounded-[1.35rem] border border-violet-400/30 bg-[#0a1427] text-white shadow-2xl shadow-slate-950/25"
+      data-testid="acreditaciones-demo">
       <header className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-400/15 text-lg text-violet-200" aria-hidden="true">✳</span>
@@ -212,43 +258,74 @@ export function AcreditacionesDemo({ lang, compact = false }: Props) {
         <p className="text-[.61rem] font-bold tracking-[.14em] text-slate-400">{t.examples}</p>
         <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t.examples}>
           {ids.map((id) => (
-            <button type="button" key={id} aria-pressed={chosen === id && !error} onClick={() => select(id)}
-              className={"min-h-9 max-w-48 shrink-0 rounded-lg border px-3 py-2 text-left text-[.67rem] leading-4 transition-colors " + (chosen === id && !error ? "border-violet-300/80 bg-violet-400/20 text-white" : "border-white/15 bg-white/5 text-slate-300 hover:border-violet-300/40")}>
+            <button type="button" key={id} aria-pressed={selectedPrompt === id}
+              onClick={() => select(id)}
+              className={"min-h-10 max-w-48 shrink-0 rounded-lg border px-3 py-2 text-left text-[.7rem] leading-4 transition-colors " +
+                (selectedPrompt === id ? "border-violet-300/80 bg-violet-400/20 text-white" : "border-white/15 bg-white/5 text-slate-300 hover:border-violet-300/40")}>
               {t.cases[id].title}
             </button>
           ))}
         </div>
 
-        <form onSubmit={submit} className="flex items-center gap-2">
+        <form onSubmit={submit} className="flex flex-wrap items-center gap-2" data-testid="demo-query-form">
           <label htmlFor={"ai-query-" + lang + (compact ? "-compact" : "-full")} className="sr-only">{t.ask}</label>
-          <input id={"ai-query-" + lang + (compact ? "-compact" : "-full")} value={query} onChange={(event) => setQuery(event.target.value)}
+          <input id={"ai-query-" + lang + (compact ? "-compact" : "-full")}
+            value={query}
+            onChange={(event) => {
+              resetPending();
+              setQuery(event.target.value);
+              setResult(null);
+              setError(false);
+            }}
             maxLength={230} placeholder={t.inputPlaceholder}
-            className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/20 bg-white/[.055] px-3 text-xs text-white outline-none placeholder:text-slate-500 focus-visible:border-violet-300 sm:text-sm" />
-          <button type="submit" className="min-h-11 shrink-0 rounded-xl bg-violet-300 px-3.5 text-xs font-bold text-slate-950 hover:bg-violet-200">
-            {t.action} ↗
+            className="min-h-11 min-w-0 flex-[1_1_210px] rounded-xl border border-white/20 bg-white/[.055] px-3 text-xs text-white outline-none placeholder:text-slate-500 focus-visible:border-violet-300 sm:text-sm" />
+          <button type="submit" disabled={working}
+            className="min-h-11 shrink-0 rounded-xl bg-violet-300 px-4 text-xs font-bold text-slate-950 hover:bg-violet-200 disabled:cursor-wait disabled:opacity-70"
+            data-testid="demo-submit">
+            {working ? "…" : t.action + " ↗"}
           </button>
         </form>
-        {error && <p role="status" className="rounded-lg bg-amber-300/10 px-3 py-2 text-xs leading-5 text-amber-200">{t.unsupported}</p>}
+        {error && (
+          <p role="alert" className="rounded-lg border border-amber-200/20 bg-amber-300/10 px-3 py-2 text-xs leading-5 text-amber-200" data-testid="demo-unsupported">
+            {t.unsupported}
+          </p>
+        )}
 
-        <div className="rounded-xl border border-white/10 bg-white/[.045] p-3.5" aria-live="polite">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[.64rem] font-bold uppercase tracking-[.12em] text-slate-400">{t.response}</p>
-            <span className="text-[.59rem] text-emerald-300">● {t.badge}</span>
-          </div>
-          <p className="mt-2 text-[1.55rem] font-semibold tracking-[-.04em] text-white">{scenario.measure}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-300">{scenario.answer}</p>
-          <div className="mt-3 space-y-2">
-            {scenario.stats.map((item) => (
-              <div key={item.name} className="grid grid-cols-[70px_1fr_auto] items-center gap-2 sm:grid-cols-[90px_1fr_auto]">
-                <span className="truncate text-[.64rem] font-medium text-slate-300">{item.name}</span>
-                <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-300 transition-[width] duration-300" style={{ width: (item.value / max) * 100 + "%" }} />
-                </div>
-                <span className="text-[.62rem] font-semibold tabular-nums text-violet-200">{item.label}</span>
+        <div ref={responseRef} tabIndex={-1} aria-live="polite" aria-atomic="true"
+          className="rounded-xl border border-white/10 bg-white/[.045] p-3.5 outline-none focus-visible:border-violet-400"
+          data-testid="demo-response">
+          {scenario ? (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[.64rem] font-bold uppercase tracking-[.12em] text-slate-400">{t.response}</p>
+                <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 text-[.62rem] font-semibold text-emerald-300">
+                  ✓ {helper.finished} #{result?.serial}
+                </span>
               </div>
-            ))}
-          </div>
-          {!compact && <p className="mt-3 text-[.67rem] leading-5 text-slate-400">{scenario.footnote}</p>}
+              <p className="mt-2 text-[1.55rem] font-semibold tracking-[-.04em] text-white" data-testid="demo-metric">{scenario.measure}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-300">{scenario.answer}</p>
+              <div className="mt-4 space-y-2.5" role="group" aria-label={scenario.title}>
+                {scenario.stats.map((item) => (
+                  <div key={item.name} className="grid grid-cols-[75px_minmax(50px,1fr)_auto] items-center gap-2 sm:grid-cols-[96px_minmax(50px,1fr)_auto]">
+                    <span className="truncate text-[.68rem] font-medium text-slate-300">{item.name}</span>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-300 transition-[width] duration-300"
+                        style={{ width: (item.value / max) * 100 + "%" }} />
+                    </div>
+                    <span className="text-[.67rem] font-semibold tabular-nums text-violet-200">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-[.68rem] leading-5 text-slate-400">{scenario.footnote}</p>
+            </>
+          ) : (
+            <div className="flex min-h-24 flex-col justify-center gap-2" role="status">
+              <span className="text-xl text-violet-300" aria-hidden="true">{working ? "◌" : "✳"}</span>
+              <p className="text-xs leading-6 text-slate-300" data-testid="demo-prompt">
+                {working ? helper.processing : helper.start}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-1 text-[.55rem] font-medium text-violet-200/90 sm:text-[.61rem]">
