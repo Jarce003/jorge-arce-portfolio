@@ -13,7 +13,14 @@ type Geometry = { buffer: WebGLBuffer; vertices: number };
 type ObjectShape = "cube" | "cone" | "cylinder";
 
 export type WorldRenderer = {
-  render: (position: WorldPosition, heading: number, elapsed: number, reducedMotion: boolean) => void;
+  render: (
+    position: WorldPosition,
+    heading: number,
+    elapsed: number,
+    reducedMotion: boolean,
+    cameraMode?: "chase" | "overview",
+  ) => void;
+  project: (position: WorldPosition, elevation?: number) => { x: number; y: number; visible: boolean };
   dispose: () => void;
 };
 
@@ -243,7 +250,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   gl.clearColor(.035, .065, .12, 1);
 
   let cameraX = 0;
+  let cameraY = 8.4;
   let cameraZ = 10;
+  let latestVP = new Float32Array(16);
   let lastShape: ObjectShape | null = null;
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
@@ -567,7 +576,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion) {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase") {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const dpr = Math.min(window.devicePixelRatio || 1, 1.45);
@@ -580,13 +589,17 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       }
       gl.viewport(0, 0, rw, rh);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      const desiredX = position.x + Math.sin(heading) * 8.8;
-      const desiredZ = position.z + Math.cos(heading) * 8.8;
+      const overview = cameraMode === "overview";
+      const desiredX = position.x + (overview ? 5.5 : Math.sin(heading) * 10.5);
+      const desiredZ = position.z + (overview ? 9.2 : Math.cos(heading) * 10.5);
+      const desiredY = overview ? 18.0 : 8.4;
       const factor = reducedMotion ? 1 : .11;
       cameraX += (desiredX - cameraX) * factor;
       cameraZ += (desiredZ - cameraZ) * factor;
-      const view = lookAt([cameraX, 8.4, cameraZ], [position.x, .75, position.z]);
-      gl.uniformMatrix4fv(vpUniform, false, multiply(perspective(rw / rh), view));
+      cameraY += (desiredY - cameraY) * factor;
+      const view = lookAt([cameraX, cameraY, cameraZ], [position.x, 1.1, position.z]);
+      latestVP = multiply(perspective(rw / rh), view);
+      gl.uniformMatrix4fv(vpUniform, false, latestVP);
       lastShape = null;
       drawRoadNetwork();
       fireStation();
@@ -594,6 +607,21 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       accreditationStation();
       hydrantsStation();
       drawLadderTruck(position, heading, elapsed, reducedMotion);
+    },
+    project(position, elevation = 5.2) {
+      // Convert a 3D station roof into a clickable screen-space annotation.
+      const x = position.x, y = elevation, z = position.z;
+      const clipX = latestVP[0] * x + latestVP[4] * y + latestVP[8] * z + latestVP[12];
+      const clipY = latestVP[1] * x + latestVP[5] * y + latestVP[9] * z + latestVP[13];
+      const clipW = latestVP[3] * x + latestVP[7] * y + latestVP[11] * z + latestVP[15];
+      if (clipW <= .2) return { x: 0, y: 0, visible: false };
+      const ndcX = clipX / clipW, ndcY = clipY / clipW;
+      const visible = ndcX > -.95 && ndcX < .95 && ndcY > -.87 && ndcY < .78;
+      return {
+        x: (ndcX * .5 + .5) * canvas.clientWidth,
+        y: (1 - (ndcY * .5 + .5)) * canvas.clientHeight,
+        visible,
+      };
     },
     dispose() {
       for(const shape of shapes.values()) gl.deleteBuffer(shape.buffer);
