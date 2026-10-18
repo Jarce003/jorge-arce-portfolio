@@ -4,239 +4,234 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { AcreditacionesDemo } from "@/components/project-demo/acreditaciones-demo";
 import type { SiteContent } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
 type Project = SiteContent["projectsSection"]["projects"][number];
 type Slug = Project["slug"];
 
-const insights: Record<Locale, Record<Slug, { icon: string; area: string; issue: string; result: string }>> = {
+const priority: Slug[] = ["acreditaciones-app", "firetrack", "evacuaplan-studio", "hidrantes-app"];
+
+const stories: Record<Locale, Record<Slug, {
+  icon: string; category: string; challenge: string; solution: string; label: string;
+}>> = {
   es: {
-    firetrack: { icon: "🧯", area: "Trazabilidad", issue: "Inspecciones e inventarios dispersos", result: "Controles, QR y mantenimiento en un mismo sistema." },
-    "evacuaplan-studio": { icon: "🏢", area: "Herramientas especializadas", issue: "Croquis difíciles de crear y actualizar", result: "Editor de planos diseñado para el proceso." },
-    "acreditaciones-app": { icon: "🎓", area: "Reglas y datos", issue: "Históricos y vigencias difíciles de conciliar", result: "Ciclos, trazabilidad y planificación con datos." },
-    "hidrantes-app": { icon: "📍", area: "Información geográfica", issue: "Datos de hidrantes poco accesibles en campo", result: "Mapa por QR, consulta de GPM y edición protegida." },
+    "acreditaciones-app": {
+      icon: "✳", category: "IA + DATOS", label: "Incluye asistente IA",
+      challenge: "Reglas y vigencias dispersas.",
+      solution: "Consultas inteligentes y planificación verificable.",
+    },
+    firetrack: {
+      icon: "🧯", category: "SAAS", label: "Gestión operativa",
+      challenge: "Controles manuales y datos separados.",
+      solution: "Inspecciones, inventario y QR conectados.",
+    },
+    "evacuaplan-studio": {
+      icon: "▦", category: "EDITOR", label: "Herramienta visual",
+      challenge: "Croquis difíciles de crear.",
+      solution: "Un editor para planos de evacuación.",
+    },
+    "hidrantes-app": {
+      icon: "📍", category: "MAPAS", label: "Consulta en campo",
+      challenge: "Hidrantes difíciles de consultar.",
+      solution: "Mapa por QR con datos de caudal.",
+    },
   },
   en: {
-    firetrack: { icon: "🧯", area: "Traceability", issue: "Scattered inspection and inventory records", result: "QR access, controls and maintenance in one system." },
-    "evacuaplan-studio": { icon: "🏢", area: "Specialized tools", issue: "Plans are hard to create and update", result: "Purpose-built evacuation plan editor." },
-    "acreditaciones-app": { icon: "🎓", area: "Rules and analytics", issue: "Complex historical records and validity cycles", result: "Cycle management, auditability and data-driven planning." },
-    "hidrantes-app": { icon: "📍", area: "Operational maps", issue: "Hydrant records are hard to consult in the field", result: "QR map, flow readings and protected edits." },
+    "acreditaciones-app": {
+      icon: "✳", category: "AI + DATA", label: "AI assistant included",
+      challenge: "Scattered rules and expiry cycles.",
+      solution: "Intelligent questions and validated planning.",
+    },
+    firetrack: {
+      icon: "🧯", category: "SAAS", label: "Operational management",
+      challenge: "Manual checks and fragmented data.",
+      solution: "Inspections, inventory and QR connected.",
+    },
+    "evacuaplan-studio": {
+      icon: "▦", category: "EDITOR", label: "Visual tools",
+      challenge: "Plans are hard to create.",
+      solution: "A purpose-built evacuation editor.",
+    },
+    "hidrantes-app": {
+      icon: "📍", category: "MAPS", label: "Field lookup",
+      challenge: "Hydrant data is hard to reach.",
+      solution: "QR-accessible map with flow records.",
+    },
   },
 };
 
-const copy = {
+const ui = {
   es: {
-    eyebrow: "PORTAFOLIO / JARCEDEV",
-    first: "Detecto oportunidades.",
-    second: "Diseño soluciones.",
-    lead: "Comprendo procesos reales, defino productos y valido resultados. La IA me asiste con la arquitectura y la programación.",
-    back: "Regresar al mundo 3D",
-    work: "PROYECTOS",
-    workTitle: "Cuatro problemas. Cuatro soluciones.",
-    workHint: "Selecciona uno para conocerlo.",
-    before: "EL PROBLEMA",
-    after: "LA SOLUCIÓN",
-    view: "Explorar caso",
-    preview: "Vista ilustrativa",
-    method: "MI MÉTODO",
-    methodTitle: "De una oportunidad a una solución funcional.",
-    methodLead: "No empiezo escribiendo código. Empiezo comprendiendo cómo funciona un proceso.",
-    step: "ETAPA",
-    example: "EJEMPLO REAL",
-    stages: [
-      { label: "Observar", detail: "Conozco el proceso, las personas, las reglas y las necesidades.", example: "Hidrantes: consultar recursos desde el teléfono, sin iniciar sesión." },
-      { label: "Detectar", detail: "Identifico información dispersa, tareas repetidas y oportunidades de mejora.", example: "FireTrack: unificar inventario, inspecciones y seguimiento." },
-      { label: "Definir", detail: "Establezco flujos y requisitos. La IA propone herramientas y genera el código.", example: "Acreditaciones: definir bloques, ciclos y vencimientos según modalidad." },
-      { label: "Validar", detail: "Pruebo escenarios reales, reporto problemas y dirijo las mejoras.", example: "EvacuaPlan: probar selección, ubicación y edición de elementos." },
+    eyebrow: "JARCEDEV / PERFIL",
+    title: "De una idea a una solución.",
+    sub: "Analizo procesos, defino el producto y valido el resultado. La IA me ayuda a construirlo.",
+    world: "Volver al mundo 3D",
+    work: "MIS PROYECTOS",
+    choice: "Toca uno para explorarlo",
+    before: "PROBLEMA",
+    after: "SOLUCIÓN",
+    open: "Conocer el proyecto",
+    model: "Vista conceptual",
+    method: "CÓMO TRABAJO",
+    example: "EJEMPLO",
+    steps: [
+      { icon: "◉", title: "Observo", line: "Entiendo el proceso.", example: "Hidrantes: el acceso debe funcionar desde el teléfono." },
+      { icon: "◇", title: "Detecto", line: "Encuentro qué mejorar.", example: "FireTrack: reunir inspecciones e inventarios." },
+      { icon: "✧", title: "Defino", line: "Diseño los flujos con IA.", example: "Acreditaciones: reglas de vigencia y planificación." },
+      { icon: "✓", title: "Valido", line: "Pruebo y perfecciono.", example: "EvacuaPlan: editar y ubicar objetos fácilmente." },
     ],
-    strengths: "LO QUE APORTO",
-    abilities: ["Análisis de procesos", "Diseño funcional", "Validación e iteración"],
-    ai: "Mi responsabilidad está en detectar el problema, definir las reglas y verificar resultados. El código se genera con asistencia de IA.",
     about: "SOBRE MÍ",
-    aboutTitle: "Conecto operaciones con tecnología.",
-    bio: "Soy Ingeniero en Sistemas. Desde 2014 trabajo en atención de emergencias, experiencia que me ayuda a entender operaciones y detectar oportunidades de mejora.",
-    bio2: "Guío el diseño funcional de productos y su implementación asistida por IA.",
-    location: "Costa Rica",
-    history: "Bombero desde 2014",
-    lang: "Inglés C1",
-    resume: "Ver CV",
-    contact: "Conversemos",
+    bio: "Ingeniero en Sistemas · Bombero desde 2014 · Diseño de productos y desarrollo asistido por IA.",
+    resume: "CV",
+    contact: "Hablemos",
   },
   en: {
-    eyebrow: "PORTFOLIO / JARCEDEV",
-    first: "I spot opportunities.",
-    second: "I shape solutions.",
-    lead: "I learn real workflows, define products and validate results. AI assists me with architecture and coding.",
-    back: "Back to the 3D world",
-    work: "PROJECTS",
-    workTitle: "Four problems. Four solutions.",
-    workHint: "Select one to explore it.",
-    before: "THE PROBLEM",
-    after: "THE SOLUTION",
-    view: "Explore case study",
-    preview: "Illustrative preview",
-    method: "MY APPROACH",
-    methodTitle: "From operational opportunity to a working product.",
-    methodLead: "I don't start by writing code. I start by understanding how people work.",
-    step: "STEP",
-    example: "REAL EXAMPLE",
-    stages: [
-      { label: "Observe", detail: "I learn the workflows, people, rules and actual needs.", example: "Hydrants: public lookup from a phone without logging in." },
-      { label: "Identify", detail: "I spot scattered information, repeated tasks and improvement opportunities.", example: "FireTrack: combine inventory, inspections and tracking." },
-      { label: "Define", detail: "I specify workflows and requirements. AI explores tools and generates code.", example: "Accreditations: define modality-specific blocks and expiry cycles." },
-      { label: "Validate", detail: "I test actual use cases, report issues and guide iterations.", example: "EvacuaPlan: validate selecting, placing and editing elements." },
+    eyebrow: "JARCEDEV / PROFILE",
+    title: "From an idea to a solution.",
+    sub: "I analyze workflows, define products and validate outcomes. AI assists with implementation.",
+    world: "Back to 3D world",
+    work: "MY PROJECTS",
+    choice: "Select one to explore",
+    before: "PROBLEM",
+    after: "SOLUTION",
+    open: "View project",
+    model: "Conceptual preview",
+    method: "HOW I WORK",
+    example: "EXAMPLE",
+    steps: [
+      { icon: "◉", title: "Observe", line: "Understand the workflow.", example: "Hydrants: direct access from a phone." },
+      { icon: "◇", title: "Identify", line: "Spot the opportunity.", example: "FireTrack: connect inspections and inventory." },
+      { icon: "✧", title: "Define", line: "Design flows with AI.", example: "Accreditations: expiry rules and planning." },
+      { icon: "✓", title: "Validate", line: "Test and improve.", example: "EvacuaPlan: simplify editing and object placement." },
     ],
-    strengths: "WHAT I BRING",
-    abilities: ["Process analysis", "Functional product design", "Testing and iteration"],
-    ai: "My responsibility is to discover the problem, define the rules and validate results. Software coding is assisted by AI.",
     about: "ABOUT ME",
-    aboutTitle: "Bridging operations and technology.",
-    bio: "I'm a Systems Engineer. My experience in emergency response since 2014 has taught me to understand operations and spot improvement opportunities.",
-    bio2: "I guide functional product design and AI-assisted software implementation.",
-    location: "Costa Rica",
-    history: "Firefighter since 2014",
-    lang: "English C1",
-    resume: "View résumé",
+    bio: "Systems Engineer · Firefighter since 2014 · Product design and AI-assisted development.",
+    resume: "Résumé",
     contact: "Let's talk",
   },
 } as const;
 
 export function CompactPortfolio({ lang, content }: { lang: Locale; content: SiteContent }) {
-  const t = copy[lang];
-  const projects = content.projectsSection.projects;
-  const [selectedSlug, setSelectedSlug] = useState<Slug>(projects[0].slug);
+  const t = ui[lang];
+  const projects = priority.map((slug) => content.projectsSection.projects.find((p) => p.slug === slug)).filter((p): p is Project => Boolean(p));
+  const [selectedSlug, setSelectedSlug] = useState<Slug>("acreditaciones-app");
   const [step, setStep] = useState(0);
-  const selected = projects.find((project) => project.slug === selectedSlug) ?? projects[0];
-  const details = insights[lang][selected.slug];
-  const image = selected.gallery[0];
+  const selected = projects.find((p) => p.slug === selectedSlug) ?? projects[0];
+  const info = stories[lang][selected.slug];
+  const preview = selected.gallery[0];
 
   return (
     <>
-      <section className="relative overflow-hidden bg-[#0a1426] px-4 pb-14 pt-12 text-white sm:px-8 sm:pb-20 sm:pt-20">
-        <div aria-hidden="true" className="pointer-events-none absolute -right-36 -top-24 size-[30rem] rounded-full bg-violet-400/10 blur-3xl" />
+      <section className="relative overflow-hidden bg-[#0a1425] px-4 pb-8 pt-8 text-white sm:px-8 sm:pb-10 sm:pt-12">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-32 size-[26rem] rounded-full bg-violet-500/10 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
-          <Link href={"/" + lang + "#mundo"} className="inline-flex min-h-11 items-center rounded-full border border-white/20 bg-white/5 px-4 text-xs font-semibold text-violet-200 hover:bg-white/10">← {t.back}</Link>
-          <p className="mt-9 text-[.7rem] font-bold tracking-[.19em] text-violet-300">{t.eyebrow}</p>
-          <h1 className="mt-4 max-w-5xl text-balance text-[clamp(2.4rem,7vw,5rem)] font-semibold leading-[1.02] tracking-[-.06em]">
-            {t.first}<span className="block text-violet-300">{t.second}</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">{t.lead}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <a href={lang === "es" ? "#proyectos" : "#projects"} className="inline-flex min-h-11 items-center rounded-full bg-violet-300 px-5 text-sm font-bold text-slate-950 hover:bg-violet-200">{t.work} ↓</a>
-            <a href={lang === "es" ? "#contacto" : "#contact"} className="inline-flex min-h-11 items-center rounded-full border border-white/20 px-5 text-sm font-semibold hover:bg-white/10">{t.contact} ↗</a>
-          </div>
+          <Link href={"/" + lang + "#mundo"} className="inline-flex min-h-10 items-center rounded-full border border-white/15 bg-white/5 px-4 text-xs font-semibold text-violet-200 hover:bg-white/10">← {t.world}</Link>
+          <p className="mt-6 text-[.64rem] font-bold tracking-[.19em] text-violet-300">{t.eyebrow}</p>
+          <h1 className="mt-2 max-w-4xl text-balance text-[clamp(2.2rem,6vw,4.4rem)] font-semibold leading-[1.05] tracking-[-.057em]">{t.title}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">{t.sub}</p>
         </div>
       </section>
 
-      <section id={lang === "es" ? "proyectos" : "projects"} className="scroll-mt-24 bg-[#f6f7fb] px-4 py-14 sm:px-8 sm:py-20">
+      <section id={lang === "es" ? "proyectos" : "projects"} className="scroll-mt-24 bg-[#0f1c31] px-4 py-10 text-white sm:px-8 sm:py-12">
         <div className="mx-auto max-w-6xl">
-          <p className="text-[.69rem] font-bold tracking-[.19em] text-violet-700">{t.work}</p>
-          <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
-            <h2 className="max-w-2xl text-balance text-[clamp(1.8rem,4vw,3rem)] font-semibold leading-[1.1] tracking-[-.05em] text-slate-950">{t.workTitle}</h2>
-            <span className="text-xs text-slate-500">{t.workHint}</span>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-[.72rem] font-bold tracking-[.18em] text-violet-300">{t.work}</h2>
+            <p className="text-xs text-slate-400">{t.choice}</p>
           </div>
-          <div className="mt-7 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3" role="group" aria-label={t.work}>
-            {projects.map((project, index) => {
-              const item = insights[lang][project.slug];
-              const active = selected.slug === project.slug;
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3" role="group" aria-label={t.work}>
+            {projects.map((project) => {
+              const item = stories[lang][project.slug];
+              const selectedNow = selectedSlug === project.slug;
+              const image = project.gallery[0];
               return (
-                <button
-                  type="button"
-                  key={project.slug}
-                  onClick={() => setSelectedSlug(project.slug)}
-                  aria-pressed={active}
-                  className={"min-h-32 rounded-2xl border p-3 text-left transition-all duration-200 sm:min-h-36 sm:p-4 " + (active ? "border-violet-300 bg-[#111d34] text-white shadow-xl" : "border-slate-200 bg-white text-slate-950 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md")}
-                >
-                  <div className="flex items-center justify-between"><span className="text-2xl" aria-hidden="true">{item.icon}</span><span className="font-mono text-[.68rem] text-violet-400">0{index + 1}</span></div>
-                  <span className="mt-3 block truncate text-sm font-bold sm:text-base">{project.title}</span>
-                  <span className={"mt-1 block text-[.69rem] leading-4 " + (active ? "text-slate-300" : "text-slate-500")}>{item.area}</span>
+                <button key={project.slug} type="button" onClick={() => setSelectedSlug(project.slug)} aria-pressed={selectedNow}
+                  className={"group overflow-hidden rounded-xl border text-left transition-colors " +
+                    (selectedNow ? "border-violet-300 bg-violet-400/15 ring-1 ring-violet-300/35" : "border-white/10 bg-white/[.04] hover:border-violet-300/40")}>
+                  <div className="relative h-16 overflow-hidden bg-[#15253e] sm:h-24">
+                    {project.slug === "acreditaciones-app" ? (
+                      <div aria-hidden="true" className="flex h-full items-center justify-center bg-[radial-gradient(ellipse_at_center,#483b81,#15253e)] text-4xl text-violet-100">✳ <span className="ml-2 rounded-lg border border-violet-200/30 px-2 py-1 text-[.67rem] font-bold tracking-wide">IA</span></div>
+                    ) : image ? (
+                      <Image src={image.src} alt="" fill sizes="(max-width:640px) 50vw, 25vw" className="object-contain p-1 opacity-85 transition-opacity group-hover:opacity-100" />
+                    ) : null}
+                  </div>
+                  <div className="flex min-h-16 items-center gap-2 px-2.5 py-2 sm:min-h-14 sm:px-3">
+                    <span className="hidden text-lg sm:inline" aria-hidden="true">{item.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[.78rem] font-bold sm:text-sm">{project.title}</p>
+                      <p className="mt-0.5 truncate text-[.61rem] text-slate-400">{item.category}</p>
+                    </div>
+                    {selectedNow && <span aria-hidden="true" className="text-violet-300">●</span>}
+                  </div>
                 </button>
               );
             })}
           </div>
-          <article key={selected.slug} className="mt-3 grid min-w-0 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-lg shadow-slate-200/40 lg:grid-cols-2">
-            <div className="flex flex-col justify-between p-5 sm:p-8">
+
+          <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[.72fr_1.28fr]">
+            <div className="flex flex-col justify-between rounded-[1.25rem] border border-white/10 bg-white/[.045] p-4 sm:p-6">
               <div aria-live="polite">
-                <p className="text-[.7rem] font-bold uppercase tracking-[.14em] text-violet-700">{details.area}</p>
-                <h3 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{selected.title}</h3>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="border-l-2 border-rose-300 pl-3"><p className="text-[.66rem] font-bold tracking-[.12em] text-rose-700">{t.before}</p><p className="mt-1 text-sm leading-6 text-slate-700">{details.issue}</p></div>
-                  <div className="border-l-2 border-emerald-400 pl-3"><p className="text-[.66rem] font-bold tracking-[.12em] text-emerald-700">{t.after}</p><p className="mt-1 text-sm leading-6 text-slate-700">{details.result}</p></div>
+                <p className="text-[.65rem] font-bold tracking-[.14em] text-violet-300">{info.category}</p>
+                <h3 className="mt-1.5 text-2xl font-semibold tracking-tight">{selected.title}</h3>
+                <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-1">
+                  <div>
+                    <p className="text-[.64rem] font-bold tracking-[.1em] text-rose-300">{t.before}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-300 sm:text-sm">{info.challenge}</p>
+                  </div>
+                  <div>
+                    <p className="text-[.64rem] font-bold tracking-[.1em] text-emerald-300">{t.after}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-200 sm:text-sm">{info.solution}</p>
+                  </div>
                 </div>
               </div>
-              <div className="mt-6">
-                <div className="flex flex-wrap gap-1.5">
-                  {selected.technologies.slice(0, 4).map((technology) => <span key={technology} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[.68rem] text-slate-600">{technology}</span>)}
+              <Link href={"/" + lang + "/projects/" + selected.slug} className="mt-5 inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-violet-300 px-5 text-xs font-bold text-slate-950 hover:bg-violet-200">{t.open} ↗</Link>
+            </div>
+
+            <div className="min-w-0" key={selected.slug}>
+              {selected.slug === "acreditaciones-app" ? (
+                <AcreditacionesDemo lang={lang} compact />
+              ) : (
+                <div className="relative min-h-64 overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#081322] sm:min-h-[320px]">
+                  {preview && <Image src={preview.src} alt={preview.alt} fill sizes="(max-width:1024px) 100vw, 58vw" className="object-contain p-4 sm:p-6" />}
+                  <span className="absolute bottom-3 left-3 rounded-full bg-[#091424]/90 px-3 py-1.5 text-[.62rem] text-slate-300">{t.model}</span>
                 </div>
-                <Link href={"/" + lang + "/projects/" + selected.slug} className="mt-5 inline-flex min-h-11 items-center rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-violet-900">{t.view} ↗</Link>
-              </div>
+              )}
             </div>
-            <div className="relative min-h-60 overflow-hidden bg-[#121d32] sm:min-h-80">
-              {image && <Image src={image.src} alt={image.alt} fill sizes="(max-width:1024px) 100vw, 50vw" className="object-contain p-3 sm:p-6" />}
-              <span className="absolute bottom-3 left-3 rounded-full border border-white/20 bg-[#111d33]/85 px-3 py-1.5 text-[.68rem] font-semibold text-white backdrop-blur">{t.preview}</span>
-            </div>
-          </article>
+          </div>
         </div>
       </section>
 
-      <section id={lang === "es" ? "proceso" : "process"} className="scroll-mt-24 bg-[#101d32] px-4 py-16 text-white sm:px-8 sm:py-20">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.85fr_1.15fr] lg:gap-16">
-          <div>
-            <p className="text-[.69rem] font-bold tracking-[.19em] text-violet-300">{t.method}</p>
-            <h2 className="mt-4 text-balance text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.08] tracking-[-.05em]">{t.methodTitle}</h2>
-            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">{t.methodLead}</p>
-            <div id={lang === "es" ? "servicios" : "services"} className="mt-7 scroll-mt-24">
-              <p className="mb-2 text-[.67rem] font-bold tracking-[.15em] text-slate-400">{t.strengths}</p>
-              <div className="flex flex-wrap gap-2">
-                {t.abilities.map((ability) => <span key={ability} className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-xs text-slate-200">{ability}</span>)}
-              </div>
-            </div>
+      <section id={lang === "es" ? "proceso" : "process"} className="scroll-mt-24 bg-[#f4f5f9] px-4 py-9 text-slate-950 sm:px-8 sm:py-12">
+        <div id={lang === "es" ? "servicios" : "services"} className="mx-auto max-w-6xl scroll-mt-24">
+          <h2 className="text-[.72rem] font-bold tracking-[.18em] text-violet-800">{t.method}</h2>
+          <div className="mt-4 grid grid-cols-4 gap-1.5 sm:gap-3" role="group" aria-label={t.method}>
+            {t.steps.map((item, index) => (
+              <button key={item.title} type="button" onClick={() => setStep(index)} aria-pressed={step === index}
+                className={"min-h-24 rounded-xl border px-1.5 py-3 text-center transition-colors sm:min-h-28 sm:p-4 " +
+                  (step === index ? "border-violet-500 bg-violet-100" : "border-slate-200 bg-white hover:border-violet-300")}>
+                <span className="block text-xl text-violet-800 sm:text-2xl" aria-hidden="true">{item.icon}</span>
+                <span className="mt-2 block text-[.65rem] font-bold sm:text-sm">{item.title}</span>
+                <span className="mt-1 hidden text-xs text-slate-600 sm:block">{item.line}</span>
+              </button>
+            ))}
           </div>
-          <div className="rounded-[1.5rem] border border-white/15 bg-white/[.045] p-4 sm:p-6">
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2" role="group" aria-label={t.method}>
-              {t.stages.map((stage, index) => (
-                <button type="button" key={stage.label} aria-pressed={step === index} onClick={() => setStep(index)}
-                  className={"min-h-20 rounded-xl border p-1.5 text-center transition-colors sm:p-3 " + (step === index ? "border-violet-300 bg-violet-300/20 text-white" : "border-white/10 bg-white/5 text-slate-300 hover:border-violet-300/50")}>
-                  <span className="block font-mono text-xs text-violet-300">0{index + 1}</span>
-                  <span className="mt-1 block text-[.68rem] font-semibold sm:text-sm">{stage.label}</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-5 h-1 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
-              <div className="h-full rounded-full bg-violet-300 transition-[width] duration-300" style={{ width: (step + 1) * 25 + "%" }} />
-            </div>
-            <div className="mt-7 min-h-52" aria-live="polite">
-              <p className="text-[.65rem] font-bold tracking-[.18em] text-violet-300">{t.step} 0{step + 1} / 04</p>
-              <h3 className="mt-2 text-2xl font-semibold">{t.stages[step].label}</h3>
-              <p className="mt-3 max-w-lg text-sm leading-7 text-slate-200">{t.stages[step].detail}</p>
-              <div className="mt-5 rounded-xl border border-white/10 bg-[#081424]/60 p-3.5">
-                <p className="text-[.68rem] font-bold tracking-[.13em] text-emerald-300">{t.example}</p>
-                <p className="mt-1 text-sm leading-6 text-slate-200">{t.stages[step].example}</p>
-              </div>
-            </div>
-          </div>
-          <p className="border-t border-white/10 pt-5 text-xs leading-6 text-slate-400 lg:col-span-2">{t.ai}</p>
+          <p className="mt-3 min-h-10 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs leading-5 text-slate-600" aria-live="polite"><strong className="text-violet-700">{t.example}:</strong> {t.steps[step].example}</p>
         </div>
       </section>
 
-      <section id={lang === "es" ? "sobre-mi" : "about"} className="scroll-mt-24 bg-[#f6f7fb] px-4 py-14 sm:px-8 sm:py-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-5 sm:grid-cols-[108px_1fr] lg:grid-cols-[130px_1fr_auto]">
-          <div className="relative size-24 overflow-hidden rounded-2xl border-4 border-white shadow-lg sm:size-28 lg:size-32">
-            <Image src="/profile/jorge-arce-square.webp" alt={lang === "es" ? "Retrato de Jorge Arce" : "Jorge Arce portrait"} fill sizes="128px" className="object-cover" />
+      <section id={lang === "es" ? "sobre-mi" : "about"} className="scroll-mt-24 bg-[#f4f5f9] px-4 pb-9 text-slate-900 sm:px-8 sm:pb-12">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 border-t border-slate-200 pt-6 sm:gap-5">
+          <div className="relative size-14 shrink-0 overflow-hidden rounded-xl">
+            <Image src="/profile/jorge-arce-square.webp" fill sizes="56px" alt={lang === "es" ? "Jorge Arce" : "Jorge Arce"} className="object-cover" />
           </div>
-          <div>
-            <p className="text-[.68rem] font-bold tracking-[.19em] text-violet-700">{t.about}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">{t.aboutTitle}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">{t.bio}</p>
-            <p className="mt-1 max-w-2xl text-xs leading-6 text-slate-500">{t.bio2}</p>
-            <div className="mt-3 flex flex-wrap gap-2 text-[.69rem] font-semibold text-slate-600">
-              {[t.location, t.history, t.lang].map((label) => <span key={label} className="rounded-full border border-slate-200 bg-white px-3 py-1.5">{label}</span>)}
-            </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xs font-bold tracking-[.12em] text-violet-800">{t.about}</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">{t.bio}</p>
           </div>
-          <div className="flex gap-2 sm:col-start-2 lg:col-start-auto lg:flex-col">
-            <a href={lang === "es" ? "/cv/Jorge-Arce-Solano-CV-ES.pdf" : "/cv/Jorge-Arce-Solano-CV-EN.pdf"} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-xs font-bold text-slate-900 hover:border-violet-400">{t.resume} ↗</a>
-            <a href="https://www.linkedin.com/in/jorge-arce-solano" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-xs font-bold text-slate-900 hover:border-violet-400">LinkedIn ↗</a>
+          <div className="flex gap-2">
+            <a href={lang === "es" ? "/cv/Jorge-Arce-Solano-CV-ES.pdf" : "/cv/Jorge-Arce-Solano-CV-EN.pdf"} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center rounded-full border border-slate-300 bg-white px-3 text-xs font-semibold hover:border-violet-500">{t.resume} ↗</a>
+            <a href="https://www.linkedin.com/in/jorge-arce-solano" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center rounded-full border border-slate-300 bg-white px-3 text-xs font-semibold hover:border-violet-500">LinkedIn ↗</a>
           </div>
         </div>
       </section>
