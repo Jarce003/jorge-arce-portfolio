@@ -1,157 +1,139 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { ContactForm } from "@/components/contact-form";
 import type { Locale } from "@/lib/i18n";
 
-type Inquiry = "improve" | "partner" | "career";
+type Topic = "process" | "collaboration" | "opportunity";
 
-const words = {
+const ui = {
   es: {
-    eyebrow: "EMPECEMOS POR EL PROBLEMA",
-    title: "¿Qué te gustaría mejorar?",
-    subtitle: "No necesitas tener una solución definida. Cuéntame el proceso, la idea o la oportunidad.",
-    question: "Quiero conversar sobre",
-    options: {
-      improve: ["Mejorar un proceso", "Un procedimiento que podría funcionar mejor"],
-      partner: ["Colaborar en un proyecto", "Una iniciativa o colaboración digital"],
-      career: ["Una oportunidad profesional", "Un rol, equipo u oportunidad de trabajo"],
+    eyebrow: "SIGUIENTE PASO",
+    headline: "¿Tienes algo que mejorar?",
+    cta: "Hablemos",
+    intro: "Empecemos con una pregunta.",
+    question: "¿Sobre qué quieres conversar?",
+    topics: {
+      process: "Un proceso que podría mejorar",
+      collaboration: "Colaborar en una idea",
+      opportunity: "Una oportunidad profesional",
     },
-    details: "Describe la situación en una frase (opcional)",
-    placeholder: "Por ejemplo: gestionamos las solicitudes en varios Excel y perdemos seguimiento...",
-    whatsapp: "Escribir por WhatsApp",
-    email: "Enviar desde JarceDev",
-    emailOpen: "Formulario seguro por correo",
-    hide: "Ocultar formulario",
-    privacy: "Tu mensaje se prepara en tu dispositivo. No se envía hasta que elijas un canal y confirmes.",
-    choose: "Elige un punto de partida",
+    label: "Cuéntame en una frase (opcional)",
+    placeholder: "Por ejemplo: usamos varios archivos para controlar las inspecciones...",
+    sendWhatsapp: "Continuar por WhatsApp",
+    sendEmail: "Usar formulario",
+    close: "Cerrar",
+    hideEmail: "Volver a las opciones",
+    notice: "Solo se envía cuando confirmes en WhatsApp o completes el formulario.",
   },
   en: {
-    eyebrow: "START WITH THE PROBLEM",
-    title: "What could work better?",
-    subtitle: "You don't need a technical specification. Tell me about the workflow, idea or opportunity.",
-    question: "I'd like to discuss",
-    options: {
-      improve: ["Improving a process", "An operational workflow that could be better"],
-      partner: ["Collaborating on a project", "A new digital project or collaboration"],
-      career: ["A professional opportunity", "A role, team or job opportunity"],
+    eyebrow: "NEXT STEP",
+    headline: "Have something to improve?",
+    cta: "Let's talk",
+    intro: "Start with one question.",
+    question: "What would you like to discuss?",
+    topics: {
+      process: "A workflow that could improve",
+      collaboration: "Collaborating on an idea",
+      opportunity: "A professional opportunity",
     },
-    details: "Describe the situation in one sentence (optional)",
-    placeholder: "For example: we track requests in separate spreadsheets and lose visibility...",
-    whatsapp: "Continue on WhatsApp",
-    email: "Send from JarceDev",
-    emailOpen: "Secure email form",
-    hide: "Hide form",
-    privacy: "Your message is prepared in your browser. Nothing is sent until you select a channel and confirm.",
-    choose: "Choose a starting point",
+    label: "One sentence about it (optional)",
+    placeholder: "For example: inspections are tracked in separate spreadsheets...",
+    sendWhatsapp: "Continue on WhatsApp",
+    sendEmail: "Use contact form",
+    close: "Close",
+    hideEmail: "Back to choices",
+    notice: "Nothing is sent until you confirm in WhatsApp or submit the contact form.",
   },
 } as const;
 
 export function ContactStudio({ lang, siteKey }: { lang: Locale; siteKey: string }) {
-  const t = words[lang];
-  const [type, setType] = useState<Inquiry>("improve");
-  const [details, setDetails] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [revision, setRevision] = useState(0);
+  const t = ui[lang];
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [topic, setTopic] = useState<Topic>("process");
+  const [detail, setDetail] = useState("");
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailRevision, setEmailRevision] = useState(0);
 
   const message = useMemo(() => {
-    const subject = t.options[type][0];
-    const introduction = lang === "es"
-      ? "Hola, encontré JarceDev y quiero conversar sobre:"
-      : "Hi, I found JarceDev and would like to talk about:";
-    return [
-      introduction,
-      subject,
-      ...(details.trim() ? ["", details.trim()] : []),
-    ].join("\n");
-  }, [details, lang, t.options, type]);
+    const greeting = lang === "es"
+      ? "Hola, encontré JarceDev. Me gustaría conversar sobre:"
+      : "Hi, I found JarceDev. I'd like to discuss:";
+    return [greeting, t.topics[topic], ...(detail.trim() ? ["", detail.trim()] : [])].join("\n");
+  }, [detail, lang, t, topic]);
 
   const whatsappUrl = "https://wa.me/50683287094?text=" + encodeURIComponent(message);
-  const updateType = (next: Inquiry) => {
-    setType(next);
-    setShowForm(false);
+
+  const open = () => {
+    setEmailOpen(false);
+    dialogRef.current?.showModal();
   };
+  const close = () => dialogRef.current?.close();
 
   return (
-    <section id={lang === "es" ? "contacto" : "contact"} className="scroll-mt-24 relative overflow-hidden bg-[#0a1426] px-4 py-16 text-white sm:px-8 sm:py-20">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-20 size-80 rounded-full bg-violet-500/10 blur-3xl" />
-      <div className="relative mx-auto max-w-6xl">
-        <div className="grid items-start gap-8 lg:grid-cols-[.9fr_1.1fr] lg:gap-16">
+    <>
+      <section id={lang === "es" ? "contacto" : "contact"} className="scroll-mt-24 bg-[#0b1628] px-4 py-8 text-white sm:px-8 sm:py-10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-[.7rem] font-semibold tracking-[.19em] text-violet-300">{t.eyebrow}</p>
-            <h2 className="mt-4 text-balance text-[clamp(2rem,5vw,3.6rem)] font-semibold leading-[1.06] tracking-[-.055em]">{t.title}</h2>
-            <p className="mt-4 max-w-md text-sm leading-7 text-slate-300 sm:text-base">{t.subtitle}</p>
-            <div className="mt-7 hidden flex-wrap gap-2 text-[.73rem] text-slate-400 lg:flex">
-              <a href="https://www.linkedin.com/in/jorge-arce-solano" target="_blank" rel="noreferrer" className="rounded-full border border-white/15 px-4 py-2 hover:border-violet-200 hover:text-white">LinkedIn ↗</a>
-              <a href="https://github.com/Jarce003" target="_blank" rel="noreferrer" className="rounded-full border border-white/15 px-4 py-2 hover:border-violet-200 hover:text-white">GitHub ↗</a>
+            <p className="text-[.65rem] font-bold tracking-[.17em] text-violet-300">{t.eyebrow}</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{t.headline}</h2>
+          </div>
+          <button type="button" ref={triggerRef} onClick={open} className="inline-flex min-h-12 items-center gap-2 rounded-full bg-violet-300 px-6 text-sm font-bold text-slate-950 transition-colors hover:bg-violet-200">
+            <span aria-hidden="true">✉</span> {t.cta} <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <button type="button" onClick={open} className="fixed bottom-[max(12px,env(safe-area-inset-bottom))] right-3 z-40 flex min-h-11 items-center gap-2 rounded-full border border-violet-200/40 bg-[#141f3b]/95 px-4 text-xs font-bold text-white shadow-[0_7px_32px_rgba(12,15,30,.45)] backdrop-blur-md transition-colors hover:bg-[#29345c] sm:bottom-6 sm:right-6" aria-label={t.cta}>
+        <span aria-hidden="true">✉</span> {t.cta}
+      </button>
+
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="contact-studio-title"
+        onClose={() => { setEmailOpen(false); triggerRef.current?.focus(); }}
+        className="fixed inset-0 m-auto max-h-[min(92svh,760px)] w-[min(92vw,540px)] overflow-y-auto rounded-[1.5rem] border border-violet-200/25 bg-[#0b1628] p-0 text-white shadow-2xl backdrop:bg-[#030816]/85 backdrop:backdrop-blur-sm"
+      >
+        <div className="p-4 sm:p-7">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[.66rem] font-bold tracking-[.17em] text-violet-300">{t.intro}</p>
+              <h2 id="contact-studio-title" className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">{t.question}</h2>
             </div>
+            <button type="button" onClick={close} aria-label={t.close} className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/5 text-xl hover:bg-white/10">×</button>
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/15 bg-white/[.055] p-4 shadow-xl shadow-black/10 sm:p-6">
-            <p className="text-[.72rem] font-semibold uppercase tracking-[.15em] text-slate-400">{t.question}</p>
-            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={t.choose}>
-              {(["improve", "partner", "career"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => updateType(option)}
-                  aria-pressed={type === option}
-                  className={"min-h-11 rounded-xl border px-3.5 text-left text-xs font-semibold transition-colors sm:text-sm " +
-                    (type === option
-                      ? "border-violet-300 bg-violet-300 text-[#101323]"
-                      : "border-white/20 bg-white/5 text-slate-200 hover:border-violet-300/70")}
-                >
-                  {t.options[option][0]}
-                </button>
-              ))}
-            </div>
-
-            <label htmlFor={"contact-idea-" + lang} className="mt-6 block text-sm font-semibold text-slate-200">{t.details}</label>
-            <textarea
-              id={"contact-idea-" + lang}
-              value={details}
-              onChange={(event) => { setDetails(event.target.value); setShowForm(false); }}
-              maxLength={1200}
-              rows={3}
-              placeholder={t.placeholder}
-              className="mt-2 w-full resize-y rounded-xl border border-white/20 bg-[#071221] p-3.5 text-sm leading-6 text-white outline-none placeholder:text-slate-500 focus:border-violet-300 focus:ring-2 focus:ring-violet-300/15"
-            />
-
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-violet-300 px-4 text-center text-sm font-bold text-[#0b1426] transition hover:bg-violet-200"
-              >
-                {t.whatsapp} ↗
-              </a>
-              <button
-                type="button"
-                onClick={() => { setShowForm((value) => !value); setRevision((value) => value + 1); }}
-                aria-expanded={showForm}
-                aria-controls="contact-email-panel"
-                className="min-h-12 flex-1 rounded-xl border border-white/20 px-4 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                {showForm ? t.hide : t.email} <span aria-hidden="true">→</span>
-              </button>
-            </div>
-            <p className="mt-4 text-[.71rem] leading-5 text-slate-400">{t.privacy}</p>
-
-            {showForm && (
-              <div id="contact-email-panel" className="mt-5 border-t border-white/15 pt-5">
-                <h3 className="mb-3 text-sm font-semibold text-white">{t.emailOpen}</h3>
-                <ContactForm key={revision} lang={lang} siteKey={siteKey} initialMessage={message} />
+          {!emailOpen ? (
+            <>
+              <div className="mt-5 grid gap-2" role="group" aria-label={t.question}>
+                {(["process", "collaboration", "opportunity"] as const).map((option) => (
+                  <button type="button" key={option} onClick={() => setTopic(option)} aria-pressed={topic === option}
+                    className={"flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors " + (topic === option ? "border-violet-300 bg-violet-300/15 text-white" : "border-white/15 bg-white/5 text-slate-300 hover:bg-white/10")}>
+                    {t.topics[option]} <span aria-hidden="true" className={topic === option ? "text-violet-200" : "text-slate-500"}>{topic === option ? "●" : "○"}</span>
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+
+              <label htmlFor={"contact-studio-detail-" + lang} className="mt-5 block text-xs font-semibold text-slate-200">{t.label}</label>
+              <textarea id={"contact-studio-detail-" + lang} value={detail} onChange={(event) => setDetail(event.target.value)} maxLength={1200} rows={3}
+                placeholder={t.placeholder} className="mt-2 w-full resize-y rounded-xl border border-white/20 bg-[#081120] px-3.5 py-3 text-sm leading-6 text-white outline-none placeholder:text-slate-500 focus-visible:border-violet-300" />
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-violet-300 px-3 text-center text-sm font-bold text-slate-950 hover:bg-violet-200">{t.sendWhatsapp} ↗</a>
+                <button type="button" onClick={() => { setEmailRevision((x) => x + 1); setEmailOpen(true); }} className="min-h-12 rounded-xl border border-white/20 px-3 text-sm font-bold text-white hover:bg-white/10">{t.sendEmail} →</button>
+              </div>
+              <p className="mt-3 text-[.68rem] leading-5 text-slate-400">{t.notice}</p>
+            </>
+          ) : (
+            <div className="mt-5">
+              <button type="button" onClick={() => setEmailOpen(false)} className="mb-4 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 px-3.5 text-xs font-semibold text-violet-200 hover:bg-white/10">← {t.hideEmail}</button>
+              <ContactForm key={emailRevision} lang={lang} siteKey={siteKey} initialMessage={message} />
+            </div>
+          )}
         </div>
-        <div className="mt-6 flex gap-3 text-xs text-slate-400 lg:hidden">
-          <a href="https://www.linkedin.com/in/jorge-arce-solano" target="_blank" rel="noreferrer" className="min-h-11 rounded-full border border-white/15 px-4 py-3">LinkedIn ↗</a>
-          <a href="https://github.com/Jarce003" target="_blank" rel="noreferrer" className="min-h-11 rounded-full border border-white/15 px-4 py-3">GitHub ↗</a>
-        </div>
-      </div>
-    </section>
+      </dialog>
+    </>
   );
 }
