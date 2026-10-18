@@ -19,6 +19,7 @@ export type WorldRenderer = {
     elapsed: number,
     reducedMotion: boolean,
     cameraMode?: "chase" | "overview",
+    lightsOn?: boolean,
   ) => void;
   project: (position: WorldPosition, elevation?: number) => { x: number; y: number; visible: boolean };
   dispose: () => void;
@@ -209,13 +210,15 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     "#version 300 es",
     "precision highp float;",
     "uniform vec3 uColor;",
+    "uniform float uEmissive;",
+    "uniform float uOpacity;",
     "in float vLight;",
     "in float vDepth;",
     "out vec4 outColor;",
     "void main(){",
-    " vec3 color = uColor * vLight;",
-    " float fog = smoothstep(28.0, 85.0, vDepth) * .30;",
-    " outColor = vec4(mix(color, vec3(0.07, 0.12, 0.20), fog), 1.0);",
+    " vec3 color = uColor * mix(vLight, 1.85, clamp(uEmissive, 0.0, 1.0));",
+    " float fog = smoothstep(28.0, 85.0, vDepth) * .30 * (1.0 - clamp(uEmissive, 0.0, 1.0));",
+    " outColor = vec4(mix(color, vec3(0.07, 0.12, 0.20), fog), uOpacity);",
     "}",
   ].join("\n"));
 
@@ -233,6 +236,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   const vpUniform = gl.getUniformLocation(program, "uVP");
   const modelUniform = gl.getUniformLocation(program, "uModel");
   const colorUniform = gl.getUniformLocation(program, "uColor");
+  const emissiveUniform = gl.getUniformLocation(program, "uEmissive");
+  const opacityUniform = gl.getUniformLocation(program, "uOpacity");
   const shapes = new Map<ObjectShape, Geometry>();
   for (const [shape, vertices] of [
     ["cube", makeCube()],
@@ -270,6 +275,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     color: string,
     angle = 0,
     roll = 0,
+    emissive = 0,
+    opacity = 1,
   ) {
     const mesh = shapes.get(shape)!;
     if (lastShape !== shape) {
@@ -282,7 +289,18 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll));
     gl.uniform3fv(colorUniform, tint(color));
+    gl.uniform1f(emissiveUniform, emissive);
+    gl.uniform1f(opacityUniform, opacity);
+    if (opacity < 1) {
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      gl.depthMask(false);
+    }
     gl.drawArrays(gl.TRIANGLES, 0, mesh.vertices);
+    if (opacity < 1) {
+      gl.disable(gl.BLEND);
+      gl.depthMask(true);
+    }
   }
   function box(x: number, y: number, z: number, sx: number, sy: number, sz: number, color: string, angle = 0) {
     draw("cube", x, y, z, sx, sy, sz, color, angle);
@@ -454,9 +472,18 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
    * Long cab-over cab, three axles, roof-mounted extendable ladder,
    * side equipment doors and warning beacons. No third-party livery.
    */
-  function drawLadderTruck(position: WorldPosition, heading: number, elapsed: number, reducedMotion: boolean) {
+  function drawLadderTruck(
+    position: WorldPosition,
+    heading: number,
+    elapsed: number,
+    reducedMotion: boolean,
+    lightsOn: boolean,
+  ) {
     const { x, z } = position;
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 2.1) * .015;
+    const alternating = reducedMotion ? true : Math.floor(elapsed * 3.3) % 2 === 0;
+    const redBright = lightsOn && alternating;
+    const blueBright = lightsOn && (reducedMotion || !alternating);
 
     // Local-to-world conversion preserves the vehicle's heading.
     // Front of the truck is negative local Z.
@@ -471,9 +498,17 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       xOffset: number, y: number, zOffset: number,
       width: number, height: number, length: number,
       color: string,
+      emission = 0,
     ) {
       const [px,pz] = local(xOffset,zOffset);
-      box(px, y + bob, pz, width,height,length,color,heading);
+      draw("cube", px, y + bob, pz, width, height, length, color, heading, 0, emission);
+    }
+    function halo(xOffset: number, zOffset: number, tint: string, intensity = 1) {
+      const [px, pz] = local(xOffset, zOffset);
+      // Two transparent concentric ground pools brighten the street ahead and
+      // behind the truck; they do not affect collision, audio or performance.
+      draw("cylinder", px, .135, pz, 3.4, .018, 3.4, tint, 0, 0, 1, .12 * intensity);
+      draw("cylinder", px, .143, pz, 1.75, .021, 1.75, tint, 0, 0, 1, .21 * intensity);
     }
 
     function wheel(xOffset: number, zOffset: number) {
@@ -520,7 +555,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     for(let i=-2;i<=2;i++) part(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
     part(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
     for(const side of [-1,1]) {
-      part(side*.78,1.11,-2.97,.36,.24,.09,"#f6e7aa");
+      part(side*.78,1.11,-2.97,.36,.24,.09,lightsOn ? "#fff1b3" : "#8d8871",lightsOn ? 1 : 0);
       part(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
       part(side*1.11,1.10,-1.86,.11,.08,1.55,"#f1eee8");
       // Fold-out mirror arm and housing.
@@ -530,8 +565,18 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     part(0,1.39,-2.97,.18,.24,.07,"#202a38");
     // Emergency warning light bar: generic red / blue.
     part(0,2.50,-2.16,1.30,.12,.30,"#c5d0df");
-    part(-.38,2.61,-2.16,.43,.19,.32,"#ec4b58");
-    part(.38,2.61,-2.16,.43,.19,.32,"#57b9e6");
+    part(-.38,2.61,-2.16,.43,.19,.32,redBright ? "#ff243b" : "#7c3443",redBright ? 1 : 0);
+    part(.38,2.61,-2.16,.43,.19,.32,blueBright ? "#48bfff" : "#315e83",blueBright ? 1 : 0);
+    // Additional side and rear flashers keep the light toggle visible from
+    // the default chase camera, which looks at the truck's back end.
+    for (const side of [-1, 1]) {
+      part(side * 1.13, 1.76, 1.60, .09, .30, .38,
+        side === -1 ? (redBright ? "#ff3447" : "#6c3440") : (blueBright ? "#4bd2ff" : "#365772"),
+        side === -1 ? Number(redBright) : Number(blueBright));
+      part(side * .78, 1.34, 2.99, .32, .25, .12,
+        side === -1 ? (redBright ? "#ff263a" : "#632c37") : (blueBright ? "#4ac8ff" : "#2a506d"),
+        side === -1 ? Number(redBright) : Number(blueBright));
+    }
 
     // Bright horizontal emergency-apparatus reflectors.
     for(const side of [-1,1]) {
@@ -577,10 +622,29 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
 
     // Distinctive white roof-mounted rescue rack.
     part(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
+
+    if (lightsOn) {
+      // Lens blooms at the lamp positions and visible pools on the road.
+      for (const side of [-.78, .78]) {
+        const [hx,hz] = local(side, -3.01);
+        draw("cube", hx, 1.11 + bob, hz, .51, .35, .12, "#fff4bc", heading, 0, 1, .42);
+        halo(side * 1.3, -4.4, "#ffe8a0", .75);
+      }
+      if (redBright) {
+        halo(-1.6, 2.96, "#ff294b", .9);
+        const [rx,rz] = local(-.38,-2.16);
+        draw("cylinder",rx,2.64+bob,rz,.78,.08,.78,"#ff3d63",0,0,1,.23);
+      }
+      if (blueBright) {
+        halo(1.6, 2.96, "#49c8ff", .9);
+        const [bx,bz] = local(.38,-2.16);
+        draw("cylinder",bx,2.64+bob,bz,.78,.08,.78,"#4cc8ff",0,0,1,.23);
+      }
+    }
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion, cameraMode = "chase") {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false) {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const lowDetail = width < 640;
@@ -612,7 +676,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       evacuaStation();
       accreditationStation();
       hydrantsStation();
-      drawLadderTruck(position, heading, elapsed, reducedMotion);
+      drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
     },
     project(position, elevation = 5.2) {
       // Convert a 3D station roof into a clickable screen-space annotation.
