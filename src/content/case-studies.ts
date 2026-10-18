@@ -160,7 +160,7 @@ export const caseStudies = {
       introduction:
         "FireTrack nació para convertir controles operativos dispersos en un sistema centralizado, seguro y trazable. El producto reúne inventario, inspecciones, mantenimiento, usuarios, reportes y acceso mediante QR en una sola aplicación web.",
       facts: [
-        { label: "Rol", value: "Diseño de producto y desarrollo Full Stack" },
+        { label: "Rol", value: "Diseño de producto y validación funcional" },
         { label: "Periodo", value: "2025–actualidad" },
         { label: "Plataforma", value: "Aplicación web responsive" },
         { label: "Estado", value: "Producción y mejora continua" },
@@ -308,7 +308,7 @@ export const caseStudies = {
       introduction:
         "EvacuaPlan Studio busca trasladar a la web un proceso que normalmente requiere herramientas gráficas generales o trabajo manual. El objetivo es ofrecer un editor especializado, comprensible y preparado para documentos imprimibles.",
       facts: [
-        { label: "Rol", value: "Diseño de producto y desarrollo Full Stack" },
+        { label: "Rol", value: "Diseño de producto y validación funcional" },
         { label: "Periodo", value: "2026–actualidad" },
         { label: "Plataforma", value: "Escritorio y tablet" },
         { label: "Estado", value: "Prototipo técnico funcional" },
@@ -609,7 +609,7 @@ export const caseStudies = {
       introduction:
         "FireTrack was created to turn scattered operational controls into one centralized, secure and traceable system. The product brings inventory, inspections, maintenance, users, reporting and QR access into a single web application.",
       facts: [
-        { label: "Role", value: "Product design and Full Stack development" },
+        { label: "Role", value: "Product direction and functional validation" },
         { label: "Timeline", value: "2025–present" },
         { label: "Platform", value: "Responsive web application" },
         { label: "Status", value: "Production and continuous improvement" },
@@ -790,7 +790,7 @@ export const caseStudies = {
       introduction:
         "EvacuaPlan Studio brings to the web a process that normally requires general-purpose design tools or manual work. The goal is to provide a specialized, understandable editor prepared for printable documents.",
       facts: [
-        { label: "Role", value: "Product design and Full Stack development" },
+        { label: "Role", value: "Product direction and functional validation" },
         { label: "Timeline", value: "2026–present" },
         { label: "Platform", value: "Desktop and tablet" },
         { label: "Status", value: "Functional technical prototype" },
