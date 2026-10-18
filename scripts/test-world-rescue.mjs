@@ -71,3 +71,62 @@ test("Discovering does not double-count a station; replay resets progress", () =
   assert.equal(completedStations(stations, rescued), 0);
   assert.equal(stationFireStrength(false, 0, undefined, false), 1);
 });
+
+
+// Forgiving approach ranges and a flat starting crossroads are part of the
+// rescue gameplay, and must not regress during future world refactors.
+const proximitySource = readFileSync(resolve("src/lib/world-proximity.ts"), "utf8");
+const proximityCompiled = ts.transpileModule(proximitySource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  reportDiagnostics: true,
+});
+assert.equal(proximityCompiled.diagnostics?.length ?? 0, 0, "Proximity utilities must transpile");
+const proximityModule = { exports: {} };
+new Function("exports", "module", proximityCompiled.outputText)(
+  proximityModule.exports,
+  proximityModule,
+);
+const {
+  DISCOVERY_RADIUS,
+  closestDiscoverableStation,
+  isInDiscoveryRange,
+} = proximityModule.exports;
+
+test("Discovery activates before the truck reaches the building", () => {
+  const station = { x: 14, z: 12 };
+  assert.equal(DISCOVERY_RADIUS, 11.5);
+  assert.ok(DISCOVERY_RADIUS > 7.3);
+  assert.equal(isInDiscoveryRange({ x: 14, z: 23.4 }, station), true);
+  assert.equal(isInDiscoveryRange({ x: 14, z: 23.6 }, station), false);
+});
+
+test("Closest station is selected without ambiguity in initial city layout", () => {
+  const stations = [
+    { id: "firetrack", x: -14, z: -12 },
+    { id: "evacuaplan", x: 14, z: -12 },
+    { id: "acreditaciones", x: -14, z: 12 },
+    { id: "hidrantes", x: 14, z: 12 },
+  ];
+  assert.equal(closestDiscoverableStation({ x: 0, z: 0 }, stations), null);
+  assert.equal(closestDiscoverableStation({ x: 13.8, z: 22.9 }, stations), "hidrantes");
+  assert.equal(closestDiscoverableStation({ x: -14, z: -1 }, stations), "firetrack");
+  assert.equal(closestDiscoverableStation({ x: 14, z: 0 }, stations), null);
+  // No two activation zones overlap in the current 24-unit station spacing.
+  for (let i = 0; i < stations.length; i++) {
+    for (let j = i + 1; j < stations.length; j++) {
+      const dx = stations[i].x - stations[j].x;
+      const dz = stations[i].z - stations[j].z;
+      assert.ok(Math.hypot(dx, dz) > 2 * DISCOVERY_RADIUS);
+    }
+  }
+});
+
+test("Circular starting pad is removed; station plot bases stay intact", () => {
+  const rendererSource = readFileSync(resolve("src/components/world/world-renderer.ts"), "utf8");
+  assert.ok(!rendererSource.includes("cylinder(0, .12, 0, 8.6"));
+  assert.ok(!rendererSource.includes("cylinder(0, .29, 0, 5.4"));
+  assert.ok(rendererSource.includes("cylinder(st.x, .015, st.z"));
+  const controlsSource = readFileSync(resolve("src/components/world/world-experience.tsx"), "utf8");
+  assert.ok(controlsSource.includes("closestDiscoverableStation(position, worldStations)"));
+  assert.ok(controlsSource.includes("if (!isInDiscoveryRange(truck, location))"));
+});
