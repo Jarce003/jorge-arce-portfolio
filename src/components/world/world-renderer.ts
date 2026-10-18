@@ -287,10 +287,45 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     draw("cone", x, 2.05 * scale, z, 1.14 * scale, 1.45 * scale, 1.14 * scale, "#3ba394");
   }
   function plot(x: number, z: number, accent: string) {
-    box(x, .10, z, 12, .20, 11, "#23394c");
+    // Raised landscaping island and bright station forecourt.
+    box(x, .10, z, 12, .20, 11, "#253e53");
     box(x, .23, z, 11.35, .08, 10.35, "#1a2e41");
+    box(x, .285, z + 4.7, 10.7, .035, .25, "#486174");
     for (let i = -2; i <= 2; i += 1) {
-      box(x + i * 2, .27, z - 5.0, .55, .1, .12, accent);
+      box(x + i * 2, .30, z - 5.0, .68, .08, .16, accent);
+    }
+    // Low-polygon planters unify the four zones visually.
+    for (const side of [-1, 1]) {
+      box(x + side * 5.2, .34, z + 1.5, .45, .38, 2.3, "#40536a");
+      for (const depth of [.65, 1.45, 2.25]) {
+        draw("cone", x + side * 5.2, .79, z + depth, .54, .85, .54, "#348981");
+      }
+    }
+  }
+  function streetLamp(x: number, z: number) {
+    // Soft retro-futuristic lamp posts, no flashing lights.
+    cylinder(x, .25, z, .36, .42, .36, "#485c70");
+    cylinder(x, 1.75, z, .105, 3.2, .105, "#aebfd0");
+    cylinder(x, 3.30, z, .48, .15, .48, "#d4dae3");
+    draw("cone", x, 3.10, z, .70, .28, .70, "#ffc77d");
+    cylinder(x, .037, z, 1.55, .025, 1.55, "#405a65");
+  }
+  function skyline() {
+    // Distant low-poly silhouettes give the world depth without image assets.
+    for (let i = 0; i < 28; i += 1) {
+      const angle = (i / 28) * Math.PI * 2;
+      const radius = 36 + (i % 5);
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const height = 3.8 + ((i * 17) % 11) * .55;
+      const tint = ["#1b3048", "#233952", "#1c3650", "#2a4057"][i % 4];
+      box(x, height / 2 - .12, z, 2.9 + (i % 3), height, 3.5, tint);
+      box(x, height + .015, z, 3.0 + (i % 3), .14, 3.65, "#334a5e");
+      if (i % 3 === 0) {
+        for (let level = 0; level < 3; level += 1) {
+          box(x, 1.55 + level * .95, z + 1.81, 1.55, .16, .045, "#5d9ca2");
+        }
+      }
     }
   }
   function fireStation() {
@@ -354,9 +389,22 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     box(x, 2.05, z-2.2, 7.8, .40, 2.8, "#4ad3b5");
   }
   function drawRoadNetwork() {
-    box(0, -.05, 0, 55, .14, 55, palette.ground);
+    box(0, -.05, 0, 94, .14, 94, palette.ground);
+    box(0, -.047, 0, 66, .016, 66, "#162b3c");
     box(0, .035, 0, 7, .08, 53, palette.road);
     box(0, .041, 0, 53, .08, 7, palette.road);
+    // Reflective curbs edge the cross-shaped road.
+    for (const side of [-1, 1]) {
+      box(side * 3.67, .07, 0, .18, .17, 50.5, "#42576c");
+      box(0, .073, side * 3.67, 50.5, .17, .18, "#42576c");
+    }
+    // Pedestrian crossings distinguish each approach to the plaza.
+    for (const direction of [-1,1]) {
+      for (let i=-4;i<=4;i+=1) {
+        box(i * .62, .097, direction * 7.7, .30, .025, 1.15, "#a5bdc5");
+        box(direction * 7.7, .098, i * .62, 1.15, .025, .30, "#a5bdc5");
+      }
+    }
     for(let i=-25; i<=25; i+=3.7){
       if(Math.abs(i)>5) {
         box(0, .093, i, .13, .025, 1.55, palette.markings);
@@ -371,17 +419,22 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       const angle = i/16*Math.PI*2;
       cylinder(Math.cos(angle)*3.1, .38, Math.sin(angle)*3.1, .16, .12, .16, palette.purple);
     }
-    for(let x=-24;x<=24;x+=4){
-      for(let z=-24;z<=24;z+=4){
-        if((Math.abs(x)>21 || Math.abs(z)>21) && (Math.round(x*2+z)%3===0)){
-          tree(x,z,.55+(Math.abs(x+z)%3)*.1);
+    for(let x=-25;x<=25;x+=4.5){
+      for(let z=-25;z<=25;z+=4.5){
+        if((Math.abs(x)>22 || Math.abs(z)>22) && (Math.round(x*2+z)%3===0)){
+          tree(x,z,.58+(Math.abs(x+z)%3)*.09);
         }
       }
     }
-    for(const st of worldStations){
-      cylinder(st.x, .3, st.z, 12.8, .05, 12.8, st.color);
-      cylinder(st.x, .34, st.z, 12.1, .06, 12.1, "#172b3f");
+    // Each site gets its own colored perimeter, with the structural plot above it.
+    for(const st of worldStations) {
+      cylinder(st.x, .015, st.z, 12.9, .065, 12.9, st.color);
+      cylinder(st.x, .060, st.z, 12.2, .06, 12.2, "#172b3f");
     }
+    for(const location of [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2],[-9.2,-4.6],[-9.2,4.6],[9.2,-4.6],[9.2,4.6]]) {
+      streetLamp(location[0],location[1]);
+    }
+    skyline();
   }
   /**
    * Original, deliberately generic US-style aerial ladder truck.
