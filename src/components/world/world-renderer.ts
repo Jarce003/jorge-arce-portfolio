@@ -774,14 +774,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         box(i, .094, 0, 1.55, .025, .13, palette.markings);
       }
     }
-    cylinder(0, .12, 0, 8.6, .14, 8.6, "#334764");
-    cylinder(0, .23, 0, 6.9, .12, 6.9, "#182b45");
-    cylinder(0, .29, 0, 5.4, .1, 5.4, "#6659a7");
-    cylinder(0, .35, 0, 4.75, .12, 4.75, "#233b58");
-    for(let i=0;i<16;i+=1) {
-      const angle = i/16*Math.PI*2;
-      cylinder(Math.cos(angle)*3.1, .38, Math.sin(angle)*3.1, .16, .12, .16, palette.purple);
-    }
+    // Keep the starting intersection unobstructed. The ladder truck now
+    // begins directly on the roadway rather than a circular podium.
     const treeSpacing = lowDetail ? 9 : 4.5;
     for(let x=-25;x<=25;x+=treeSpacing){
       for(let z=-25;z<=25;z+=treeSpacing){
