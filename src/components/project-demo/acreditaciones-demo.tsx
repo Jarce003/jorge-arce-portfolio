@@ -163,12 +163,13 @@ const content: Record<"es" | "en", {
 const ids: ScenarioId[] = ["priority", "capacity", "performance", "validity"];
 
 function detectScenario(text: string, lang: Props["lang"]): ScenarioId | null {
-  const normalized = text.toLocaleLowerCase(lang).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (/fecha|sesion|session|grupo|group|cupo|seat|capacity|capacidad/.test(normalized)) return "capacity";
-  if (/reproba|fail|rendim|performance|2025/.test(normalized)) return "performance";
-  if (/vigent|current|valid|acredit|accredit|operator|maquinist/.test(normalized)) return "validity";
-  if (/prior|block|bloque|demand|evaluar|evaluat/.test(normalized)) return "priority";
-  return null;
+  // The public portfolio contains a four-question synthetic showcase, not a
+  // generative AI endpoint. Never answer unrelated free-form requests by
+  // guessing an intent and substituting a canned number.
+  const normalize = (value: string) =>
+    value.toLocaleLowerCase(lang).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?!.]/g, "").replace(/\s+/g, " ").trim();
+  const normalized = normalize(text);
+  return ids.find((id) => normalized === normalize(content[lang].cases[id].prompt)) ?? null;
 }
 
 export function AcreditacionesDemo({ lang, compact = false }: Props) {
