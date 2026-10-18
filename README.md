@@ -1,79 +1,72 @@
-# Jorge Arce Solano — Professional Portfolio
+# JarceDev — Jorge Arce Solano
 
-![Portfolio preview](public/og/portfolio-og.png)
+Portfolio: [Español](https://www.jarcedev.com/es) · [English](https://www.jarcedev.com/en)
 
-## Live website
+## Professional focus
 
-- Spanish: https://www.jarcedev.com/es
-- English: https://www.jarcedev.com/en
+I am a **Systems Engineer focused on process improvement, digital product definition and AI-assisted software creation**.
 
-Bilingual professional portfolio presenting my experience developing web applications, SaaS products, operational systems and interactive software.
+My contribution is to study real-world operations, identify improvement opportunities, define product requirements and business rules, evaluate options and validate implementations. **ChatGPT and other AI tools perform the coding and assist with architecture and testing.** I coordinate decisions, execute guided checks, test real workflows, identify problems and approve iterations. I do not claim to have hand-written AI-generated code.
 
-The website is available in Spanish and English and includes detailed case studies for FireTrack and EvacuaPlan Studio.
-
-## Featured projects
+## Case studies
 
 ### FireTrack
 
-Multi-tenant SaaS platform for fire extinguisher inventory, inspections, maintenance, QR workflows, alerts, audit records, PDF reports and Excel imports.
+A multi-company fire extinguisher management product covering inventory, inspections, maintenance, QR access, alerts, PDF reports and Excel imports.
 
-My responsibilities included requirements analysis, architecture, frontend and backend development, PostgreSQL database design, Supabase authentication, Row Level Security, testing, deployment and ongoing maintenance.
+**My role:** identifying the operational need, defining business rules and permissions, prioritizing capabilities, guiding AI-assisted implementation and validating the workflows.
 
 ### EvacuaPlan Studio
 
-Interactive emergency and evacuation plan editor currently in active development.
+A specialized browser-based emergency plan editor with object manipulation and interactions designed around real documentation workflows.
 
-The editor includes architectural drawing tools, emergency symbols, object transformations, multi-selection, undo and redo workflows, and support for mouse, touchscreen and stylus interaction.
+**My role:** identifying the need for dedicated planning tools, defining features and expected behavior, validating usability and managing revisions with AI assistance.
 
-## Main stack
+### Acreditaciones
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- Supabase
-- PostgreSQL
-- Node.js
-- Vercel
+A private operator accreditation system covering historical reconciliation, qualification cycles, assessments and evaluation planning. The project uses Next.js and PostgreSQL, plus Python, FastAPI, DuckDB and Google OR-Tools for analytics and planning.
 
-## Portfolio features
+**My role:** interpreting domain rules, defining how qualifications expire and renew, managing implementation priorities, testing results and validating the system. The public portfolio demo uses **synthetic data only**.
 
-- Spanish and English versions
-- Responsive and mobile-first layout
-- Real product screenshots
-- Interactive project galleries
-- Detailed technical case studies
-- Accessible navigation
-- Downloadable CV in both languages
-- Protected contact form, WhatsApp, LinkedIn and GitHub contact options
-- Open Graph metadata, sitemap, robots and web manifest
+## Tools used in the products
 
-## Local development
+Next.js, React, TypeScript, Tailwind CSS, Supabase, PostgreSQL, Node.js, Python, FastAPI, DuckDB, Google OR-Tools and generative AI.
 
-    npm install
-    npm run dev
+This is a list of **technologies used across my products**, not a claim that I manually write production code in each language.
 
-Open http://localhost:3000/es or http://localhost:3000/en.
+## Portfolio implementation
 
-## Quality checks
+The website itself is built with Next.js 16, React 19, TypeScript and Tailwind CSS 4, deployed to Vercel. It includes:
 
-    npm run check:encoding
-    npm run build
+- Spanish and English navigation and content
+- Responsive project presentations and detailed technical case studies
+- Interactive product demos (using sanitized or fictional information)
+- Protected contact form and links to professional profiles
+- CV downloads, Open Graph tags, sitemap and accessible navigation
 
-## Repository scope
+### Proposed 3D exploration
 
-This repository contains the source code of my personal portfolio.
+An optional, original interactive 3D world inspired by the experience of [Bruno Simon](https://bruno-simon.com/), but tailored to process improvement and JarceDev's cases.
 
-The FireTrack and EvacuaPlan Studio production repositories are private and are not included here. This public repository contains only sanitized screenshots, descriptions and case-study material intended for professional review.
+Read the **[3D concept and technical plan](docs/jarcedev-3d-concept.md)**. This is currently a proposal, **not an implemented site feature**.
 
-## Contact
+## Development
 
-- LinkedIn: https://www.linkedin.com/in/jorge-arce-solano
-- GitHub: https://github.com/Jarce003
-- WhatsApp: +506 8328-7094
+```bash
+npm install
+npm run check:encoding
+npm run build
+npm run dev
+```
+
+Visit http://localhost:3000/es or http://localhost:3000/en.
+
+## Privacy and source
+
+Project implementations such as FireTrack, EvacuaPlan Studio and Acreditaciones may reside in private repositories. Only public-friendly narratives, fictional demos and sanitized visuals belong in this portfolio.
 
 ## License
 
 Copyright © 2026 Jorge Arce Solano. All rights reserved.
 
-The source code and visual assets are publicly available for portfolio review. No permission is granted to copy, modify, distribute or reuse them without prior written authorization.
+Unless otherwise stated, the repository and visuals are available for review; copying, redistribution or modification is not authorized.
