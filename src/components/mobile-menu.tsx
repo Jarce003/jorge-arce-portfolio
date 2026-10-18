@@ -29,6 +29,9 @@ export function MobileMenu({
 
   const menuId = "mobile-navigation";
   const homePath = `/${lang}`;
+  const routeToSection = (hash: string) => hash === "#mundo"
+    ? `${homePath}#mundo`
+    : `${homePath}/portfolio${hash}`;
 
   const contactHash =
     lang === "es" ? "#contacto" : "#contact";
@@ -110,7 +113,7 @@ export function MobileMenu({
                 {content.navigation.map((item) => (
                   <a
                     key={item.href}
-                    href={`${homePath}${item.href}`}
+                    href={routeToSection(item.href)}
                     className="flex min-h-12 items-center rounded-xl px-4 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
                     onClick={closeMenu}
                   >
@@ -118,7 +121,7 @@ export function MobileMenu({
                   </a>
                 ))}
                 <a
-                  href={`${homePath}${contactHash}`}
+                  href={`${homePath}/portfolio${contactHash}`}
                   className="flex min-h-12 items-center rounded-xl px-4 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
                   onClick={closeMenu}
                 >
