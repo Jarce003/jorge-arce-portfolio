@@ -47,7 +47,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <>
-      <SiteHeader lang={lang} content={content} />
+      <SiteHeader lang={lang} content={content} variant="world" />
 
       <main>
         <WorldExperience lang={lang} />
