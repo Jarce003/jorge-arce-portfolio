@@ -68,6 +68,16 @@ try {
     Write-Host "Se omite Blender por solicitud." -ForegroundColor DarkGray
   }
 
+  $truckGLB = Join-Path $models "ladder-truck.glb"
+  $stationGLB = Join-Path $models "firetrack-station.glb"
+  if ((Test-Path -LiteralPath $truckGLB) -and (Test-Path -LiteralPath $stationGLB)) {
+    Checked "Validar tamaño, materiales y estructura animable de los dos GLB" {
+      & node (Join-Path $root "tools\blender\verify_glb.mjs") $truckGLB $stationGLB
+    }
+  } else {
+    Write-Host "No hay dos GLB todavía. Se utilizaran los modelos geometricos del laboratorio." -ForegroundColor Yellow
+  }
+
   Set-Location -LiteralPath $experiment
   if ($SkipInstall) {
     if (-not (Test-Path -LiteralPath (Join-Path $experiment "node_modules\vite"))) {
