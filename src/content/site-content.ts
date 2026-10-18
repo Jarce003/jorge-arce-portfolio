@@ -17,7 +17,7 @@ type NavigationItem = {
 };
 
 type Project = {
-  slug: "firetrack" | "evacuaplan-studio";
+  slug: "firetrack" | "evacuaplan-studio" | "acreditaciones-app";
   caseStudyLabel: string;
   title: string;
   status: string;
@@ -153,9 +153,10 @@ export const siteContent = {
         "Node.js",
         "PostgreSQL",
         "Supabase",
+        "Python",
       ],
       metrics: [
-        { value: "2", label: "productos propios" },
+        { value: "3", label: "productos destacados" },
         { value: "Ciclo completo", label: "de requisitos a producción" },
         { value: "C1", label: "nivel de inglés" },
       ],
@@ -266,6 +267,27 @@ export const siteContent = {
               alt: "EvacuaPlan Studio mostrando una pared con puerta y ventana",
             },
           ],
+        },
+        {
+          slug: "acreditaciones-app",
+          caseStudyLabel: "Ver caso de estudio",
+          title: "Acreditaciones",
+          status: "Sistema privado en evolución",
+          description: "Sistema de control de acreditaciones de operadores con ciclos de vigencia, historial de pruebas, reportes y análisis para planificar evaluaciones.",
+          highlights: [
+            "Normalización de históricos, validación de identidad y reglas de vigencia por modalidad y bloques.",
+            "Motor analítico independiente en Python con FastAPI, DuckDB y Google OR-Tools para análisis y planificación.",
+            "Asistencia con IA, consultas a datos y trazabilidad de aprobaciones sin exponer información real en esta demostración.",
+          ],
+          technologies: ["Next.js", "TypeScript", "PostgreSQL", "Python", "FastAPI", "DuckDB", "OR-Tools", "IA"],
+          gallery: [{
+            id: "overview",
+            label: "Vista conceptual",
+            title: "Control de acreditaciones y planificación",
+            description: "Visualización ilustrativa creada para el portafolio, sin datos de participantes reales.",
+            src: "/projects/acreditaciones/overview.svg",
+            alt: "Ilustración conceptual del sistema de acreditaciones sin datos reales",
+          }],
         },
       ],
     },
@@ -439,9 +461,10 @@ export const siteContent = {
         "Node.js",
         "PostgreSQL",
         "Supabase",
+        "Python",
       ],
       metrics: [
-        { value: "2", label: "independent products" },
+        { value: "3", label: "featured products" },
         { value: "End-to-end", label: "requirements to production" },
         { value: "C1", label: "English proficiency" },
       ],
@@ -552,6 +575,27 @@ export const siteContent = {
               alt: "EvacuaPlan Studio showing a wall with a door and window",
             },
           ],
+        },
+        {
+          slug: "acreditaciones-app",
+          caseStudyLabel: "View case study",
+          title: "Accreditations",
+          status: "Private system in active development",
+          description: "Operator accreditation management with validity cycles, test history, reporting and analytics for evaluation planning.",
+          highlights: [
+            "Historical record normalization, identity reconciliation and modality-specific validity rules.",
+            "Independent Python analytics service with FastAPI, DuckDB and Google OR-Tools for analysis and scheduling.",
+            "AI-assisted data questions and approval traceability, with no real participant information exposed in this demo.",
+          ],
+          technologies: ["Next.js", "TypeScript", "PostgreSQL", "Python", "FastAPI", "DuckDB", "OR-Tools", "AI"],
+          gallery: [{
+            id: "overview",
+            label: "Concept preview",
+            title: "Accreditation control and planning",
+            description: "Illustrative portfolio preview created without real participant data.",
+            src: "/projects/acreditaciones/overview.svg",
+            alt: "Conceptual view of the accreditation system using synthetic data",
+          }],
         },
       ],
     },
