@@ -15,7 +15,7 @@ import {
 import { MobileDriveControls } from "./mobile-drive-controls";
 
 type Language = "es" | "en";
-type StationId = (typeof worldStations)[number]["id"];
+type StationId = string;
 type ControlKey = "forward" | "reverse" | "left" | "right";
 type ViewMode = "world" | "directory";
 type SceneStatus = "loading" | "ready" | "fallback";
