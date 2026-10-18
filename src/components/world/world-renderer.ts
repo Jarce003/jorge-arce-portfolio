@@ -405,8 +405,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       }
       gl.viewport(0, 0, rw, rh);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      const desiredX = position.x - Math.sin(heading) * 8.8;
-      const desiredZ = position.z - Math.cos(heading) * 8.8;
+      const desiredX = position.x + Math.sin(heading) * 8.8;
+      const desiredZ = position.z + Math.cos(heading) * 8.8;
       const factor = reducedMotion ? 1 : .11;
       cameraX += (desiredX - cameraX) * factor;
       cameraZ += (desiredZ - cameraZ) * factor;
@@ -425,8 +425,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.deleteProgram(program);
       gl.deleteShader(vert);
       gl.deleteShader(frag);
-      const lose = gl.getExtension("WEBGL_lose_context");
-      lose?.loseContext();
+      // Preserve the canvas context; mode switching may reinitialize it.
     },
   };
 }
