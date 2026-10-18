@@ -1,7 +1,7 @@
 import type { ProjectGalleryItem } from "@/content/site-content";
 import type { Locale } from "@/lib/i18n";
 
-export const caseStudySlugs = ["firetrack", "evacuaplan-studio"] as const;
+export const caseStudySlugs = ["firetrack", "evacuaplan-studio", "acreditaciones-app"] as const;
 
 export type CaseStudySlug = (typeof caseStudySlugs)[number];
 
@@ -69,6 +69,7 @@ export type CaseStudy = {
 };
 
 const galleries: Record<CaseStudySlug, ProjectGalleryItem[]> = {
+  "acreditaciones-app": [{ id: "overview", label: "Demo", title: "Accreditation analytics", description: "Synthetic portfolio illustration", src: "/projects/acreditaciones/overview.svg", alt: "Conceptual accreditation dashboard using fictional records" }],
   firetrack: [
     {
       id: "dashboard",
@@ -440,6 +441,157 @@ export const caseStudies = {
         secondaryAction: "Ver FireTrack",
       },
     },
+    "acreditaciones-app": {
+  "slug": "acreditaciones-app",
+  "metadata": {
+    "title": "Acreditaciones | Caso de estudio",
+    "description": "Sistema de acreditaciones con lógica de vigencias, análisis de datos, motor Python y planificación con OR-Tools."
+  },
+  "breadcrumb": "Volver a proyectos",
+  "status": "Sistema privado en evolución",
+  "title": "Acreditaciones",
+  "subtitle": "Control de vigencias, historial de pruebas y planificación basada en datos.",
+  "introduction": "Aplicación privada para consultar, registrar y planificar acreditaciones de operadores. Su complejidad radica en conciliar registros históricos y aplicar reglas de vigencia distintas por modalidad y bloque.",
+  "facts": [
+    {
+      "label": "Rol",
+      "value": "Análisis, arquitectura y desarrollo Full Stack"
+    },
+    {
+      "label": "Periodo",
+      "value": "2026"
+    },
+    {
+      "label": "Plataforma",
+      "value": "Web responsive + servicio analítico Python"
+    },
+    {
+      "label": "Acceso",
+      "value": "Privado; demo pública sintética"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "overview",
+      "label": "Demo",
+      "title": "Acreditaciones",
+      "description": "Aplicación privada para consultar, registrar y planificar acreditaciones de operadores. Su complejidad radica en conciliar registros históricos y aplicar reglas de vigencia distintas por modalidad y bloque.",
+      "src": "/projects/acreditaciones/overview.svg",
+      "alt": "Acreditaciones — synthetic conceptual illustration"
+    }
+  ],
+  "problem": {
+    "eyebrow": "El desafío",
+    "title": "Convertir registros históricos en decisiones confiables",
+    "paragraphs": [
+      "Los registros históricos requieren normalizar identidades, conservar aprobaciones y determinar cuándo un ciclo está vigente.",
+      "Las modalidades tienen reglas diferentes. Mostrar únicamente fechas aisladas no permite comprender la vigencia completa ni priorizar nuevas evaluaciones."
+    ]
+  },
+  "solution": {
+    "eyebrow": "La solución",
+    "title": "Un sistema con reglas explícitas y análisis especializado",
+    "paragraphs": [
+      "La aplicación centraliza personas, pruebas y aprobaciones; preserva el responsable y permite consultar estados por bloque y por acreditación.",
+      "Un servicio analítico en Python habilita el análisis con DuckDB y modelos de planificación mediante Google OR-Tools. La interfaz web incorpora un asistente para consultas contextualizadas."
+    ]
+  },
+  "role": {
+    "eyebrow": "Participación",
+    "title": "Desarrollo de extremo a extremo",
+    "description": "Diseño de la solución, reglas de negocio, flujos de registro, analítica y experiencia de usuario.",
+    "areas": [
+      "Normalización y conciliación de registros históricos",
+      "Diseño y pruebas de reglas de vigencia",
+      "Interfaz responsive y autenticación",
+      "Consultas y persistencia con PostgreSQL",
+      "Integración de un motor Python de análisis",
+      "Pruebas y evaluación del asistente de IA"
+    ]
+  },
+  "decisions": {
+    "eyebrow": "Decisiones técnicas",
+    "title": "Elegir cada herramienta según el problema",
+    "description": "La arquitectura combina distintas tecnologías en lugar de imponer una sola para todas las tareas.",
+    "items": [
+      {
+        "title": "Next.js y TypeScript",
+        "description": "Interfaz y lógica web para consulta, registro y administración."
+      },
+      {
+        "title": "PostgreSQL y Supabase",
+        "description": "Persistencia y control de acceso a registros privados."
+      },
+      {
+        "title": "Python y FastAPI",
+        "description": "Servicio analítico independiente con endpoints propios."
+      },
+      {
+        "title": "DuckDB",
+        "description": "Consultas analíticas eficientes sobre históricos."
+      },
+      {
+        "title": "Google OR-Tools",
+        "description": "Modelos de planificación y asignación bajo restricciones."
+      },
+      {
+        "title": "IA asistida",
+        "description": "Interfaz de preguntas y respuestas sobre el contexto operativo, sujeta a controles y pruebas."
+      }
+    ]
+  },
+  "capabilities": {
+    "eyebrow": "Funciones",
+    "title": "Operación, vigencia y planificación",
+    "items": [
+      {
+        "title": "Conciliación histórica",
+        "description": "Normalización y vinculación de registros relacionados."
+      },
+      {
+        "title": "Ciclos de vigencia",
+        "description": "Cálculo por modalidad, bloque y fecha base."
+      },
+      {
+        "title": "Historial y firma",
+        "description": "Registro de aprobaciones y responsable."
+      },
+      {
+        "title": "Análisis",
+        "description": "Consultas sobre resultados históricos y prioridades."
+      },
+      {
+        "title": "Planificación",
+        "description": "Modelos para preparar y optimizar evaluaciones."
+      },
+      {
+        "title": "Asistente",
+        "description": "Preguntas contextualizadas con evaluación de respuestas."
+      }
+    ]
+  },
+  "outcome": {
+    "eyebrow": "Resultado",
+    "title": "Una plataforma con una arquitectura ampliada",
+    "paragraphs": [
+      "El proyecto muestra una evolución técnica desde el desarrollo web hasta los servicios analíticos, la optimización matemática y la asistencia con IA.",
+      "La demo en JarceDev es independiente del sistema real y utiliza solamente datos ficticios."
+    ],
+    "signals": [
+      "Aplicación privada",
+      "Motor analítico Python",
+      "FastAPI + DuckDB + OR-Tools",
+      "Datos protegidos",
+      "Vista demostrativa sintética"
+    ]
+  },
+  "cta": {
+    "title": "¿Tu organización necesita digitalizar reglas complejas?",
+    "description": "Podemos traducir procesos históricos, validaciones y necesidades de análisis en software usable y seguro.",
+    "primaryAction": "Contactarme",
+    "secondaryAction": "Ver FireTrack"
+  }
+},
   },
   en: {
     firetrack: {
@@ -796,5 +948,156 @@ export const caseStudies = {
         secondaryAction: "View FireTrack",
       },
     },
+    "acreditaciones-app": {
+  "slug": "acreditaciones-app",
+  "metadata": {
+    "title": "Accreditations | Case study",
+    "description": "Accreditation management with validity rules, data analysis, Python analytics and OR-Tools scheduling."
+  },
+  "breadcrumb": "Back to projects",
+  "status": "Private system under development",
+  "title": "Accreditations",
+  "subtitle": "Validity cycles, test history and data-driven evaluation planning.",
+  "introduction": "Private application for querying, registering and planning operator accreditations. Its complexity lies in reconciling historical records and applying modality-specific validity rules.",
+  "facts": [
+    {
+      "label": "Role",
+      "value": "Analysis, architecture and Full Stack development"
+    },
+    {
+      "label": "Timeline",
+      "value": "2026"
+    },
+    {
+      "label": "Platform",
+      "value": "Responsive web + Python analytics service"
+    },
+    {
+      "label": "Access",
+      "value": "Private; synthetic public demo"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "overview",
+      "label": "Demo",
+      "title": "Accreditations",
+      "description": "Private application for querying, registering and planning operator accreditations. Its complexity lies in reconciling historical records and applying modality-specific validity rules.",
+      "src": "/projects/acreditaciones/overview.svg",
+      "alt": "Accreditations — synthetic conceptual illustration"
+    }
+  ],
+  "problem": {
+    "eyebrow": "The challenge",
+    "title": "Turning historical records into reliable decisions",
+    "paragraphs": [
+      "Historical data requires identity reconciliation and accurate records of assessments and approval dates.",
+      "Different modalities have different validity criteria. Isolated test dates do not reveal the full cycle status or evaluation priorities."
+    ]
+  },
+  "solution": {
+    "eyebrow": "The solution",
+    "title": "Explicit business rules with specialized analytics",
+    "paragraphs": [
+      "The application centralizes people, assessment blocks and approvals with traceability for the reviewer.",
+      "A Python service supports analysis with DuckDB and planning models via Google OR-Tools. A contextual AI assistant complements the web interface."
+    ]
+  },
+  "role": {
+    "eyebrow": "My contribution",
+    "title": "End-to-end implementation",
+    "description": "Product workflows, business rules, data analysis and UX.",
+    "areas": [
+      "Historical data normalization and reconciliation",
+      "Validity-cycle modeling and tests",
+      "Responsive UI and authentication",
+      "PostgreSQL querying and persistence",
+      "Python analytics engine integration",
+      "AI assistant regression and evaluation"
+    ]
+  },
+  "decisions": {
+    "eyebrow": "Engineering decisions",
+    "title": "Select each tool for its strengths",
+    "description": "Rather than forcing one language to solve everything, the architecture separates concerns.",
+    "items": [
+      {
+        "title": "Next.js and TypeScript",
+        "description": "Interactive web workflows and administration."
+      },
+      {
+        "title": "PostgreSQL and Supabase",
+        "description": "Data persistence and restricted access."
+      },
+      {
+        "title": "Python and FastAPI",
+        "description": "Dedicated analytics service and APIs."
+      },
+      {
+        "title": "DuckDB",
+        "description": "Efficient analytical queries over historical records."
+      },
+      {
+        "title": "Google OR-Tools",
+        "description": "Constraint-based planning and allocation."
+      },
+      {
+        "title": "AI assistant",
+        "description": "Contextual queries with guardrails and evaluation."
+      }
+    ]
+  },
+  "capabilities": {
+    "eyebrow": "Capabilities",
+    "title": "Operations, status and planning",
+    "items": [
+      {
+        "title": "Historical reconciliation",
+        "description": "Normalize and link related records."
+      },
+      {
+        "title": "Validity cycles",
+        "description": "Compute status per modality, block and baseline date."
+      },
+      {
+        "title": "Audit trail",
+        "description": "Track approvals and their reviewer."
+      },
+      {
+        "title": "Analytics",
+        "description": "Explore results and priorities from historic data."
+      },
+      {
+        "title": "Planning",
+        "description": "Schedule assessments with optimization models."
+      },
+      {
+        "title": "Assistant",
+        "description": "Contextual questions with response evaluation."
+      }
+    ]
+  },
+  "outcome": {
+    "eyebrow": "Outcome",
+    "title": "An evolving multi-technology platform",
+    "paragraphs": [
+      "The project demonstrates a progression from full-stack web engineering into analytical services, mathematical optimization and AI.",
+      "The JarceDev preview is separate from the production system and uses only synthetic data."
+    ],
+    "signals": [
+      "Private application",
+      "Python analytics service",
+      "FastAPI + DuckDB + OR-Tools",
+      "Protected participant data",
+      "Synthetic interactive preview"
+    ]
+  },
+  "cta": {
+    "title": "Need to turn complex rules into a usable system?",
+    "description": "Let's define practical and secure software around your requirements, records and planning needs.",
+    "primaryAction": "Contact me",
+    "secondaryAction": "View FireTrack"
+  }
+},
   },
 } satisfies Record<Locale, Record<CaseStudySlug, CaseStudy>>;
