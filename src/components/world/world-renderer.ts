@@ -371,6 +371,27 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     box(x, .59, z+3.75, 2.75, .08, 1.55, "#4f7188");
     box(x+3.68, 3.4, z-1.95, .2, 1.0, .2, "#f3f8fc");
     draw("cone",x+3.68,4.04,z-1.95,.7,.55,.7,accent,0,0,1);
+
+    // Architectural identity: the ladder-operations hall has a recognizable
+    // double-height canopy, service gantry and raised red warning mast.
+    for (const side of [-1, 1]) {
+      box(x+side*2.35, 3.55, z+1.25, .35, 1.95, .34, "#ecf2f6");
+      box(x+side*2.35, 4.52, z+1.25, .56, .17, .6, accent);
+      box(x+side*2.65, 1.06, z-2.95, .17, 1.85, .15, "#a4c6d3");
+    }
+    box(x, 4.57, z+1.25, 5.8, .23, 1.35, "#cddce4");
+    box(x, 4.74, z+1.25, 5.2, .11, 1.05, accent);
+    for (const stripe of [-1.7,-.56,.56,1.7]) {
+      box(x+stripe, 4.77, z+1.76, .15, .07, .22, "#fff0ec");
+    }
+    // Small extinguishers at the front make its subject readable from the
+    // overview camera without labels or extra textures.
+    for (const offset of [-1.1, 0, 1.1]) {
+      cylinder(x+offset, .59, z+4.5, .34, .76, .34, "#c62d41");
+      cylinder(x+offset, 1.01, z+4.5, .27, .13, .27, "#d9e0e6");
+      box(x+offset, 1.18, z+4.5, .22, .10, .22, "#253a4e");
+    }
+    draw("cube",x+3.68,4.36,z-1.95,.62,.18,.62,accent,0,0,daylightTarget > .5 ? .12 : 1);
   }
   function evacuaStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -399,6 +420,31 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     box(x+1.90,2.85,z+1.05,.15,.9,.15,accent);
     cylinder(x+1.90,3.38,z+1.05,.6,.22,.6,"#f4f8fd");
+
+    // An open drafting bay displays a stylized evacuation route directly on
+    // its floor plan. All shapes are geometry, not potentially illegible text.
+    box(x, .86, z+3.05, 3.45, .15, 2.05, "#eaf5f9");
+    for (const offset of [-1.35, -.45, .45, 1.35]) {
+      box(x+offset, .95, z+3.05, .055, .025, 1.78, "#8cbbc9");
+    }
+    for (const offset of [-.78, 0, .78]) {
+      box(x, .95, z+3.05+offset, 3.2, .025, .05, "#8cbbc9");
+    }
+    box(x-.72, .986, z+3.06, 1.25, .027, .13, "#2caf9c");
+    box(x-.12, .986, z+2.66, .13, .027, .82, "#2caf9c");
+    draw("cone", x-.10, 1.02, z+2.27, .45, .13, .45, "#39d8b7");
+
+    // Rooftop drafting light and tilted visual design fins.
+    for (const side of [-1, 1]) {
+      box(x+side*2.7, 3.62, z-1.45, .15, 1.1, 3.35, "#88c4d4");
+      draw("cube", x+side*2.7, 4.19, z-1.45, .17, .16, 3.1,
+        accent, 0, 0, daylightTarget > .5 ? .1 : .9);
+    }
+    box(x, 3.70, z-1.55, 3.95, .20, .60, "#d6f2f6");
+    for (let index=0; index<3; index++) {
+      draw("cube", x-1.15+index*1.15, 3.82, z-1.55,
+        .70, .12, .48, accent, 0, 0, daylightTarget > .5 ? .12 : .85);
+    }
   }
   function accreditationStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -421,6 +467,24 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       box(x+side,2.05,z+1.1,.48,1.2,.14,"#e9e4ff");
       box(x+side,2.46,z+1.24,.30,.18,.07,accent);
     }
+
+    // Layered academy wings and analytical tower cap, with luminous
+    // ring-shaped data nodes for a clearer AI / decision-support silhouette.
+    for (const side of [-1, 1]) {
+      box(x+side*3.48, 2.1, z-1.35, .48, 3.10, 4.30, "#c8bfe8");
+      box(x+side*3.52, 3.66, z-1.35, .78, .15, 4.5, accent);
+      for (let band=0; band<3; band++) {
+        box(x+side*3.70, 1.25+band*.75, z-1.35, .12, .22, 3.75, "#f3eafc");
+      }
+    }
+    cylinder(x, 4.96, z-1.45, 2.45, .12, 2.45, "#f1e4fd");
+    cylinder(x, 5.16, z-1.45, 1.95, .10, 1.95, accent);
+    for (const side of [-1, 1]) {
+      cylinder(x+side*1.55, 3.84, z+2.30, .22, 1.25, .22, "#eee9ff");
+      draw("cone",x+side*1.55,4.58,z+2.30,.78,.47,.78,accent);
+    }
+    draw("cylinder", x, 5.85, z-1.45, .77, .16, .77, accent,
+      0, 0, daylightTarget > .5 ? .12 : 1);
   }
   function hydrantsStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -444,6 +508,23 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     for(let i=0;i<3;i++) {
       cylinder(x-2.1+i*2.15,.11,z+4.25,.50,.12,.50,"#378b77");
     }
+
+    // Oversized hydrant emblem and pipe couplings: a memorable destination
+    // shape that doesn't depend on tiny annotations to explain the product.
+    const hx = x-1.7, hz = z+3.05;
+    cylinder(hx, .98, hz, 1.05, 1.55, 1.05, "#dd364c");
+    cylinder(hx, 1.84, hz, 1.26, .30, 1.26, "#f4c9ac");
+    cylinder(hx, 2.12, hz, .48, .43, .48, "#d33347");
+    for (const side of [-1,1]) {
+      box(hx+side*.72, 1.21, hz, .95, .38, .42, "#d63d51");
+      cylinder(hx+side*1.15, 1.21, hz, .56, .26, .56, "#c5d8d9");
+      box(hx+side*1.16, 1.21, hz, .16, .56, .58, "#9eb7c0");
+    }
+    cylinder(hx, .18, hz, 1.70, .24, 1.70, "#4f7f7b");
+    // Elevated mapping node with glowing rim, visible from the truck.
+    box(x+3.25, 4.23, z-2.1, 2.2, .17, 2.2, "#e1f6f1");
+    draw("cylinder", x+3.25, 4.33, z-2.1, 2.6, .08, 2.6,
+      accent, 0, 0, daylightTarget > .5 ? .08 : .9);
   }
   // Additional projects use a reusable structure template without new renderer code.
   function genericStation(x: number, z: number, accent: string) {
