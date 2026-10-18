@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 
 type Pedal = "forward" | "reverse";
 
@@ -81,6 +81,14 @@ export function MobileDriveControls({
     onPedal(pedal, false);
   }
 
+  function pedalKey(event: ReactKeyboardEvent<HTMLButtonElement>, pedal: Pedal, pressed: boolean) {
+    if (event.key !== " " && event.key !== "Enter") return;
+    event.preventDefault();
+    if (disabled) return;
+    if (pressed) onPedal(pedal, true);
+    else releasePedal(pedal);
+  }
+
   useEffect(() => {
     if (!disabled) return;
     // Closing a modal or leaving the 3D scene can never leave a pedal held.
@@ -136,7 +144,10 @@ export function MobileDriveControls({
           onKeyUp={(event) => {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") resetWheel();
           }}
-          onBlur={resetWheel}
+          onBlur={() => {
+            // Focusing the second pedal must not cancel an active second finger.
+            if (activePointerRef.current === null) resetWheel();
+          }}
         >
           <span className="pointer-events-none absolute inset-2 rounded-full border border-dashed border-white/35" />
           <span
@@ -164,6 +175,9 @@ export function MobileDriveControls({
           onPointerCancel={() => releasePedal("reverse")}
           onLostPointerCapture={() => releasePedal("reverse")}
           onContextMenu={(event) => event.preventDefault()}
+          onKeyDown={(event) => pedalKey(event, "reverse", true)}
+          onKeyUp={(event) => pedalKey(event, "reverse", false)}
+          onBlur={() => releasePedal("reverse")}
           className="flex h-[78px] w-[62px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-amber-200/40 bg-amber-400/15 text-white shadow-lg backdrop-blur active:bg-amber-400/40 disabled:opacity-50 sm:h-[96px] sm:w-[76px]"
         >
           <span aria-hidden="true" className="text-xl font-black">↓</span>
@@ -178,6 +192,9 @@ export function MobileDriveControls({
           onPointerCancel={() => releasePedal("forward")}
           onLostPointerCapture={() => releasePedal("forward")}
           onContextMenu={(event) => event.preventDefault()}
+          onKeyDown={(event) => pedalKey(event, "forward", true)}
+          onKeyUp={(event) => pedalKey(event, "forward", false)}
+          onBlur={() => releasePedal("forward")}
           className="flex h-[104px] w-[76px] touch-none select-none flex-col items-center justify-center gap-1 rounded-2xl border-2 border-emerald-200/50 bg-emerald-400/25 text-white shadow-lg backdrop-blur active:bg-emerald-400/45 disabled:opacity-50 sm:h-[120px] sm:w-[88px]"
         >
           <span aria-hidden="true" className="text-3xl font-black">↑</span>
