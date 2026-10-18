@@ -21,7 +21,7 @@ export default async function HomePage({ params }: HomePageProps) {
     <>
       <SiteHeader lang={lang} content={siteContent[lang]} variant="world" />
       <main>
-        <WorldExperience lang={lang} />
+        <WorldExperience lang={lang} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""} />
       </main>
     </>
   );
