@@ -186,14 +186,14 @@ export const caseStudies = {
         eyebrow: "Mi participación",
         title: "Responsabilidad de extremo a extremo",
         description:
-          "Lideré el producto desde la definición funcional hasta la implementación, validación y despliegue. Esto incluyó decisiones técnicas y de experiencia de usuario, además del mantenimiento continuo.",
+          "Identifiqué el problema operativo, definí requisitos y reglas, prioricé funcionalidades y coordiné la implementación asistida por IA. Después evalué el comportamiento, comprobé flujos y dirigí los cambios hasta su despliegue.",
         areas: [
           "Levantamiento y priorización de requerimientos",
-          "Arquitectura de aplicación y modelado de datos",
-          "Frontend, backend y rutas de servidor",
-          "Autenticación, roles, RLS y seguridad",
+          "Revisión de alternativas de arquitectura y modelos de datos",
+          "Definición de flujos y validación de interfaces y servicios",
+          "Especificación y revisión de roles, permisos y seguridad",
           "Pruebas funcionales y de regresión",
-          "Despliegue, monitoreo y correcciones",
+          "Coordinación de despliegues y seguimiento de incidencias",
         ],
       },
       decisions: {
@@ -275,7 +275,7 @@ export const caseStudies = {
         title: "Un producto desplegado y en evolución continua",
         paragraphs: [
           "FireTrack pasó de una necesidad operativa a una aplicación en producción con procesos completos, seguridad por empresa y herramientas para usuarios con responsabilidades distintas.",
-          "El proyecto demuestra mi capacidad para analizar un dominio, convertir reglas reales en software y mantener un producto después del lanzamiento.",
+          "El proyecto demuestra cómo puedo comprender un dominio, definir requisitos y mantener la evolución de una solución mediante desarrollo asistido por IA y validación funcional.",
         ],
         signals: [
           "Aplicación en producción",
@@ -334,11 +334,11 @@ export const caseStudies = {
         eyebrow: "Mi participación",
         title: "Producto, interacción y arquitectura del editor",
         description:
-          "Defino el comportamiento de las herramientas, convierto necesidades operativas en reglas de interacción y desarrollo la arquitectura técnica que mantiene objetos, geometría e historial de cambios.",
+          "Identifiqué las necesidades de edición, definí las herramientas y reglas de interacción, y coordiné con IA las alternativas de implementación. Pruebo el editor y dirijo los cambios según su utilidad, precisión y facilidad de uso.",
         areas: [
           "Definición funcional y experiencia de edición",
-          "Modelado de objetos y estado gráfico",
-          "Herramientas de dibujo y transformación",
+          "Definición funcional de objetos y su comportamiento",
+          "Requisitos de dibujo, selección y transformación",
           "Interacción con mouse, touch y Apple Pencil",
           "Pruebas visuales, funcionales y responsive",
           "Git, checkpoints y entregas incrementales",
@@ -455,7 +455,7 @@ export const caseStudies = {
   "facts": [
     {
       "label": "Rol",
-      "value": "Análisis, arquitectura y desarrollo Full Stack"
+      "value": "Análisis de procesos y dirección funcional con IA"
     },
     {
       "label": "Periodo",
@@ -499,13 +499,13 @@ export const caseStudies = {
   "role": {
     "eyebrow": "Participación",
     "title": "Desarrollo de extremo a extremo",
-    "description": "Diseño de la solución, reglas de negocio, flujos de registro, analítica y experiencia de usuario.",
+    "description": "Identificación del problema, reglas de negocio, diseño funcional y validación; la IA asiste con arquitectura e implementación.",
     "areas": [
       "Normalización y conciliación de registros históricos",
       "Diseño y pruebas de reglas de vigencia",
-      "Interfaz responsive y autenticación",
+      "Definición y validación de interfaz y autenticación",
       "Consultas y persistencia con PostgreSQL",
-      "Integración de un motor Python de análisis",
+      "Evaluación y coordinación del motor analítico Python",
       "Pruebas y evaluación del asistente de IA"
     ]
   },
@@ -668,14 +668,14 @@ export const caseStudies = {
         eyebrow: "My role",
         title: "End-to-end ownership",
         description:
-          "I led the product from functional definition through implementation, validation and deployment. This included technical and UX decisions as well as ongoing maintenance.",
+          "I identified the operational problem, defined requirements and business rules, prioritized features and coordinated AI-assisted implementation. I then validated workflows and guided revisions through deployment.",
         areas: [
           "Requirements discovery and prioritization",
-          "Application architecture and data modeling",
-          "Frontend, backend and server routes",
-          "Authentication, roles, RLS and security",
+          "Reviewing architecture options and data models",
+          "Defining workflows and validating interfaces and services",
+          "Specifying and reviewing roles, permissions and security",
           "Functional and regression testing",
-          "Deployment, monitoring and fixes",
+          "Coordinating releases and following up on issues",
         ],
       },
       decisions: {
@@ -757,7 +757,7 @@ export const caseStudies = {
         title: "A deployed product under continuous development",
         paragraphs: [
           "FireTrack evolved from an operational need into a production application with complete workflows, company-level security and tools for users with different responsibilities.",
-          "The project demonstrates my ability to understand a domain, translate real rules into software and maintain a product after launch.",
+          "The project demonstrates how I understand a domain, define requirements and guide product evolution through AI-assisted development and functional validation.",
         ],
         signals: [
           "Production application",
@@ -841,11 +841,11 @@ export const caseStudies = {
         eyebrow: "My role",
         title: "Product, interaction and editor architecture",
         description:
-          "I define tool behavior, convert operational needs into interaction rules and develop the technical architecture that manages objects, geometry and change history.",
+          "I identified editing needs, defined tool behavior and interaction rules, and coordinated AI-assisted technical options. I test the editor and direct revisions based on utility, precision and ease of use.",
         areas: [
           "Functional definition and editing experience",
-          "Object modeling and graphical state",
-          "Drawing and transformation tools",
+          "Functional definition of objects and behavior",
+          "Drawing, selection and transformation requirements",
           "Mouse, touch and Apple Pencil interaction",
           "Visual, functional and responsive testing",
           "Git, checkpoints and incremental releases",
@@ -962,7 +962,7 @@ export const caseStudies = {
   "facts": [
     {
       "label": "Role",
-      "value": "Analysis, architecture and Full Stack development"
+      "value": "Process analysis and AI-assisted product direction"
     },
     {
       "label": "Timeline",
@@ -1006,13 +1006,13 @@ export const caseStudies = {
   "role": {
     "eyebrow": "My contribution",
     "title": "End-to-end implementation",
-    "description": "Product workflows, business rules, data analysis and UX.",
+    "description": "Problem framing, business rules, functional design and validation; AI assists with architecture and implementation.",
     "areas": [
       "Historical data normalization and reconciliation",
       "Validity-cycle modeling and tests",
-      "Responsive UI and authentication",
+      "Functional design and review of responsive UI and authentication",
       "PostgreSQL querying and persistence",
-      "Python analytics engine integration",
+      "Scoping and validation of Python analytics engine",
       "AI assistant regression and evaluation"
     ]
   },
