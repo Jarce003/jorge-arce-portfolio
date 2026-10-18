@@ -208,6 +208,7 @@ export function App() {
         <div className="indicators">
           <span><b>{metrics.fps || "—"}</b> FPS aproximados</span>
           <span><b>{metrics.calls || "—"}</b> draw calls</span>
+          <span><b>{pose.current.z.toFixed(1)}</b> posición Z</span>
           <span><b>{discovered ? "1/1" : "0/1"}</b> rescates</span>
         </div>
         <p className="key-hint">WASD / Flechas · E Descubrir · C Cámara · N Día/Noche · R Reiniciar</p>
