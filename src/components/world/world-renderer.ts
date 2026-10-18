@@ -173,8 +173,10 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string): WebG
 }
 
 export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
-  const gl = canvas.getContext("webgl2", { alpha: false, antialias: true, powerPreference: "high-performance" });
-  if (!gl) throw new Error("WebGL 2 not supported");
+  const context = canvas.getContext("webgl2", { alpha: false, antialias: true, powerPreference: "high-performance" });
+  if (!context) throw new Error("WebGL 2 not supported");
+  // Assign to a non-null constant because it is captured by the render helpers.
+  const gl: WebGL2RenderingContext = context;
 
   const vert = compile(gl, gl.VERTEX_SHADER, [
     "#version 300 es",
