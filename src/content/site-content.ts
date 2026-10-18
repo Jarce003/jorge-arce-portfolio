@@ -414,7 +414,6 @@ export const siteContent = {
     },
   },
   en: {
-  en: {
     metadata: {
       title: "Jorge Arce | Systems Engineer & Digital Solutions",
       description:
