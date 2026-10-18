@@ -254,6 +254,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
     if (mode !== "world") return;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const canvasElement: HTMLCanvasElement = canvas;
 
     let renderer: ReturnType<typeof createWorldRenderer>;
     try {
@@ -328,7 +329,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
       }
       if (overlayOpenRef.current) return;
       // Do not capture WASD or scroll keys after the visitor leaves this section.
-      const rect = canvas.getBoundingClientRect();
+      const rect = canvasElement.getBoundingClientRect();
       if (rect.bottom < window.innerHeight * .25 || rect.top > window.innerHeight * .75) return;
       const mapping: Record<string, ControlKey> = {
         w: "forward", arrowup: "forward",
