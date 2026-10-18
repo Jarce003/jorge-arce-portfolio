@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -11,6 +12,20 @@ import { isLocale } from "@/lib/i18n";
 type PortfolioPageProps = {
   params: Promise<{ lang: string }>;
 };
+
+export async function generateMetadata({ params }: PortfolioPageProps): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) notFound();
+
+  return {
+    title: lang === "es" ? "Proyectos y perfil profesional" : "Projects & professional profile",
+    description: siteContent[lang].projectsSection.description,
+    alternates: {
+      canonical: "/" + lang + "/portfolio",
+      languages: { es: "/es/portfolio", en: "/en/portfolio" },
+    },
+  };
+}
 
 export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const { lang } = await params;
