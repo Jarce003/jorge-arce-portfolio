@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { getProjects } from "@/content/projects";
 import { rescueIsFinished } from "@/lib/world-fire";
+import { closestDiscoverableStation, isInDiscoveryRange } from "@/lib/world-proximity";
 import { ProjectPanel } from "@/components/projects/project-panel";
 import { ProjectArtwork } from "@/components/projects/project-artwork";
 import { ContactStudio } from "@/components/portfolio/contact-studio";
@@ -40,7 +41,7 @@ const copy = {
     accelerate: "Avanzar",
     reverse: "Retroceder",
     guide: "Guía",
-    guideText: "Conduce a cada estación. Pulsa Descubrir para que el camión lance agua, apague las llamas y revele el proyecto. Puedes ir directamente desde la lista de estaciones.",
+    guideText: "Acércate a una estación: no necesitas tocar el edificio. Pulsa Descubrir para lanzar agua, apagar las llamas y revelar el proyecto. También puedes elegirlo en la lista.",
     close: "Cerrar",
     discover: "Descubrir",
     visit: "Ir a la estación",
@@ -101,7 +102,7 @@ const copy = {
     accelerate: "Accelerate",
     reverse: "Reverse",
     guide: "Guide",
-    guideText: "Drive to a station and press Discover. The ladder truck sprays water, extinguishes the flames and reveals the project. You can also travel directly using the station list.",
+    guideText: "Drive near a station; you don’t have to touch the building. Press Discover to spray water, extinguish the flames and reveal the project. You can also use the station list."
     close: "Close",
     discover: "Discover",
     visit: "Travel to station",
@@ -149,13 +150,7 @@ const copy = {
 } as const;
 
 function closestStation(position: WorldPosition): StationId | null {
-  const close = worldStations
-    .map((station) => ({
-      id: station.id,
-      distance: Math.hypot(station.x - position.x, station.z - position.z),
-    }))
-    .sort((a, b) => a.distance - b.distance)[0];
-  return close?.distance < 7.3 ? close.id : null;
+  return closestDiscoverableStation(position, worldStations);
 }
 
 export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKey?: string }) {
@@ -251,7 +246,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
     // Direct selection also remains possible for keyboard/touch accessibility:
     // position the vehicle near the building before launching its water jet.
     const truck = vehicleRef.current;
-    if (Math.hypot(truck.x - location.x, truck.z - location.z) >= 7.3) {
+    if (!isInDiscoveryRange(truck, location)) {
       truck.x = location.x;
       truck.z = location.z + (location.z < 0 ? 7 : -7);
       truck.heading = location.z < 0 ? 0 : Math.PI;
