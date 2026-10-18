@@ -57,6 +57,7 @@ try {
     Write-Warning "No hay Python en PATH; la prueba XML completa se ejecuta de todos modos en GitHub Actions."
   }
 
+  Invoke-Checked "Probar consultas y respuestas del asistente IA" { npm.cmd run test:demo }
   Invoke-Checked "Validar TypeScript" { npx.cmd tsc --noEmit }
   Invoke-Checked "Compilar version de produccion" { npm.cmd run build }
   Write-Host ""
