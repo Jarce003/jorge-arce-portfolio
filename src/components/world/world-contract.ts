@@ -19,6 +19,7 @@ export type WorldRenderer = {
     cameraMode?: WorldCamera,
     lightsOn?: boolean,
     timeOfDay?: WorldTime,
+    extinguishedStations?: ReadonlySet<string>,
   ) => void;
   project: (
     position: WorldPosition,
