@@ -45,7 +45,7 @@ This is a list of **technologies used across my products**, not a claim that I m
 The website itself is built with Next.js 16, React 19, TypeScript and Tailwind CSS 4, deployed to Vercel. It includes:
 
 - Spanish and English navigation and content
-- Responsive project presentations and detailed technical case studies
+- Unified visual project previews, compact shareable pages and a four-step process
 - Interactive product demos (using sanitized or fictional information)
 - Protected contact form and links to professional profiles
 - CV downloads, Open Graph tags, sitemap and accessible navigation
@@ -54,7 +54,7 @@ The website itself is built with Next.js 16, React 19, TypeScript and Tailwind C
 
 The JarceDev homepage at `/es` and `/en` is now **exclusively the playable 3D world**, featuring an original American-style aerial ladder truck. Visiting `/` redirects to `/es`.
 
-The extended information previously appearing below the world has been **replaced by a compact interactive** `/es/portfolio` and `/en/portfolio` experience. Four clickable visual project tiles, a brief four-step process selector and a one-line profile link to stand-alone case studies at `/[lang]/projects/[slug]`. The navigation menu and contact links now point to those routes, so accessibility and search discovery remain available without entering WebGL.
+The extended information is now a **compact interactive** `/es/portfolio` / `/en/portfolio` experience. Four normalized vector previews, a brief process selector and one-line professional profile all use the same shared project catalog. Shareable `/[lang]/projects/[slug]` routes show the *same short project panel*, not large case-study articles. The navigation menu and contact links now point to those routes, so accessibility and search discovery remain available without entering WebGL.
 
 **Minimal mobile HUD:** the immersive world takes the entire available viewport beneath the global navigation. The long hero text, description, main action row and persistent project strip are gone on phones. The visible controls are:
 - 🚨 **Luces / Lights** toggles working headlights, alternating **red-only** emergency beacons and their luminous reflections. Desktop shortcut: **L**. Motion-sensitive users see static lights without strobing.
@@ -67,7 +67,7 @@ Keyboard driving uses **WASD or arrow keys**, **E** for nearby stations and **R*
 
 The original lightweight WebGL2 renderer dynamically lowers the mobile pixel ratio and detail. Content remains in HTML routes and is not locked inside 3D canvases. The 3D truck and surroundings are still **original geometric prototypes**, not finished production-quality custom 3D artwork.
 
-GitHub Actions checks encoding, TypeScript and production builds, and Vercel provides isolated preview deployments. Real-device appearance, glare/brightness and two-thumb comfort still need visual testing before we call the experience final.
+GitHub Actions checks encoding, the unique project catalog and preview illustrations, TypeScript, and production builds. Vercel provides isolated preview deployments when deployment quotas permit. Real-device appearance, glare/brightness and two-thumb comfort still need visual testing before we call the experience final.
 
 Read the [3D concept and development roadmap](docs/jarcedev-3d-concept.md).
 
@@ -80,6 +80,12 @@ Acreditaciones includes a private assistant based on AI query compilation and a 
 ## Contact experience
 
 A floating “Hablemos / Let's talk” action opens a focused dialog. Visitors choose an inquiry type, optionally describe the situation and then select either a prefilled WhatsApp handoff or the existing protected email form with Cloudflare Turnstile. Nothing is submitted automatically.
+
+## JarceDev 3.0 architecture and new projects
+
+All projects now live in `src/content/projects.ts`. That one catalog controls the 3D station, visual thumbnail, short text, bilingual direct link and sitemap. The renderer provides reusable structure templates (including a generic template) and a daytime/nighttime switch using the `N` key. A future React Three Fiber v9 engine can reuse `src/components/world/world-contract.ts` without changing the catalog or driving UI.
+
+See the complete [world-first architecture and technology roadmap](docs/jarcedev-3-world-first.md), including Blender/Python and optional AI-assisted GLB modeling.
 
 ## Development
 
