@@ -1,5 +1,6 @@
 import { getWorldStations, type StructureType } from "@/content/projects";
 import { stationFireStrength, WATER_REACHES_FIRE_SECONDS, waterStreamStrength } from "@/lib/world-fire";
+import { dampingFactor } from "@/lib/world-motion";
 
 import type { WorldPosition, WorldRenderer, WorldRescueEffect } from "./world-contract";
 
@@ -102,19 +103,21 @@ function modelMatrix(
   sy: number,
   sz: number,
   angle: number,
-  roll = 0,
+  roll: number,
+  result: Mat4,
 ): Mat4 {
+  // Fill a reusable matrix in-place. Allocating a Float32Array for every
+  // building, flame and truck part created hundreds of objects per frame
+  // and intermittent garbage-collection pauses during driving.
   const s = Math.sin(angle);
   const c = Math.cos(angle);
   const cr = Math.cos(roll);
   const sr = Math.sin(roll);
-  // R_y(heading) * R_z(roll) * scale: wheels can rotate around their axle.
-  return new Float32Array([
-    c * cr * sx, sr * sx, -s * cr * sx, 0,
-    -c * sr * sy, cr * sy, s * sr * sy, 0,
-    s * sz, 0, c * sz, 0,
-    x, y, z, 1,
-  ]);
+  result[0] = c * cr * sx; result[1] = sr * sx; result[2] = -s * cr * sx; result[3] = 0;
+  result[4] = -c * sr * sy; result[5] = cr * sy; result[6] = s * sr * sy; result[7] = 0;
+  result[8] = s * sz; result[9] = 0; result[10] = c * sz; result[11] = 0;
+  result[12] = x; result[13] = y; result[14] = z; result[15] = 1;
+  return result;
 }
 
 function makeCube(): Float32Array {
@@ -249,6 +252,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   let cameraZ = 10;
   let latestVP: Mat4 = new Float32Array(16);
   let lastShape: ObjectShape | null = null;
+  const modelScratch = new Float32Array(16);
+  let lastFrameSeconds: number | null = null;
   let daylight = 0;
   let daylightTarget = 0;
   const fireFadeStart = new Map<string, number>();
@@ -280,11 +285,10 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.vertexAttribPointer(normalAttrib, 3, gl.FLOAT, false, 24, 12);
       lastShape = shape;
     }
-    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll));
+    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll, modelScratch));
     gl.uniform3fv(colorUniform, tint(color));
     gl.uniform1f(emissiveUniform, emissive);
     gl.uniform1f(opacityUniform, opacity);
-    gl.uniform1f(daylightUniform, daylight);
     if (opacity < 1) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -988,15 +992,21 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         canvas.height = rh;
       }
       gl.viewport(0, 0, rw, rh);
+      const frameDelta = lastFrameSeconds === null
+        ? 1 / 60
+        : Math.max(0, Math.min(elapsed - lastFrameSeconds, .10));
+      lastFrameSeconds = elapsed;
       daylightTarget = timeOfDay === "day" ? 1 : 0;
-      daylight += (daylightTarget - daylight) * (reducedMotion ? 1 : .085);
+      daylight += (daylightTarget - daylight) * (reducedMotion ? 1 : dampingFactor(frameDelta, 5.35));
+      // The daylight uniform is shared across every object in this frame.
+      gl.uniform1f(daylightUniform, daylight);
       gl.clearColor(.035 + .55 * daylight, .065 + .68 * daylight, .12 + .72 * daylight, 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       const overview = cameraMode === "overview";
       const desiredX = position.x + (overview ? 5.5 : Math.sin(heading) * 10.5);
       const desiredZ = position.z + (overview ? 9.2 : Math.cos(heading) * 10.5);
       const desiredY = overview ? 18.0 : 8.4;
-      const factor = reducedMotion ? 1 : .11;
+      const factor = reducedMotion ? 1 : dampingFactor(frameDelta, 7.0);
       cameraX += (desiredX - cameraX) * factor;
       cameraZ += (desiredZ - cameraZ) * factor;
       cameraY += (desiredY - cameraY) * factor;
