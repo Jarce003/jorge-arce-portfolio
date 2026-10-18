@@ -67,6 +67,7 @@ try {
 
   Invoke-Checked "Probar consultas y respuestas del asistente IA" { npm.cmd run test:demo }
   Invoke-Checked "Probar secuencia de agua y extincion del mundo 3D" { npm.cmd run test:world }
+  Invoke-Checked "Probar suavidad y rendimiento de conduccion" { npm.cmd run test:motion }
   Invoke-Checked "Validar TypeScript" { npx.cmd tsc --noEmit }
   Invoke-Checked "Compilar version de produccion" { npm.cmd run build }
   Write-Host ""
