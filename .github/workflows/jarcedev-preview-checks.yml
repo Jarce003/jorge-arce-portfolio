@@ -28,6 +28,8 @@ jobs:
         run: npm ci
       - name: Encoding validation
         run: npm run check:encoding
+      - name: Project catalog and artwork validation
+        run: npm run check:projects
       - name: TypeScript validation
         run: npx tsc --noEmit
       - name: Production build
