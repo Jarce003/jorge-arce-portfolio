@@ -121,6 +121,9 @@ const copy = {
     controls: "WASD o flechas · conducir el camión escalera",
     keyboard: "E · abrir proyecto",
     reset: "R · reiniciar",
+    camera: "Cambiar cámara",
+    cameraChase: "Vista trasera",
+    cameraOverview: "Vista aérea",
     steer: "Girar",
     accelerate: "Avanzar",
     reverse: "Retroceder",
@@ -155,6 +158,9 @@ const copy = {
     controls: "WASD or arrow keys · drive the ladder truck",
     keyboard: "E · open project",
     reset: "R · restart",
+    camera: "Change camera",
+    cameraChase: "Chase view",
+    cameraOverview: "Bird's-eye view",
     steer: "Steer",
     accelerate: "Accelerate",
     reverse: "Reverse",
@@ -199,6 +205,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const vehicleRef = useRef({ x: 0, z: 0, heading: 0, speed: 0 });
   const inputRef = useRef(new Set<ControlKey>());
   const nearbyRef = useRef<StationId | null>(null);
+  const stationMarkerRefs = useRef<Partial<Record<StationId, HTMLButtonElement | null>>>({});
+  const cameraModeRef = useRef<"chase" | "overview">("chase");
+  const overlayOpenRef = useRef(false);
 
   const [mode, setMode] = useState<ViewMode>("world");
   const [sceneStatus, setSceneStatus] = useState<SceneStatus>("loading");
@@ -206,6 +215,17 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const [activeStation, setActiveStation] = useState<StationId | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [visited, setVisited] = useState<StationId[]>([]);
+  const [cameraMode, setCameraMode] = useState<"chase" | "overview">("chase");
+
+  const toggleCamera = useCallback(() => {
+    cameraModeRef.current = cameraModeRef.current === "chase" ? "overview" : "chase";
+    setCameraMode(cameraModeRef.current);
+  }, []);
+
+  useEffect(() => {
+    overlayOpenRef.current = Boolean(activeStation) || guideOpen;
+    if (overlayOpenRef.current) inputRef.current.clear();
+  }, [activeStation, guideOpen]);
 
   const activeCopy = stations.find((station) => station.id === activeStation);
   const nearestCopy = stations.find((station) => station.id === nearby);
@@ -258,10 +278,13 @@ export function WorldExperience({ lang }: { lang: Language }) {
       if (document.visibilityState === "visible") {
         const v = vehicleRef.current;
         const input = inputRef.current;
-        const accelerating = input.has("forward") ? 1 : 0;
-        const reversing = input.has("reverse") ? 1 : 0;
+        const acceptingControls = !overlayOpenRef.current;
+        const accelerating = acceptingControls && input.has("forward") ? 1 : 0;
+        const reversing = acceptingControls && input.has("reverse") ? 1 : 0;
         const direction = accelerating - reversing;
-        const steer = (input.has("left") ? 1 : 0) - (input.has("right") ? 1 : 0);
+        const steer = acceptingControls
+          ? (input.has("left") ? 1 : 0) - (input.has("right") ? 1 : 0)
+          : 0;
 
         if (direction) v.speed += direction * 13 * dt;
         v.speed *= Math.exp(-2.8 * dt);
@@ -279,16 +302,34 @@ export function WorldExperience({ lang }: { lang: Language }) {
           nearbyRef.current = station;
           setNearby(station);
         }
-        renderer.render(v, v.heading, time / 1000, motionMedia.matches);
+        renderer.render(v, v.heading, time / 1000, motionMedia.matches, cameraModeRef.current);
+        for (const station of worldStations) {
+          const element = stationMarkerRefs.current[station.id];
+          if (!element) continue;
+          const point = renderer.project(station, 5.9);
+          const visible = point.visible;
+          element.style.display = visible ? "flex" : "none";
+          element.style.transform = "translate3d(" + point.x + "px," + point.y + "px,0) translate(-50%,-100%)";
+          element.tabIndex = visible ? 0 : -1;
+        }
       }
       raf = window.requestAnimationFrame(frame);
     }
 
     function keydown(event: KeyboardEvent) {
       const target = event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target.tagName))) return;
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
+      if (key === "escape") {
+        setActiveStation(null);
+        setGuideOpen(false);
+        return;
+      }
+      if (overlayOpenRef.current) return;
+      // Do not capture WASD or scroll keys after the visitor leaves this section.
+      const rect = canvas.getBoundingClientRect();
+      if (rect.bottom < window.innerHeight * .25 || rect.top > window.innerHeight * .75) return;
       const mapping: Record<string, ControlKey> = {
         w: "forward", arrowup: "forward",
         s: "reverse", arrowdown: "reverse",
@@ -306,9 +347,8 @@ export function WorldExperience({ lang }: { lang: Language }) {
         Object.assign(vehicleRef.current, { x: 0, z: 0, heading: 0, speed: 0 });
         setActiveStation(null);
       }
-      if (key === "escape") {
-        setActiveStation(null);
-        setGuideOpen(false);
+      if (key === "c" && !event.repeat) {
+        toggleCamera();
       }
     }
     function keyup(event: KeyboardEvent) {
@@ -336,7 +376,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
       window.removeEventListener("blur", blur);
       renderer.dispose();
     };
-  }, [mode, openStation]);
+  }, [mode, openStation, toggleCamera]);
 
   function touchButton(key: ControlKey, symbol: string, label: string) {
     return (
@@ -374,6 +414,22 @@ export function WorldExperience({ lang }: { lang: Language }) {
           />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,11,25,.86)_0%,rgba(5,11,25,.18)_42%,rgba(5,11,25,.05)_67%,rgba(5,11,25,.92)_100%)]" />
           <div className="pointer-events-none absolute -top-32 right-1/3 size-96 rounded-full bg-violet-500/10 blur-[120px]" />
+          <div className="pointer-events-none absolute inset-0 z-[12] overflow-hidden" aria-label={lang === "es" ? "Estaciones del mundo" : "World stations"}>
+            {stations.map((station) => (
+              <button
+                key={station.id}
+                ref={(element) => { stationMarkerRefs.current[station.id] = element; }}
+                type="button"
+                onClick={() => openStation(station.id)}
+                style={{ display: "none" }}
+                aria-label={(lang === "es" ? "Descubrir " : "Discover ") + station.name}
+                className="pointer-events-auto absolute left-0 top-0 min-w-28 flex-col items-center gap-1 rounded-xl border border-violet-200/40 bg-[#111b33]/95 px-3 py-2 text-xs font-semibold text-white shadow-xl shadow-indigo-950/40 backdrop-blur-md transition-colors hover:border-violet-300 hover:bg-indigo-950/95"
+              >
+                <span className="flex items-center gap-2"><span aria-hidden="true">{station.icon}</span>{station.name}</span>
+                <span className="text-[.64rem] font-normal text-violet-200">{t.discover} ↗</span>
+              </button>
+            ))}
+          </div>
         </>
       ) : (
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_45%_25%,#302c58_0%,#101d35_42%,#071221_85%)]" />
@@ -402,9 +458,14 @@ export function WorldExperience({ lang }: { lang: Language }) {
               {mode === "world" ? t.directory : t.explore}
             </button>
             {mode === "world" && (
-              <button type="button" onClick={() => setGuideOpen(true)} className="min-h-10 rounded-full px-3.5 text-xs font-semibold text-violet-200 hover:text-white">
-                ? {t.guide}
-              </button>
+              <>
+                <button type="button" onClick={toggleCamera} className="min-h-10 rounded-full border border-white/20 bg-slate-950/50 px-3.5 text-xs font-semibold text-violet-100 hover:bg-slate-900">
+                  ◈ {t.camera}: {cameraMode === "chase" ? t.cameraChase : t.cameraOverview}
+                </button>
+                <button type="button" onClick={() => setGuideOpen(true)} className="min-h-10 rounded-full px-3.5 text-xs font-semibold text-violet-200 hover:text-white">
+                  ? {t.guide}
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -441,6 +502,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.controls}</span>
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.keyboard}</span>
                     <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">{t.reset}</span>
+                    <span className="rounded-full border border-white/15 bg-slate-950/65 px-3 py-2">C · {t.camera}</span>
                   </div>
                   <p className="mt-3 max-w-lg text-xs leading-5 text-slate-400">{t.context}</p>
                 </div>
