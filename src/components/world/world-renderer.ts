@@ -590,15 +590,31 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         : 0.86 + Math.sin(elapsed * 4.1 + index * 1.53 + station.x) * 0.14;
       const height = (1.65 + (index % 2) * .48) * motion * strength;
       const baseHeight = index % 2 ? 4.05 : 3.36;
-      const y = baseHeight + height * 0.30;
-      // Broad ember-colored cone with a shorter luminous yellow core.
-      draw("cone", x, y, z, .94 * strength, height, .94 * strength,
-        "#ff6e30", 0, 0, 1);
-      draw("cone", x + .06, y - .10, z - .05, .49 * strength,
-        height * .68, .49 * strength, "#ffd16e", 0, 0, 1);
+      const y = baseHeight + height * .30;
+      const sway = reducedMotion ? 0 : Math.sin(elapsed * 5.0 + index * 1.91) * .14;
+      // Several irregular moving flame tongues give a softer silhouette
+      // than a single geometrically perfect triangular flame.
+      draw("cone", x + sway, y, z, .88 * strength, height, .88 * strength,
+        "#ef6532", 0, 0, .7);
+      draw("cone", x - .15 - sway * .7, y - .22, z + .20,
+        .52 * strength, height * .73, .52 * strength, "#ffb24e", 0, 0, .85);
+      draw("cone", x + .22 + sway, y - .14, z - .11,
+        .36 * strength, height * .65, .36 * strength,
+        "#f9d17b", 0, 0, .8);
       if (!lowDetail) {
-        draw("cone", x - .22, y - .20, z + .24, .39 * strength,
-          height * .52, .39 * strength, "#ff3f37", 0, 0, 1);
+        draw("cone", x - .36 + sway * .5, y - .17, z - .16,
+          .39 * strength, height * .59, .39 * strength,
+          "#ff4538", 0, 0, .6);
+        // Sparse flickering embers suggest rising heat without a costly
+        // particle engine or a full-screen glow effect.
+        for (let ember = 0; ember < 2; ember++) {
+          const lift = (elapsed * (.77 + ember * .12) + index * .36 + ember * .53) % 1;
+          draw("cube", x + sway + Math.sin(index + ember * 2.6) * .24,
+            baseHeight + .7 + lift * (height + .45),
+            z - .2 + ember * .26,
+            .075 * strength, .11 * strength, .075 * strength,
+            "#ffb56d", 0, 0, .85, .45 * strength);
+        }
       }
       // The ground glow is deliberately subtle in daylight. At night it
       // reads from both the chase and the overview camera.
