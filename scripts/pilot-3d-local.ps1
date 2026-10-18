@@ -2,6 +2,7 @@ param(
   [switch]$SkipInstall,
   [switch]$SkipBlender,
   [switch]$NoServer,
+  [string]$ModelZip = "",
   [int]$Port = 4174
 )
 
@@ -53,7 +54,51 @@ try {
   }
   Write-Host "Node: $node" -ForegroundColor Green
 
-  if (-not $SkipBlender) {
+  # Reuse the actual Blender exports already validated by GitHub Actions.
+  # Users who downloaded the asset ZIP should not have to install Blender.
+  if (-not $ModelZip) {
+    $downloaded = Join-Path $env:USERPROFILE "Downloads\jarcedev-blender-models.zip"
+    if (Test-Path -LiteralPath $downloaded) { $ModelZip = $downloaded }
+  }
+
+  if ($ModelZip) {
+    if (-not (Test-Path -LiteralPath $ModelZip)) {
+      throw "El ZIP de modelos no existe: $ModelZip"
+    }
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($ModelZip)
+    try {
+      # Explicit trusted entry names; do not expand arbitrary or unrelated
+      # files into the Git worktree.
+      $entries = @(
+        "public/models/jarcedev/v1/ladder-truck.glb",
+        "public/models/jarcedev/v1/firetrack-station.glb",
+        "tools/blender/output/jarcedev-assets.blend"
+      )
+      foreach ($entryName in $entries) {
+        $entry = $zip.GetEntry($entryName)
+        if (-not $entry) {
+          throw "Falta el archivo esperado en el ZIP: $entryName"
+        }
+        if ($entry.Length -lt 1000 -or $entry.Length -gt 5000000) {
+          throw "Tamaño de modelo inesperado: $entryName"
+        }
+        $destination = Join-Path $root ($entryName.Replace("/", "\"))
+        $parent = Split-Path -Parent $destination
+        if (-not (Test-Path -LiteralPath $parent)) {
+          New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        }
+        $inputStream = $entry.Open()
+        try {
+          $outputStream = [System.IO.File]::Create($destination)
+          try { $inputStream.CopyTo($outputStream) }
+          finally { $outputStream.Dispose() }
+        } finally { $inputStream.Dispose() }
+        Write-Host ("Modelo recuperado: " + $entryName) -ForegroundColor Green
+      }
+    } finally { $zip.Dispose() }
+  } elseif (-not $SkipBlender) {
     $blender = Find-Blender
     if ($blender) {
       Write-Host "Blender encontrado: $blender" -ForegroundColor Green
@@ -61,8 +106,8 @@ try {
         & $blender --background --factory-startup --python $generator -- --output $models
       }
     } else {
-      Write-Warning "Blender no esta instalado o accesible. La escena 3D funcionara con geometria basica."
-      Write-Host "Para generar los GLB instala Blender 4+ y vuelve a ejecutar este script." -ForegroundColor Yellow
+      Write-Warning "Blender no esta instalado. La escena 3D funcionara con geometria basica."
+      Write-Host "Puedes descargar los modelos ya verificados, sin instalar Blender." -ForegroundColor Yellow
     }
   } else {
     Write-Host "Se omite Blender por solicitud." -ForegroundColor DarkGray
