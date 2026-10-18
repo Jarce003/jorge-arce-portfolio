@@ -623,6 +623,12 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
    * Curved segmented geometry follows the destination project station. No
    * particle library, physics engine, downloaded textures or extra assets.
    */
+  /**
+   * Light, cyan water spray from the aerial tip. The curved translucent
+   * stream is deliberately broken into short moving ribbons and droplets;
+   * this avoids a visually rigid, opaque white tube in high-angle cameras.
+   * The impact is a restrained mist rather than an oversized white stain.
+   */
   function drawWaterJet(
     truck: WorldPosition,
     heading: number,
@@ -635,26 +641,30 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     const strength = waterStreamStrength(elapsed, rescue.startedAt);
     if (strength < .02) return;
 
-    // The nozzle is just ahead of the nested ladder, not beside the cab.
     const sourceX = truck.x - Math.sin(heading) * 2.78;
     const sourceZ = truck.z - Math.cos(heading) * 2.78;
     const sourceY = 2.68;
-    const targetX = station.x + Math.sin(age * 2.8) * .82;
-    const targetZ = station.z + Math.cos(age * 2.4) * .76;
+    const targetX = station.x + Math.sin(age * 2.3) * .44;
+    const targetZ = station.z + Math.cos(age * 2.1) * .40;
     const targetY = 4.12;
-    const segments = lowDetail ? 9 : 16;
+    const segments = lowDetail ? 10 : 17;
 
     function jetPoint(t: number): [number, number, number] {
-      const arch = Math.sin(t * Math.PI) * 1.65;
+      // Smooth parabola: strong initial nozzle pressure and light gravity
+      // drop before impact. Animated perpendicular turbulence is subtle.
+      const arch = Math.sin(t * Math.PI) * 1.6;
+      const wiggle = Math.sin(t * 16 - elapsed * 17) * .06 * t;
       return [
-        sourceX + (targetX - sourceX) * t,
+        sourceX + (targetX - sourceX) * t + wiggle,
         sourceY + (targetY - sourceY) * t + arch,
-        sourceZ + (targetZ - sourceZ) * t,
+        sourceZ + (targetZ - sourceZ) * t - wiggle,
       ];
     }
-    // Camera-facing water highlights are segmented cuboids following a
-    // pitched 3D path. The existing WebGL shader handles their emission.
+
     for (let index = 0; index < segments; index++) {
+      // Tiny moving gaps make the stream read as fast-flowing water rather
+      // than a single solid pole. Keep the nozzle segment visible.
+      if (index > 1 && (index + Math.floor(elapsed * 19)) % 6 === 0) continue;
       const start = jetPoint(index / segments);
       const end = jetPoint((index + 1) / segments);
       const dx = end[0] - start[0];
@@ -662,37 +672,67 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       const dz = end[2] - start[2];
       const length = Math.hypot(dx, dy, dz);
       if (length < .01) continue;
+
       const yaw = Math.atan2(-dz, dx);
       const pitch = Math.asin(Math.max(-1, Math.min(1, dy / length)));
-      const ripple = Math.sin(index * 2.6 + elapsed * 20) * .026;
-      const mx = (start[0] + end[0]) / 2;
-      const my = (start[1] + end[1]) / 2;
-      const mz = (start[2] + end[2]) / 2;
-      draw("cube", mx, my, mz, length * 1.18,
-        (.20 + ripple) * strength, .17 * strength,
-        "#58cdec", yaw, pitch, 1, .74 * strength);
-      if (!lowDetail || index % 2 === 0) {
-        draw("cube", mx, my + .015, mz, length * 1.13,
-          .072 * strength, .070 * strength,
-          "#e5fcff", yaw, pitch, 1, .95 * strength);
+      const centerX = (start[0] + end[0]) * .5;
+      const centerY = (start[1] + end[1]) * .5;
+      const centerZ = (start[2] + end[2]) * .5;
+      const pulse = .88 + .12 * Math.sin(elapsed * 22 - index * 1.7);
+      const taper = 1 + index / segments * .27;
+
+      draw("cube", centerX, centerY, centerZ,
+        length * .94, .085 * taper * pulse * strength,
+        .085 * taper * strength, "#36bde0",
+        yaw, pitch, .52, .48 * strength);
+
+      if (index % 3 === 0) {
+        draw("cube", centerX, centerY + .035, centerZ,
+          length * .56, .035 * strength, .035 * strength,
+          "#b0ebf5", yaw, pitch, .35, .27 * strength);
       }
     }
 
-    // Short spray fan and splashes over the affected building.
-    const splashes = lowDetail ? 5 : 10;
-    for (let i = 0; i < splashes; i++) {
-      const theta = i / splashes * Math.PI * 2 + elapsed * 2.5;
-      const radius = .34 + (i % 3) * .21;
-      const px = targetX + Math.cos(theta) * radius;
-      const pz = targetZ + Math.sin(theta) * radius;
-      const rise = .16 + Math.abs(Math.sin(elapsed * 7 + i)) * .78;
-      draw("cube", px, targetY + rise, pz,
-        .14 * strength, (.16 + (i % 3) * .10) * strength,
-        .14 * strength, "#b7f4ff", 0, 0, 1, .75 * strength);
+    // Small distinct droplets travel along the stream, contributing the
+    // appearance of flow without a general-purpose particle system.
+    const drops = lowDetail ? 12 : 25;
+    for (let index = 0; index < drops; index++) {
+      const t = ((index + .3) / drops + age * 1.6) % 1;
+      const [px, py, pz] = jetPoint(t);
+      const jitter = .055 * Math.sin(index * 7.7 + elapsed * 11) * t;
+      const size = (.08 + index % 3 * .022) * strength;
+      draw("cylinder", px + jitter, py, pz - jitter,
+        size, size * 1.6, size, index % 4 === 0 ? "#c5f5fd" : "#55cae6",
+        0, 0, .5, .57 * strength);
     }
-    draw("cylinder", targetX, targetY + .05, targetZ,
-      1.65 * strength, .06, 1.65 * strength,
-      "#c9faff", 0, 0, 1, .15 * strength);
+
+    // Impact is a fine fan of little splashes plus blue-gray mist.
+    // A broad white opaque disk was distracting in the earlier recording.
+    const splashes = lowDetail ? 5 : 9;
+    for (let index = 0; index < splashes; index++) {
+      const theta = index * 2.399 + elapsed * 2.5;
+      const radius = .18 + (index % 4) * .14;
+      const rise = .15 + Math.abs(Math.sin(elapsed * 6.7 + index)) * .46;
+      const size = (.09 + (index % 3) * .03) * strength;
+      draw("cylinder",
+        targetX + Math.cos(theta) * radius,
+        targetY + rise,
+        targetZ + Math.sin(theta) * radius,
+        size, .16 * strength, size,
+        "#7edaf0", 0, 0, .45, .39 * strength);
+    }
+    const mist = lowDetail ? 2 : 4;
+    for (let index = 0; index < mist; index++) {
+      const drift = (age * .38 + index * .23) % 1;
+      draw("cone",
+        targetX + Math.sin(index * 2.1 + elapsed * .8) * .39,
+        targetY + .26 + drift * .65,
+        targetZ + Math.cos(index * 2.2) * .32,
+        (.56 + drift * .45) * strength,
+        (.24 + drift * .26) * strength,
+        (.56 + drift * .45) * strength,
+        "#8faeb9", 0, 0, 0, .07 * strength);
+    }
   }
 
   function drawRoadNetwork(lowDetail = false) {
