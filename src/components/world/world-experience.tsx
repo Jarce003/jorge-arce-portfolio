@@ -12,7 +12,7 @@ import {
   createWorldRenderer,
   worldStations,
 } from "./world-renderer";
-import type { WorldPosition } from "./world-contract";
+import type { WorldPosition, WorldRescueEffect } from "./world-contract";
 import { MobileDriveControls } from "./mobile-drive-controls";
 
 type Language = "es" | "en";
@@ -78,6 +78,11 @@ const copy = {
     day: "Día",
     night: "Noche",
     dayModeInstructions: "N · cambiar día y noche",
+    fireStatus: "Incendio pendiente",
+    recovery: "Estación recuperada",
+    extinguishing: "El camión está lanzando agua para apagar las llamas…",
+    rescued: "Estaciones recuperadas",
+    replay: "Reiniciar rescate",
   },
   en: {
     eyebrow: "JARCEDEV / INTERACTIVE WORLD",
@@ -134,6 +139,11 @@ const copy = {
     day: "Day",
     night: "Night",
     dayModeInstructions: "N · toggle day and night",
+    fireStatus: "Fire still burning",
+    recovery: "Station recovered",
+    extinguishing: "The ladder truck is spraying water to extinguish the flames…",
+    rescued: "Stations recovered",
+    replay: "Restart rescue",
   },
 } as const;
 
@@ -163,6 +173,8 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
   const inputRef = useRef(new Set<ControlKey>());
   const touchSteeringRef = useRef(0);
   const nearbyRef = useRef<StationId | null>(null);
+  const extinguishedRef = useRef<Set<StationId>>(new Set());
+  const rescueRef = useRef<WorldRescueEffect | null>(null);
   const stationMarkerRefs = useRef<Partial<Record<StationId, HTMLButtonElement | null>>>({});
   const cameraModeRef = useRef<"chase" | "overview">("chase");
   const overlayOpenRef = useRef(false);
@@ -175,6 +187,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
   const [activeStation, setActiveStation] = useState<StationId | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [visited, setVisited] = useState<StationId[]>([]);
+  const [rescuing, setRescuing] = useState(false);
   const [cameraMode, setCameraMode] = useState<"chase" | "overview">("chase");
   const [lightsOn, setLightsOn] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState<"day" | "night">("day");
@@ -205,21 +218,62 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
   }, []);
 
   useEffect(() => {
-    overlayOpenRef.current = Boolean(activeStation) || guideOpen || stationMenuOpen || mode === "directory";
+    overlayOpenRef.current = rescuing || Boolean(activeStation) || guideOpen || stationMenuOpen || mode === "directory";
     if (overlayOpenRef.current) {
       inputRef.current.clear();
       touchSteeringRef.current = 0;
     }
-  }, [activeStation, guideOpen, stationMenuOpen, mode]);
+  }, [activeStation, guideOpen, stationMenuOpen, mode, rescuing]);
 
   const activeCopy = stations.find((station) => station.id === activeStation);
   const nearestCopy = stations.find((station) => station.id === nearby);
 
   const openStation = useCallback((id: StationId) => {
-    setActiveStation(id);
+    const location = worldStations.find((station) => station.id === id);
+    if (!location || rescueRef.current) return;
+
     setStationMenuOpen(false);
-    setVisited((previous) => previous.includes(id) ? previous : [...previous, id]);
+    setGuideOpen(false);
     inputRef.current.clear();
+    touchSteeringRef.current = 0;
+
+    // Previously recovered stations may always be reopened immediately.
+    if (extinguishedRef.current.has(id) ||
+      mode === "directory" || sceneStatus !== "ready" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      extinguishedRef.current.add(id);
+      setVisited((previous) => previous.includes(id) ? previous : [...previous, id]);
+      setActiveStation(id);
+      return;
+    }
+
+    // Direct selection also remains possible for keyboard/touch accessibility:
+    // position the vehicle near the building before launching its water jet.
+    const truck = vehicleRef.current;
+    if (Math.hypot(truck.x - location.x, truck.z - location.z) >= 7.3) {
+      truck.x = location.x;
+      truck.z = location.z + (location.z < 0 ? 7 : -7);
+      truck.heading = location.z < 0 ? 0 : Math.PI;
+    }
+    truck.speed = 0;
+    rescueRef.current = { stationId: id, startedAt: performance.now() / 1000 };
+    setActiveStation(null);
+    setRescuing(true);
+  }, [mode, sceneStatus]);
+
+  const resetJourney = useCallback(() => {
+    rescueRef.current = null;
+    extinguishedRef.current.clear();
+    Object.assign(vehicleRef.current, { x: 0, z: 0, heading: 0, speed: 0 });
+    nearbyRef.current = null;
+    inputRef.current.clear();
+    touchSteeringRef.current = 0;
+    setNearby(null);
+    setVisited([]);
+    setActiveStation(null);
+    setStationMenuOpen(false);
+    setGuideOpen(false);
+    setRescuing(false);
   }, []);
 
   const travelTo = useCallback((id: StationId) => {
@@ -286,7 +340,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
       if (document.visibilityState === "visible" && sceneIsVisible) {
         const v = vehicleRef.current;
         const input = inputRef.current;
-        const acceptingControls = !overlayOpenRef.current;
+        const acceptingControls = !overlayOpenRef.current && !rescueRef.current;
         const accelerating = acceptingControls && input.has("forward") ? 1 : 0;
         const reversing = acceptingControls && input.has("reverse") ? 1 : 0;
         const direction = accelerating - reversing;
@@ -311,7 +365,21 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
           nearbyRef.current = station;
           setNearby(station);
         }
-        renderer.render(v, v.heading, time / 1000, motionMedia.matches, cameraModeRef.current, lightsOnRef.current, daytimeRef.current);
+        const rescue = rescueRef.current;
+        const seconds = time / 1000;
+        if (rescue && seconds - rescue.startedAt >= 2.35) {
+          extinguishedRef.current.add(rescue.stationId);
+          rescueRef.current = null;
+          setVisited((previous) => previous.includes(rescue.stationId)
+            ? previous : [...previous, rescue.stationId]);
+          setRescuing(false);
+          setActiveStation(rescue.stationId);
+        }
+        renderer.render(
+          v, v.heading, seconds, motionMedia.matches, cameraModeRef.current,
+          lightsOnRef.current, daytimeRef.current, extinguishedRef.current,
+          rescueRef.current,
+        );
         for (const station of worldStations) {
           const element = stationMarkerRefs.current[station.id];
           if (!element) continue;
@@ -354,8 +422,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
         openStation(nearbyRef.current);
       }
       if (key === "r" && !event.repeat) {
-        Object.assign(vehicleRef.current, { x: 0, z: 0, heading: 0, speed: 0 });
-        setActiveStation(null);
+        resetJourney();
       }
       if (key === "c" && !event.repeat) {
         toggleCamera();
@@ -400,7 +467,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
       touchSteeringRef.current = 0;
       renderer.dispose();
     };
-  }, [mode, openStation, toggleCamera, toggleLights, toggleDay]);
+  }, [mode, openStation, toggleCamera, toggleLights, toggleDay, resetJourney]);
 
 
   return (
@@ -448,6 +515,9 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
           <h1 className="inline-flex rounded-full border border-violet-300/30 bg-[#0a152b]/80 px-2.5 py-2 text-[10px] font-bold tracking-[.13em] text-violet-100 shadow-lg backdrop-blur-md sm:px-3 sm:text-xs">
             <span className="sm:hidden">JD · 3D</span><span className="hidden sm:inline">{t.brand}</span>
           </h1>
+          <span aria-live="polite" className="ml-2 inline-flex rounded-full border border-emerald-300/25 bg-slate-950/60 px-2.5 py-2 text-[10px] font-semibold text-emerald-200 backdrop-blur">
+            {visited.length}/{stations.length} ✓
+          </span>
           <p className="mt-2 hidden max-w-xs rounded-xl bg-slate-950/50 px-3 py-2 text-xs text-slate-200 backdrop-blur lg:block">
             {lang === "es" ? "Explora problemas convertidos en soluciones." : "Explore problems turned into solutions."}
           </p>
@@ -514,12 +584,19 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
         </div>
       </div>
 
-      {mode === "world" && sceneStatus === "ready" && nearby && !activeCopy && !stationMenuOpen && !guideOpen && (
+      {mode === "world" && sceneStatus === "ready" && nearby && !activeCopy && !stationMenuOpen && !guideOpen && !rescuing && (
         <div role="status" className="absolute inset-x-4 bottom-[155px] z-20 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-xl border border-violet-200/35 bg-[#0a152b]/90 px-3 py-2 text-xs shadow-xl backdrop-blur sm:bottom-24">
           <span className="font-semibold">{nearestCopy?.icon} {nearestCopy?.name}</span>
           <button type="button" onClick={() => openStation(nearby)} className="min-h-10 rounded-lg bg-violet-300 px-4 text-xs font-bold text-slate-950 hover:bg-violet-200">
-            {t.discover} ↗
+            💧 {t.discover} ↗
           </button>
+        </div>
+      )}
+
+      {mode === "world" && rescuing && (
+        <div role="status" aria-live="polite"
+          className="pointer-events-none absolute inset-x-4 bottom-[170px] z-30 mx-auto max-w-sm rounded-xl border border-cyan-200/45 bg-[#071b31]/90 px-4 py-3 text-center text-xs font-semibold text-cyan-100 shadow-2xl backdrop-blur-sm sm:bottom-28">
+          <span aria-hidden="true">💧 </span>{t.extinguishing}
         </div>
       )}
 
@@ -541,7 +618,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
               lang={lang}
               onSteer={setMobileSteering}
               onPedal={setMobilePedal}
-              disabled={sceneStatus !== "ready" || Boolean(activeStation) || guideOpen || stationMenuOpen}
+              disabled={sceneStatus !== "ready" || Boolean(activeStation) || guideOpen || stationMenuOpen || rescuing}
             />
           </div>
           <div className="hidden items-center justify-between gap-4 rounded-xl border border-white/15 bg-slate-950/65 px-5 py-3 text-xs text-slate-200 shadow-lg backdrop-blur-lg lg:flex">
@@ -610,6 +687,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href={"/" + lang + "/portfolio"} className="inline-flex min-h-11 items-center rounded-full border border-violet-200/30 px-5 text-sm font-semibold text-white hover:bg-violet-400/10">{t.profile} ↗</Link>
               <button type="button" onClick={() => { setStationMenuOpen(false); setGuideOpen(true); }} className="inline-flex min-h-11 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-slate-200 hover:bg-white/10">ⓘ {t.guide}</button>
+              <button type="button" onClick={resetJourney} className="inline-flex min-h-11 items-center rounded-full border border-rose-300/25 px-4 text-sm font-semibold text-rose-200 hover:bg-rose-400/10">↻ {t.replay}</button>
             </div>
           </div>
         </div>
