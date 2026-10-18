@@ -1,7 +1,6 @@
 # JarceDev — Concepto 3D y arquitectura propuesta
 
-> Propuesta en exploración. **No es una funcionalidad implementada ni publicada.**
-> La implementación queda supeditada a aprobación del concepto, presupuesto de rendimiento y pruebas de accesibilidad.
+> **Estado actualizado (octubre 2026):** ya existe un prototipo 3D funcional en una rama de desarrollo. Se puede conducir el camión escalera y explorar cuatro estaciones, pero **no es la versión artística final ni se ha publicado en main**. El lanzamiento requiere revisión de diseño, jugabilidad, rendimiento y accesibilidad.
 
 ## Posicionamiento
 
@@ -55,6 +54,16 @@ No incorporar Python, bases de datos o llamadas a servicios de IA en la experien
 - Respetar prefers-reduced-motion, alternativas sin 3D y foco/lectores de pantalla.
 - No exponer información privada de las aplicaciones ni datos personales de participantes.
 - No copiar modelos, sonidos, logotipos ni composición artística de Bruno Simon; inspiración en la interacción, no clonación del trabajo.
+
+## Estado del prototipo inicial
+
+- Motor WebGL2 propio para perspectiva, iluminación básica, terreno, edificios y estaciones.
+- Camión escalera estadounidense original con ruedas orientadas, tres ejes, compartimentos, cabina y escalera.
+- Controles táctiles y teclado, cambio de cámara y etiquetas flotantes de estaciones.
+- Acceso a proyectos mediante botones, casos de estudio y alternativa HTML.
+- Se mantienen builds automatizados en GitHub Actions y Vercel Preview.
+
+**Pendiente:** modelos y texturas artísticas finales, iluminación más avanzada, colisiones robustas, pulido móvil y pruebas visuales en dispositivos reales. La arquitectura puede evolucionar hacia Three.js / React Three Fiber si supera en mantenibilidad y calidad al prototipo WebGL actual.
 
 ## Entregas propuestas
 
