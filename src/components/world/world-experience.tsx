@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { getProjects } from "@/content/projects";
 import { ProjectPanel } from "@/components/projects/project-panel";
+import { ProjectArtwork } from "@/components/projects/project-artwork";
 import { ContactStudio } from "@/components/portfolio/contact-studio";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -597,7 +597,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
                   className="flex min-h-16 items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:border-violet-300/50 hover:bg-violet-400/10"
                 >
                   <span className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg bg-[#091525]">
-                    <Image src={station.preview} alt="" fill sizes="80px" className="object-contain" />
+                    <ProjectArtwork key={station.slug} project={station} decorative sizes="80px" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{station.name}</span>
