@@ -1,6 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+
+import { getProjects } from "@/content/projects";
+import { ProjectPanel } from "@/components/projects/project-panel";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -16,103 +20,6 @@ type ControlKey = "forward" | "reverse" | "left" | "right";
 type ViewMode = "world" | "directory";
 type SceneStatus = "loading" | "ready" | "fallback";
 
-type StationCopy = {
-  id: StationId;
-  name: string;
-  icon: string;
-  type: string;
-  problem: string;
-  answer: string;
-  technology: string;
-  slug?: string;
-};
-
-const stationCopy: Record<Language, StationCopy[]> = {
-  es: [
-    {
-      id: "firetrack",
-      name: "FireTrack",
-      icon: "🧯",
-      type: "Gestión y trazabilidad",
-      problem: "Inventarios, inspecciones y registros dispersos entre documentos y procesos manuales.",
-      answer: "Una solución multiempresa que concentra controles, estados, registros, alertas y acceso QR.",
-      technology: "Next.js · PostgreSQL · Supabase",
-      slug: "firetrack",
-    },
-    {
-      id: "evacuaplan",
-      name: "EvacuaPlan Studio",
-      icon: "🏢",
-      type: "Herramientas especializadas",
-      problem: "Crear croquis de evacuación con herramientas genéricas puede ser lento y complejo.",
-      answer: "Un editor enfocado en símbolos, estructuras, transformaciones y documentos técnicos.",
-      technology: "React · TypeScript · Konva",
-      slug: "evacuaplan-studio",
-    },
-    {
-      id: "acreditaciones",
-      name: "Acreditaciones",
-      icon: "🎓",
-      type: "Asistente IA · Planificación",
-      problem: "Históricos extensos y reglas distintas para calcular ciclos, vigencias y prioridades.",
-      answer: "Consultas en lenguaje natural con IA, cálculos verificados y planificación sobre reglas de acreditación. La demostración usa datos ficticios.",
-      technology: "Python · FastAPI · DuckDB · OR-Tools",
-      slug: "acreditaciones-app",
-    },
-    {
-      id: "hidrantes",
-      name: "Hidrantes",
-      icon: "📍",
-      type: "Geolocalización operativa",
-      problem: "Consultar la ubicación y características de hidrantes sobre el terreno.",
-      answer: "Una aplicación con mapa público accesible mediante QR y gestión privada de ubicaciones.",
-      technology: "Next.js · Supabase · Geolocalización",
-      slug: "hidrantes-app",
-    },
-  ],
-  en: [
-    {
-      id: "firetrack",
-      name: "FireTrack",
-      icon: "🧯",
-      type: "Operational traceability",
-      problem: "Inventory, inspection and maintenance data scattered across documents and manual workflows.",
-      answer: "A multi-company product that brings inspections, records, alerts and QR access together.",
-      technology: "Next.js · PostgreSQL · Supabase",
-      slug: "firetrack",
-    },
-    {
-      id: "evacuaplan",
-      name: "EvacuaPlan Studio",
-      icon: "🏢",
-      type: "Specialized tools",
-      problem: "Designing evacuation plans with generic tools is often slow and unnecessarily complex.",
-      answer: "A purpose-built editor for symbols, structures, transformations and technical documents.",
-      technology: "React · TypeScript · Konva",
-      slug: "evacuaplan-studio",
-    },
-    {
-      id: "acreditaciones",
-      name: "Accreditations",
-      icon: "🎓",
-      type: "AI assistant · Planning",
-      problem: "Extensive historical records and multiple rules for calculating validity, cycles and priorities.",
-      answer: "Natural-language queries with AI, validated calculations and planning based on accreditation rules. The public preview uses fictional data.",
-      technology: "Python · FastAPI · DuckDB · OR-Tools",
-      slug: "acreditaciones-app",
-    },
-    {
-      id: "hidrantes",
-      name: "Hydrants",
-      icon: "📍",
-      type: "Operational mapping",
-      problem: "Finding the location and characteristics of hydrants while working in the field.",
-      answer: "A public QR-accessible map with a private location management module.",
-      technology: "Next.js · Supabase · Geolocation",
-      slug: "hidrantes-app",
-    },
-  ],
-};
 
 const copy = {
   es: {
@@ -159,13 +66,17 @@ const copy = {
     stations: "Estaciones",
     quickAccess: "Elige qué proyecto descubrir",
     profile: "Mi perfil y proyectos",
-    shortInstructions: "WASD / Flechas: conducir · E: descubrir · C: cámara · L: luces · R: reiniciar",
+    shortInstructions: "WASD / Flechas: conducir · E: proyectos · C: cámara · L: luces · N: día/noche · R: reiniciar",
     mobileInstructions: "Usa el volante y los pedales para conducir. Pulsa 🚨 para las luces y ▦ para elegir proyectos.",
     interaction: "Conduce el camión escalera para descubrir cómo convierto problemas reales en soluciones.",
     loading: "Cargando el mundo...",
     noWebgl: "Este dispositivo no pudo cargar el mundo 3D. Puedes descubrir todos los proyectos desde esta vista.",
     lightsAnnouncement: "Iluminación del camión",
     closeProjects: "Cerrar estaciones",
+    dayMode: "Día / noche",
+    day: "Día",
+    night: "Noche",
+    dayModeInstructions: "N · cambiar día y noche",
   },
   en: {
     eyebrow: "JARCEDEV / INTERACTIVE WORLD",
@@ -211,13 +122,17 @@ const copy = {
     stations: "Stations",
     quickAccess: "Choose a project to discover",
     profile: "Profile and projects",
-    shortInstructions: "WASD / Arrows: drive · E: discover · C: camera · L: lights · R: reset",
+    shortInstructions: "WASD / Arrows: drive · E: project · C: camera · L: lights · N: day/night · R: reset",
     mobileInstructions: "Use the steering wheel and pedals to drive. Press 🚨 for the lights and ▦ to browse projects.",
     interaction: "Drive the aerial ladder truck and discover how I turn real operational problems into digital solutions.",
     loading: "Loading the world...",
     noWebgl: "This device could not load the 3D world. You can still browse every project here.",
     lightsAnnouncement: "Truck lighting",
     closeProjects: "Close stations",
+    dayMode: "Day / night",
+    day: "Day",
+    night: "Night",
+    dayModeInstructions: "N · toggle day and night",
   },
 } as const;
 
@@ -233,7 +148,15 @@ function closestStation(position: WorldPosition): StationId | null {
 
 export function WorldExperience({ lang }: { lang: Language }) {
   const t = copy[lang];
-  const stations = stationCopy[lang];
+  // All station panels and navigation labels come from the shared project manifest.
+  const stations = getProjects(lang).map((project) => ({
+    ...project,
+    id: project.station.id,
+    name: project.title,
+    type: project.category,
+    answer: project.solution,
+    technology: project.technologies.join(" · "),
+  }));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const vehicleRef = useRef({ x: 0, z: 0, heading: 0, speed: 0 });
   const inputRef = useRef(new Set<ControlKey>());
@@ -243,6 +166,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const cameraModeRef = useRef<"chase" | "overview">("chase");
   const overlayOpenRef = useRef(false);
   const lightsOnRef = useRef(false);
+  const daytimeRef = useRef<"day" | "night">("day");
 
   const [mode, setMode] = useState<ViewMode>("world");
   const [sceneStatus, setSceneStatus] = useState<SceneStatus>("loading");
@@ -252,6 +176,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const [visited, setVisited] = useState<StationId[]>([]);
   const [cameraMode, setCameraMode] = useState<"chase" | "overview">("chase");
   const [lightsOn, setLightsOn] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<"day" | "night">("day");
   const [stationMenuOpen, setStationMenuOpen] = useState(false);
 
   const setMobileSteering = useCallback((value: number) => {
@@ -261,6 +186,11 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const setMobilePedal = useCallback((pedal: "forward" | "reverse", pressed: boolean) => {
     if (pressed) inputRef.current.add(pedal);
     else inputRef.current.delete(pedal);
+  }, []);
+
+  const toggleDay = useCallback(() => {
+    daytimeRef.current = daytimeRef.current === "day" ? "night" : "day";
+    setTimeOfDay(daytimeRef.current);
   }, []);
 
   const toggleLights = useCallback(() => {
@@ -380,7 +310,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
           nearbyRef.current = station;
           setNearby(station);
         }
-        renderer.render(v, v.heading, time / 1000, motionMedia.matches, cameraModeRef.current, lightsOnRef.current);
+        renderer.render(v, v.heading, time / 1000, motionMedia.matches, cameraModeRef.current, lightsOnRef.current, daytimeRef.current);
         for (const station of worldStations) {
           const element = stationMarkerRefs.current[station.id];
           if (!element) continue;
@@ -432,6 +362,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
       if (key === "l" && !event.repeat) {
         toggleLights();
       }
+      if (key === "n" && !event.repeat) {
+        toggleDay();
+      }
       if (key === "m" && !event.repeat) {
         setStationMenuOpen(true);
       }
@@ -466,7 +399,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
       touchSteeringRef.current = 0;
       renderer.dispose();
     };
-  }, [mode, openStation, toggleCamera, toggleLights]);
+  }, [mode, openStation, toggleCamera, toggleLights, toggleDay]);
 
 
   return (
@@ -526,6 +459,17 @@ export function WorldExperience({ lang }: { lang: Language }) {
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2" role="group" aria-label={t.orientation}>
           {mode === "world" && (
             <>
+              <button
+                type="button"
+                onClick={toggleDay}
+                aria-label={t.dayMode + ": " + (timeOfDay === "day" ? t.day : t.night)}
+                aria-pressed={timeOfDay === "day"}
+                title={t.dayMode + " (N)"}
+                className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
+              >
+                <span aria-hidden="true" className="text-lg leading-5">{timeOfDay === "day" ? "☀" : "☾"}</span>
+                <span className="text-[9px] font-semibold sm:text-[11px]">{timeOfDay === "day" ? t.day : t.night}</span>
+              </button>
               <button
                 type="button"
                 onClick={toggleLights}
@@ -655,7 +599,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
                   onClick={() => { travelTo(station.id); openStation(station.id); }}
                   className="flex min-h-16 items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:border-violet-300/50 hover:bg-violet-400/10"
                 >
-                  <span aria-hidden="true" className="text-2xl">{station.icon}</span>
+                  <span className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg bg-[#091525]">
+                    <Image src={station.preview} alt="" fill sizes="80px" className="object-contain" />
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{station.name}</span>
                     <span className="block text-[11px] text-slate-400">{station.type}</span>
@@ -670,30 +616,12 @@ export function WorldExperience({ lang }: { lang: Language }) {
       )}
 
       {activeCopy && (
-        <div className="absolute inset-0 z-50 flex items-end justify-center bg-[#071221]/85 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="world-station-title">
-          <article className="max-h-[87svh] w-full max-w-lg overflow-y-auto rounded-2xl border border-violet-200/25 bg-[#101d34] p-5 shadow-2xl sm:rounded-3xl sm:p-8">
-            <div className="flex items-start justify-between gap-3">
-              <span aria-hidden="true" className="flex size-12 items-center justify-center rounded-xl bg-white/10 text-2xl">{activeCopy.icon}</span>
-              <button type="button" onClick={() => setActiveStation(null)} aria-label={t.close} className="min-h-11 min-w-11 rounded-xl border border-white/15 text-xl hover:bg-white/15">×</button>
-            </div>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[.14em] text-violet-300">{activeCopy.type}</p>
-            <h2 id="world-station-title" className="mt-1 text-2xl font-semibold sm:text-3xl">{activeCopy.name}</h2>
-            <div className="mt-5 space-y-4">
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-amber-300">{t.problem}</h3><p className="mt-1 text-sm leading-6 text-slate-200">{activeCopy.problem}</p></div>
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-emerald-300">{t.answer}</h3><p className="mt-1 text-sm leading-6 text-slate-200">{activeCopy.answer}</p></div>
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-slate-400">{t.technologies}</h3><p className="mt-1 text-xs leading-6 text-slate-300">{activeCopy.technology}</p></div>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {activeCopy.slug ? (
-                <Link href={"/" + lang + "/projects/" + activeCopy.slug} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950 hover:bg-violet-200">
-                  {activeCopy.id === "acreditaciones" ? (lang === "es" ? "Probar asistente IA" : "Try AI assistant") : t.caseStudy} ↗
-                </Link>
-              ) : (
-                <Link href={"/" + lang + "/portfolio#"+(lang==="es"?"proyectos":"projects")} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950">{t.moreProjects} ↗</Link>
-              )}
-              <button type="button" onClick={() => setActiveStation(null)} className="min-h-11 rounded-full border border-white/20 px-4 text-sm font-semibold hover:bg-white/10">{t.back}</button>
-            </div>
-          </article>
+        <div className="absolute inset-0 z-50 flex items-end justify-center bg-[#071221]/85 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center"
+          role="dialog" aria-modal="true" aria-label={activeCopy.title}>
+          <div className="max-h-[92svh] w-full max-w-3xl overflow-y-auto rounded-[1.3rem]">
+            <ProjectPanel lang={lang} project={activeCopy} onClose={() => setActiveStation(null)}
+              directLink={false} />
+          </div>
         </div>
       )}
 
