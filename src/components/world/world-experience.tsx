@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { getProjects } from "@/content/projects";
+import { rescueIsFinished } from "@/lib/world-fire";
 import { ProjectPanel } from "@/components/projects/project-panel";
 import { ProjectArtwork } from "@/components/projects/project-artwork";
 import { ContactStudio } from "@/components/portfolio/contact-studio";
@@ -31,7 +32,7 @@ const copy = {
     directory: "Ver proyectos directamente",
     controls: "WASD o flechas · conducir el camión escalera",
     keyboard: "E · abrir proyecto",
-    reset: "R · reiniciar",
+    reset: "R · reiniciar rescate",
     camera: "Cambiar cámara",
     cameraChase: "Vista trasera",
     cameraOverview: "Vista aérea",
@@ -39,7 +40,7 @@ const copy = {
     accelerate: "Avanzar",
     reverse: "Retroceder",
     guide: "Guía",
-    guideText: "Conduce hacia las estaciones. Al acercarte, pulsa E o el botón «Descubrir» para conocer el problema y la solución. También puedes seleccionar una estación de la lista para viajar directamente.",
+    guideText: "Conduce a cada estación. Pulsa Descubrir para que el camión lance agua, apague las llamas y revele el proyecto. Puedes ir directamente desde la lista de estaciones.",
     close: "Cerrar",
     discover: "Descubrir",
     visit: "Ir a la estación",
@@ -67,7 +68,7 @@ const copy = {
     stations: "Estaciones",
     quickAccess: "Elige qué proyecto descubrir",
     profile: "Mi perfil y proyectos",
-    shortInstructions: "WASD / Flechas: conducir · E: proyectos · C: cámara · L: luces · N: día/noche · R: reiniciar",
+    shortInstructions: "WASD / Flechas: conducir · E: agua y descubrir · C: cámara · L: luces · N: día/noche · R: reiniciar",
     mobileInstructions: "Usa el volante y los pedales para conducir. Pulsa 🚨 para las luces y ▦ para elegir proyectos.",
     interaction: "Conduce el camión escalera para descubrir cómo convierto problemas reales en soluciones.",
     loading: "Cargando el mundo...",
@@ -92,7 +93,7 @@ const copy = {
     directory: "Browse projects directly",
     controls: "WASD or arrow keys · drive the ladder truck",
     keyboard: "E · open project",
-    reset: "R · restart",
+    reset: "R · restart rescue",
     camera: "Change camera",
     cameraChase: "Chase view",
     cameraOverview: "Bird's-eye view",
@@ -100,7 +101,7 @@ const copy = {
     accelerate: "Accelerate",
     reverse: "Reverse",
     guide: "Guide",
-    guideText: "Drive towards any station. When nearby, press E or Discover to see the problem and solution. You can also select a station to travel there directly.",
+    guideText: "Drive to a station and press Discover. The ladder truck sprays water, extinguishes the flames and reveals the project. You can also travel directly using the station list.",
     close: "Close",
     discover: "Discover",
     visit: "Travel to station",
@@ -128,7 +129,7 @@ const copy = {
     stations: "Stations",
     quickAccess: "Choose a project to discover",
     profile: "Profile and projects",
-    shortInstructions: "WASD / Arrows: drive · E: project · C: camera · L: lights · N: day/night · R: reset",
+    shortInstructions: "WASD / Arrows: drive · E: spray and discover · C: camera · L: lights · N: day/night · R: restart",
     mobileInstructions: "Use the steering wheel and pedals to drive. Press 🚨 for the lights and ▦ to browse projects.",
     interaction: "Drive the aerial ladder truck and discover how I turn real operational problems into digital solutions.",
     loading: "Loading the world...",
@@ -278,7 +279,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
 
   const travelTo = useCallback((id: StationId) => {
     const location = worldStations.find((station) => station.id === id);
-    if (!location) return;
+    if (!location || rescueRef.current) return;
     const vehicle = vehicleRef.current;
     vehicle.x = location.x;
     vehicle.z = location.z + (location.z < 0 ? 7 : -7);
@@ -367,7 +368,7 @@ export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKe
         }
         const rescue = rescueRef.current;
         const seconds = time / 1000;
-        if (rescue && seconds - rescue.startedAt >= 2.35) {
+        if (rescue && rescueIsFinished(seconds, rescue.startedAt)) {
           extinguishedRef.current.add(rescue.stationId);
           rescueRef.current = null;
           setVisited((previous) => previous.includes(rescue.stationId)
