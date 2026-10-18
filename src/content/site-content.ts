@@ -127,6 +127,7 @@ export const siteContent = {
         "Diseño de soluciones digitales y mejora de procesos mediante desarrollo de productos asistido por IA.",
     },
     navigation: [
+      { label: "Mundo 3D", href: "#mundo" },
       { label: "Proyectos", href: "#proyectos" },
       { label: "Servicios", href: "#servicios" },
       { label: "Proceso", href: "#proceso" },
@@ -420,6 +421,7 @@ export const siteContent = {
         "Operational process improvement and digital product design through AI-assisted software development.",
     },
     navigation: [
+      { label: "3D World", href: "#mundo" },
       { label: "Projects", href: "#projects" },
       { label: "Services", href: "#services" },
       { label: "Process", href: "#process" },
