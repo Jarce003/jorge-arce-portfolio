@@ -1,5 +1,5 @@
 import { getWorldStations, type StructureType } from "@/content/projects";
-import { stationFireStrength } from "@/lib/world-fire";
+import { stationFireStrength, WATER_REACHES_FIRE_SECONDS, waterStreamStrength } from "@/lib/world-fire";
 
 import type { WorldPosition, WorldRenderer, WorldRescueEffect } from "./world-contract";
 
@@ -632,10 +632,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     lowDetail: boolean,
   ) {
     const age = elapsed - rescue.startedAt;
-    if (age < 0 || age > 2.35) return;
-    const ramp = Math.max(0, Math.min(1, (age - .12) / .34));
-    const tail = Math.max(0, Math.min(1, (2.35 - age) / .28));
-    const strength = Math.min(ramp, tail);
+    const strength = waterStreamStrength(elapsed, rescue.startedAt);
     if (strength < .02) return;
 
     // The nozzle is just ahead of the nested ladder, not beside the cab.
@@ -961,7 +958,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       for (const station of worldStations) {
         drawStation(station.structure, station.x, station.z, station.color);
         const waterHasReachedFlames = rescue?.stationId === station.id &&
-          elapsed - rescue.startedAt >= .58;
+          elapsed - rescue.startedAt >= WATER_REACHES_FIRE_SECONDS;
         drawStationFire(station, elapsed, lowDetail, reducedMotion,
           extinguishedStations.has(station.id) || waterHasReachedFlames);
       }
