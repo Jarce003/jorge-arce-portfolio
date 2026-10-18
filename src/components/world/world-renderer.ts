@@ -1,7 +1,7 @@
 import { getWorldStations, type StructureType } from "@/content/projects";
 import { stationFireStrength } from "@/lib/world-fire";
 
-import type { WorldPosition, WorldRenderer } from "./world-contract";
+import type { WorldPosition, WorldRenderer, WorldRescueEffect } from "./world-contract";
 
 /**
  * JarceDev exploration world — dependency-free WebGL2 prototype.
@@ -618,6 +618,86 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
   }
 
+  /**
+   * A lightweight stylized water jet emitted from the aerial ladder tip.
+   * Curved segmented geometry follows the destination project station. No
+   * particle library, physics engine, downloaded textures or extra assets.
+   */
+  function drawWaterJet(
+    truck: WorldPosition,
+    heading: number,
+    station: (typeof worldStations)[number],
+    elapsed: number,
+    rescue: WorldRescueEffect,
+    lowDetail: boolean,
+  ) {
+    const age = elapsed - rescue.startedAt;
+    if (age < 0 || age > 2.35) return;
+    const ramp = Math.max(0, Math.min(1, (age - .12) / .34));
+    const tail = Math.max(0, Math.min(1, (2.35 - age) / .28));
+    const strength = Math.min(ramp, tail);
+    if (strength < .02) return;
+
+    // The nozzle is just ahead of the nested ladder, not beside the cab.
+    const sourceX = truck.x - Math.sin(heading) * 2.78;
+    const sourceZ = truck.z - Math.cos(heading) * 2.78;
+    const sourceY = 2.68;
+    const targetX = station.x + Math.sin(age * 2.8) * .82;
+    const targetZ = station.z + Math.cos(age * 2.4) * .76;
+    const targetY = 4.12;
+    const segments = lowDetail ? 9 : 16;
+
+    function jetPoint(t: number): [number, number, number] {
+      const arch = Math.sin(t * Math.PI) * 1.65;
+      return [
+        sourceX + (targetX - sourceX) * t,
+        sourceY + (targetY - sourceY) * t + arch,
+        sourceZ + (targetZ - sourceZ) * t,
+      ];
+    }
+    // Camera-facing water highlights are segmented cuboids following a
+    // pitched 3D path. The existing WebGL shader handles their emission.
+    for (let index = 0; index < segments; index++) {
+      const start = jetPoint(index / segments);
+      const end = jetPoint((index + 1) / segments);
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const dz = end[2] - start[2];
+      const length = Math.hypot(dx, dy, dz);
+      if (length < .01) continue;
+      const yaw = Math.atan2(-dz, dx);
+      const pitch = Math.asin(Math.max(-1, Math.min(1, dy / length)));
+      const ripple = Math.sin(index * 2.6 + elapsed * 20) * .026;
+      const mx = (start[0] + end[0]) / 2;
+      const my = (start[1] + end[1]) / 2;
+      const mz = (start[2] + end[2]) / 2;
+      draw("cube", mx, my, mz, length * 1.18,
+        (.20 + ripple) * strength, .17 * strength,
+        "#58cdec", yaw, pitch, 1, .74 * strength);
+      if (!lowDetail || index % 2 === 0) {
+        draw("cube", mx, my + .015, mz, length * 1.13,
+          .072 * strength, .070 * strength,
+          "#e5fcff", yaw, pitch, 1, .95 * strength);
+      }
+    }
+
+    // Short spray fan and splashes over the affected building.
+    const splashes = lowDetail ? 5 : 10;
+    for (let i = 0; i < splashes; i++) {
+      const theta = i / splashes * Math.PI * 2 + elapsed * 2.5;
+      const radius = .34 + (i % 3) * .21;
+      const px = targetX + Math.cos(theta) * radius;
+      const pz = targetZ + Math.sin(theta) * radius;
+      const rise = .16 + Math.abs(Math.sin(elapsed * 7 + i)) * .78;
+      draw("cube", px, targetY + rise, pz,
+        .14 * strength, (.16 + (i % 3) * .10) * strength,
+        .14 * strength, "#b7f4ff", 0, 0, 1, .75 * strength);
+    }
+    draw("cylinder", targetX, targetY + .05, targetZ,
+      1.65 * strength, .06, 1.65 * strength,
+      "#c9faff", 0, 0, 1, .15 * strength);
+  }
+
   function drawRoadNetwork(lowDetail = false) {
     box(0, -.05, 0, 94, .14, 94, daylightTarget > .5 ? "#91bcb4" : palette.ground);
     box(0, -.047, 0, 66, .016, 66, daylightTarget > .5 ? "#79a6a4" : "#162b3c");
@@ -847,7 +927,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night", extinguishedStations: ReadonlySet<string> = new Set()) {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night", extinguishedStations: ReadonlySet<string> = new Set(), rescue: WorldRescueEffect | null = null) {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const lowDetail = width < 640;
@@ -880,10 +960,18 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       drawRoadNetwork(lowDetail);
       for (const station of worldStations) {
         drawStation(station.structure, station.x, station.z, station.color);
+        const waterHasReachedFlames = rescue?.stationId === station.id &&
+          elapsed - rescue.startedAt >= .58;
         drawStationFire(station, elapsed, lowDetail, reducedMotion,
-          extinguishedStations.has(station.id));
+          extinguishedStations.has(station.id) || waterHasReachedFlames);
       }
       drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
+      if (rescue) {
+        const station = worldStations.find((item) => item.id === rescue.stationId);
+        if (station && !reducedMotion) {
+          drawWaterJet(position, heading, station, elapsed, rescue, lowDetail);
+        }
+      }
     },
     project(position, elevation = 5.2) {
       // Convert a 3D station roof into a clickable screen-space annotation.
