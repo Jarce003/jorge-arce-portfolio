@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProjectShowcase } from "@/components/project-showcase";import { HeroProcessCard } from "@/components/hero-process-card";
+import { ProjectShowcase } from "@/components/project-showcase";
+import { WorldExperience } from "@/components/world/world-experience";import { HeroProcessCard } from "@/components/hero-process-card";
 import { ContactSection } from "@/components/contact-section";
 import { ProfileSection } from "@/components/profile-section";import { SiteHeader } from "@/components/site-header";
 import { siteContent } from "@/content/site-content";
@@ -49,99 +50,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <SiteHeader lang={lang} content={content} />
 
       <main>
-        <section className="relative isolate overflow-hidden border-b border-slate-800 bg-[#090f1f] text-white">
-          <div
-            className="pointer-events-none absolute inset-0 surface-grid opacity-20"
-            aria-hidden="true"
-          />
-
-          <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-10 lg:py-36">
-            <div>
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-[0.7rem] font-semibold leading-5 text-emerald-200 sm:px-4 sm:text-xs">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full bg-emerald-500"
-                  aria-hidden="true"
-                />
-                {content.hero.availability}
-              </div>
-
-              <h1 className="max-w-4xl text-balance text-[2.8rem] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:text-6xl lg:text-[4.65rem] lg:leading-[1.03]">
-                {content.hero.title}
-              </h1>
-
-              <p className="mt-7 max-w-2xl text-pretty text-base leading-7 text-slate-300 sm:mt-8 sm:text-lg sm:leading-8">
-                {content.hero.description}
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row">
-                <Link
-                  href={`/${lang}#${sectionIds.projects}`}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-violet-400 px-6 text-sm font-semibold text-slate-950 shadow-lg shadow-violet-500/15 transition hover:bg-violet-300"
-                >
-                  {content.hero.primaryAction}
-                  <span className="ml-2" aria-hidden="true">
-                    ↓
-                  </span>
-                </Link>
-
-                <a
-                  href={`/${lang}#${lang === "es" ? "contacto" : "contact"}`}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-600 bg-white/5 px-6 text-sm font-semibold text-white transition hover:border-violet-300 hover:bg-white/10"
-                >
-                  {content.hero.secondaryAction}
-                </a>
-              </div>
-
-              <div className="mt-10 border-t border-slate-700/70 pt-6 sm:mt-12 sm:pt-7">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  {content.hero.technologiesLabel}
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2.5 sm:gap-x-5 sm:gap-y-3">
-                  {content.hero.technologies.map((technology) => (
-                    <span
-                      key={technology}
-                      className="text-sm font-semibold text-slate-300"
-                    >
-                      {technology}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div
-                className="absolute -inset-5 rounded-[2.4rem] bg-violet-500/25 blur-3xl"
-                aria-hidden="true"
-              />
-
-              <div className="relative">
-                <HeroProcessCard lang={lang} />
-              </div>
-            </div>
-          </div>
-
-          <div className="relative mx-auto max-w-7xl border-t border-slate-800 px-4 sm:px-8 lg:px-10">
-            <div className="grid grid-cols-3">
-              {content.hero.metrics.map((metric, index) => (
-                <div
-                  key={metric.label}
-                  className={`px-2 py-5 text-center sm:px-6 sm:py-7 sm:text-left ${
-                    index > 0 ? "border-l border-slate-800" : ""
-                  }`}
-                >
-                  <p className="text-base font-bold leading-tight text-white sm:text-xl">
-                    {metric.value}
-                  </p>
-                  <p className="mt-1 text-[0.68rem] leading-4 text-slate-400 sm:text-sm">
-                    {metric.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <WorldExperience lang={lang} />
 
         <section
           id={sectionIds.projects}
