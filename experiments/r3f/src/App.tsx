@@ -150,7 +150,6 @@ export function App(){
       <header className="topbar">
         <button type="button" className="identity" onClick={()=>setPortfolioOpen(false)}
           aria-label="JarceDev, volver al mundo 3D">
-          <span className="experiment-mark">JD</span>
           <span className="identity-lines">
             <strong>JARCEDEV</strong>
             <small>Ingeniería de software · Costa Rica</small>
@@ -161,23 +160,31 @@ export function App(){
             setFocusedProject("acreditaciones-app");
             setPortfolioOpen(true);
           }}>
-            Mi perfil y proyectos ↗
+            <span className="full-label">Mi perfil y proyectos</span>
+            <span className="mobile-label">Proyectos</span>
           </button>
-          <button type="button" className="reset-button" onClick={restart}>↻ Reiniciar</button>
+          <button type="button" className="reset-button" onClick={restart}>Reiniciar</button>
         </div>
       </header>
       <section className="tools" aria-label="Preferencias de exploración">
-        <button type="button" onClick={()=>setDay(s=>!s)}>
-          {day?"☾ Noche":"☀ Día"}
+        <button type="button" onClick={()=>setDay(s=>!s)}
+          aria-label={day?"Activar modo noche":"Activar modo día"}
+          title={day?"Activar modo noche":"Activar modo día"}>
+          <span aria-hidden="true">{day?"☾":"☀"}</span>
+          <span className="tool-label">{day?"Noche":"Día"}</span>
         </button>
-        <button type="button" onClick={()=>setOverview(s=>!s)}>
-          ◈ {overview?"Seguir camión":"Vista aérea"}
+        <button type="button" onClick={()=>setOverview(s=>!s)}
+          aria-label={overview?"Seguir camión":"Vista aérea"}
+          title={overview?"Seguir camión":"Vista aérea"}>
+          <span aria-hidden="true">◈</span>
+          <span className="tool-label">{overview?"Seguir camión":"Vista aérea"}</span>
         </button>
         <button type="button" onClick={()=>setLights(s=>!s)}
           aria-pressed={lights}
           title="Controla los destellos luminosos del camión; no produce sonido."
           aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
-          🚨 {lights?"Luces de emergencia":"Luces apagadas"}
+          <span aria-hidden="true">✦</span>
+          <span className="tool-label">{lights?"Luces de emergencia":"Luces apagadas"}</span>
         </button>
       </section>
       <nav className="stations-dock" aria-label="Proyectos disponibles">
@@ -213,6 +220,9 @@ export function App(){
         </div>
         <p className="key-hint">WASD: conducir · E: apagar fuego · C: cámara · N: día/noche</p>
       </section>
+      <div className="mobile-progress" role="status" aria-label={"Proyectos descubiertos: "+rescued.size+" de 4"}>
+        <span>Rescates</span> <strong>{rescued.size}/4</strong>
+      </div>
       <section className="interaction" aria-live="polite">
         {selected?(
           <article className="project-info" aria-label={"Proyecto "+selected.title}>
