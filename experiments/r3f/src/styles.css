@@ -279,3 +279,77 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
   scrollbar-color:#5d7190 #101c32;overscroll-behavior:contain;
 }
 .portfolio-browser button,.portfolio-browser a{cursor:pointer}
+
+/* Final JarceDev world polish: typography first, controls second. */
+.mobile-label,.mobile-progress{display:none}
+.go-back .full-label{display:inline}
+.tools button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.identity strong{letter-spacing:.12em;font-size:16px}
+.topbar{min-height:66px}
+.header-actions{align-items:center}
+@media(max-width:900px){
+  .topbar{min-height:58px;padding:9px 14px}
+  .identity strong{font-size:15px}
+  .tools{top:63px;left:auto;right:12px;justify-content:flex-end;max-width:100%}
+  .stations-dock{top:111px}
+}
+@media(max-width:600px){
+  .portfolio-world{min-height:0}
+  .topbar{min-height:52px;padding:7px 12px;gap:8px}
+  .identity{gap:0}
+  .identity strong{font-size:16px;letter-spacing:.09em}
+  .identity small{display:none}
+  .header-actions{gap:6px}
+  .go-back,.reset-button{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:34px;padding:8px 10px;font-size:11px;line-height:1;
+  }
+  .go-back .full-label{display:none}
+  .go-back .mobile-label{display:inline}
+  .tools{top:59px;left:auto;right:12px;gap:5px;width:auto}
+  .tools button{
+    min-width:40px;min-height:36px;padding:7px 10px;font-size:17px;
+    border-radius:12px;color:#eaefff;
+  }
+  .tools .tool-label{display:none}
+  .stations-dock{
+    top:108px;left:10px;right:10px;gap:7px;width:auto;
+    display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+    padding:0 0 7px;
+    mask-image:linear-gradient(90deg,#000 0%,#000 91%,transparent 100%);
+  }
+  .stations-dock::-webkit-scrollbar{display:none}
+  .stations-dock button{
+    flex:0 0 137px;width:137px;min-height:43px;border-radius:12px;
+    padding:7px 8px;gap:5px;
+  }
+  .station-icon{width:17px;font-size:14px}
+  .station-details strong{font-size:10px}
+  .station-details small{display:none}
+  .station-progress{font-size:14px}
+  .mobile-progress{
+    display:inline-flex;align-items:center;gap:8px;position:absolute;
+    top:164px;right:12px;z-index:5;
+    padding:6px 10px;border-radius:999px;background:#0b1b31e6;
+    border:1px solid #8092ba66;color:#d9e7f5;font-size:10px;
+    backdrop-filter:blur(8px);
+  }
+  .mobile-progress strong{color:#a7f5df;font-size:13px}
+  .overview{display:none}
+  .interaction{bottom:105px;width:min(100% - 20px,470px)}
+  .rescue-card{padding:9px 10px;gap:7px;border-radius:14px}
+  .rescue-card>span{font-size:18px}
+  .rescue-text strong{font-size:12px}
+  .rescue-text small{font-size:10px;line-height:1.3}
+  .discover{min-height:35px;padding:7px 10px;font-size:11px}
+  .drive-controls{
+    bottom:max(9px,env(safe-area-inset-bottom));left:9px;right:9px
+  }
+  .steering,.pedals{gap:6px}
+  .drive-button{width:55px;min-height:60px;padding:5px;border-radius:13px}
+  .drive-button>span{font-size:23px}
+  .drive-button small{font-size:9px;margin-top:3px}
+  .drive-forward{min-height:69px}
+  .drive-reverse{min-height:60px}
+}
+.portfolio-world[data-view="portfolio"] .mobile-progress{display:none}
