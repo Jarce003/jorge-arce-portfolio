@@ -112,9 +112,9 @@ export type SiteContent = {
 export const siteContent = {
   es: {
     metadata: {
-      title: "Jorge Arce | Ingeniero en Sistemas y soluciones digitales",
+      title: "JarceDev | Portafolio interactivo 3D de Jorge Arce",
       description:
-        "Diseño de soluciones digitales y mejora de procesos mediante desarrollo de productos asistido por IA.",
+        "Explora FireTrack, EvacuaPlan Studio, Acreditaciones e Hidrantes en un mundo 3D interactivo. Soluciones digitales para problemas reales.",
     },
     navigation: [
       { label: "Mundo 3D", href: "#mundo" },
@@ -281,9 +281,9 @@ export const siteContent = {
   },
   en: {
     metadata: {
-      title: "Jorge Arce | Systems Engineer & Digital Solutions",
+      title: "JarceDev | Interactive 3D Portfolio by Jorge Arce",
       description:
-        "Operational process improvement and digital product design through AI-assisted software development.",
+        "Explore FireTrack, EvacuaPlan Studio, Accreditations and Hydrants in an interactive 3D world. Digital solutions to real operational problems.",
     },
     navigation: [
       { label: "3D World", href: "#mundo" },
