@@ -35,6 +35,76 @@ async function capture(page,filename){
       error instanceof Error?error.message:String(error));
   }
 }
+// Layout correctness cannot be inferred from a successful build or a
+// screenshot alone: assert that the actual 3D shell and essential controls
+// fit within the device's available CSS viewport after rotation.
+async function checkResponsiveWorld(page,width,height,label){
+  // New device contexts must be created at the target orientation. Changing
+  // viewport size on an isMobile:true Chromium context leaves its layout
+  // viewport locked to the ORIGINAL phone width despite updating height.
+  // That is an emulator limitation, not an actual orientation test.
+  const size=page.viewportSize();
+  assert.deepEqual(size,{width,height},label+": wrong emulated device dimensions");
+  await page.waitForTimeout(350);
+  // React Three Fiber measures its parent with ResizeObserver. On headless
+  // SwiftShader it can take several frames to process an orientation change;
+  // verify the FINAL measured viewport rather than a stale intermediate frame.
+  const immediate=await page.evaluate(()=>({
+    innerHeight:window.innerHeight,
+    shellHeight:document.querySelector(".portfolio-world")?.getBoundingClientRect().height,
+    canvasHeight:document.querySelector(".viewport canvas")?.getBoundingClientRect().height,
+    containerHeight:document.querySelector(".viewport")?.getBoundingClientRect().height,
+  }));
+  console.log(label+": immediate resize measurements",JSON.stringify(immediate));
+  try{
+    await page.waitForFunction(expected=>{
+      const canvas=document.querySelector(".viewport canvas");
+      return canvas && Math.abs(canvas.getBoundingClientRect().height-expected)<2;
+    },height,{timeout:12000,polling:200});
+  }catch(error){
+    console.warn(label+": 3D canvas did not settle after orientation change",
+      error instanceof Error?error.message:String(error));
+  }
+  const frame=await page.evaluate(()=>{
+    const shell=document.querySelector(".portfolio-world");
+    const canvas=document.querySelector(".viewport canvas");
+    const ids=[".topbar",".tools",".rescue-progress",".drive-controls",".steering",".pedals"];
+    const bbox=node=>{
+      if(!node)return null;
+      const b=node.getBoundingClientRect();
+      return {x:b.x,y:b.y,width:b.width,height:b.height,right:b.right,bottom:b.bottom};
+    };
+    return {
+      innerWidth:window.innerWidth,innerHeight:window.innerHeight,
+      world:bbox(shell),canvas:bbox(canvas),
+      controls:Object.fromEntries(ids.map(selector=>[selector,bbox(document.querySelector(selector))])),
+      scrollHeight:document.documentElement.scrollHeight,
+      wheel:document.querySelector(".steering-wheel-art")?.getBoundingClientRect().width??0,
+      wheelDisplay:document.querySelector(".steering-wheel-art")
+        ?getComputedStyle(document.querySelector(".steering-wheel-art")).display:null,
+    };
+  });
+  assert.equal(frame.innerWidth,width,label+": viewport width");
+  assert.equal(frame.innerHeight,height,label+": viewport height");
+  assert(frame.world && Math.abs(frame.world.height-height)<2,
+    label+": world must fill the display without forcing a minimum height");
+  assert(frame.canvas && Math.abs(frame.canvas.height-height)<2,
+    label+": canvas must fill available height; got "+
+      JSON.stringify({canvas:frame.canvas,world:frame.world,screen:frame.innerHeight}));
+  assert(frame.scrollHeight<=height+2,
+    label+": document must not create a white/blank strip below the world");
+  for(const [selector,box] of Object.entries(frame.controls)){
+    assert(box && box.width>0 && box.height>0,label+": missing "+selector);
+    assert(box.y>=-1 && box.bottom<=height+2,
+      label+": "+selector+" clipped vertically "+JSON.stringify(box));
+    assert(box.x>=-1 && box.right<=width+2,
+      label+": "+selector+" outside left/right edges "+JSON.stringify(box));
+  }
+  assert(frame.wheelDisplay!=="none" && frame.wheel>0,
+    label+": touch steering wheel must be visible");
+  await capture(page,label+".png");
+  console.log(label+": responsive full-height world, canvas and controls OK");
+}
 async function loadPage(page){
   await page.goto(url,{waitUntil:"networkidle",timeout:45000});
   await page.getByText("JARCEDEV",{exact:true}).waitFor();
@@ -247,9 +317,30 @@ try{
   await phoneAward.getByRole("button",{name:"Seguir explorando"}).click();
   console.log("Mobile: four rescues, visible 4/4 award, dismiss and reopen OK.");
 
+  // Independent device contexts emulate the TRUE viewport dimensions of a
+  // physical landscape phone and portrait/landscape tablets. Each should be
+  // fully visible immediately on page load, without a blank strip or clipping.
+  await mobile.close();
+
+  const devices=[
+    {width:844,height:390,label:"phone-landscape"},
+    {width:820,height:1180,label:"tablet-portrait"},
+    {width:1180,height:820,label:"tablet-landscape"},
+  ];
+  for(const device of devices){
+    const page=await browser.newPage({
+      viewport:{width:device.width,height:device.height},
+      isMobile:true,hasTouch:true,deviceScaleFactor:1,
+    });
+    page.on("pageerror",error=>errors.push(device.label+": "+error.message));
+    await loadPage(page);
+    await checkResponsiveWorld(page,device.width,device.height,device.label);
+    await page.getByRole("button",{name:"Acelerar"}).tap();
+    await page.close();
+  }
+
   // The English route must use the SAME interactive 3D world, localized
   // project details, gallery, and working touch/keyboard controls.
-  await mobile.close();
   const english=await browser.newPage({viewport:{width:1200,height:790}});
   english.on("pageerror",error=>errors.push("English: "+error.message));
   await english.goto(url+"?lang=en",{waitUntil:"networkidle",timeout:45000});

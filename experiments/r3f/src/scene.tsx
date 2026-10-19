@@ -65,17 +65,33 @@ export function WorldScene({
       rescue.current=null;
       onRescueComplete(action.stationId);
     }
-    const mobile=gl.domElement.clientWidth<560;
-    if(overview)cameraDesired.set(pose.x+12.7,20.8,pose.z+12.7);
-    else {
-      // Three-quarter chase view: shows the recognizable cab and
-      // compartments instead of hiding all truck detail behind its tail.
-      const back = mobile ? 12.1 : 9.4;
-      const side = mobile ? 2.65 : 4.6;
+    // Responsive camera uses BOTH canvas dimensions. A rotated phone may
+    // report 844px wide, yet is still a phone with only ~390px of height.
+    // Using width alone previously switched it to the desktop chase camera,
+    // cutting off the truck in a very short landscape viewport.
+    const screenWidth=gl.domElement.clientWidth;
+    const screenHeight=gl.domElement.clientHeight;
+    const portraitPhone=screenWidth<600 && screenHeight>=screenWidth;
+    const landscapePhone=screenHeight<=550 && screenWidth>screenHeight
+      && screenWidth<=1050;
+    const tabletPortrait=screenWidth>=600 && screenWidth<=1100
+      && screenHeight>screenWidth;
+    const tabletLandscape=screenWidth>=701 && screenWidth<=1399
+      && screenWidth>screenHeight && screenHeight>550;
+    if(overview){
+      const overviewHeight=landscapePhone?24:tabletPortrait?23:20.8;
+      cameraDesired.set(pose.x+12.7,overviewHeight,pose.z+12.7);
+    }else{
+      const back=landscapePhone?14.4:tabletPortrait?13.5:
+        tabletLandscape?11.6:portraitPhone?12.1:9.4;
+      const side=landscapePhone?4.3:tabletPortrait?3.6:
+        tabletLandscape?4.1:portraitPhone?2.65:4.6;
+      const height=landscapePhone?8.1:tabletPortrait?8.0:
+        tabletLandscape?7.1:portraitPhone?7.5:6.25;
       cameraDesired.set(
-        pose.x + Math.sin(pose.heading)*back + Math.cos(pose.heading)*side,
-        mobile ? 7.5 : 6.25,
-        pose.z + Math.cos(pose.heading)*back - Math.sin(pose.heading)*side,
+        pose.x+Math.sin(pose.heading)*back+Math.cos(pose.heading)*side,
+        height,
+        pose.z+Math.cos(pose.heading)*back-Math.sin(pose.heading)*side,
       );
     }
     cameraTarget.set(pose.x,1.55,pose.z);
