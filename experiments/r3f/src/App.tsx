@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getProjects } from "@/content/projects";
 import { AcreditacionesDemo } from "./acreditaciones-demo";
+import { PortfolioBrowser } from "./portfolio-browser";
 import {
   initialPose, closestStation, isAtStation, travelToStation,
   stations, type Controls, type Rescue, type StationId, type TruckPose,
@@ -12,17 +13,6 @@ import { WorldScene } from "./scene";
 const projects=getProjects("es");
 const assets=Object.values(MODEL_FILES);
 type Direction="forward"|"reverse"|"left"|"right";
-function projectUrl(slug:string){
-  // The standalone Vite preview may occupy port 3000 itself. Send its case
-  // study links to the actual deployed site, never back to the Vite SPA.
-  // The integrated Next.js experience continues to use relative paths.
-  if(typeof window!=="undefined" &&
-      window.location.pathname==="/" &&
-      ["localhost","127.0.0.1"].includes(window.location.hostname)){
-    return "https://www.jarcedev.com/es/projects/"+slug;
-  }
-  return "/es/projects/"+slug;
-}
 async function assetExists(path:string){
   try{
     const result=await fetch(path,{method:"HEAD",cache:"no-store"});
@@ -34,6 +24,7 @@ export function App(){
   const truck=useRef<TruckPose>(initialPose());
   const rescue=useRef<Rescue|null>(null);
   const [day,setDay]=useState(true);
+  const [portfolioOpen,setPortfolioOpen]=useState(false);
   const [overview,setOverview]=useState(false);
   const [lights,setLights]=useState(true);
   const [assetStatus,setAssetStatus]=useState<"loading"|"ready"|"partial">("loading");
@@ -66,6 +57,7 @@ export function App(){
     Object.assign(truck.current,initialPose());
     rescue.current=null;setNearby(null);setRescued(new Set());
     setPanel(null);setAiOpen(false);setBusy(false);setRewardDismissed(false);
+    setPortfolioOpen(false);
   },[]);
   const discover=useCallback(()=>{
     if(rescue.current)return;
@@ -142,9 +134,10 @@ export function App(){
   const allRescued=rescued.size===stations.length;
   const showReward=allRescued&&!rewardDismissed;
   return (
-    <main className="pilot portfolio-world" data-assets={assetStatus}>
+    <main className="pilot portfolio-world" data-assets={assetStatus}
+      data-view={portfolioOpen?"portfolio":"world"}>
       <div className="viewport" aria-label="Mundo interactivo de proyectos JarceDev">
-        <Canvas dpr={[.85,1.15]} shadows
+        <Canvas frameloop={portfolioOpen?"never":"always"} dpr={[.85,1.15]} shadows
           camera={{position:[0,8,13],fov:51,near:.1,far:130}}
           gl={{antialias:true,powerPreference:"high-performance"}}>
           <WorldScene day={day} overview={overview} modelMode={modelMode}
@@ -154,18 +147,18 @@ export function App(){
         </Canvas>
       </div>
       <header className="topbar">
-        <a className="identity" href={projectUrl("firetrack").replace("/projects/firetrack","")}
-          aria-label="JarceDev, inicio del portafolio">
+        <button type="button" className="identity" onClick={()=>setPortfolioOpen(false)}
+          aria-label="JarceDev, volver al mundo 3D">
           <span className="experiment-mark">JD</span>
           <span className="identity-lines">
             <strong>JARCEDEV</strong>
             <small>Ingeniería de software · Costa Rica</small>
           </span>
-        </a>
+        </button>
         <div className="header-actions">
-          <a className="go-back" href={projectUrl("firetrack").replace("/projects/firetrack","/portfolio")}>
-            Portafolio clásico ↗
-          </a>
+          <button type="button" className="go-back" onClick={()=>setPortfolioOpen(true)}>
+            Mi perfil y proyectos ↗
+          </button>
           <button type="button" className="reset-button" onClick={restart}>↻ Reiniciar</button>
         </div>
       </header>
@@ -307,6 +300,7 @@ export function App(){
           </div>
         </section>
       )}
+      {portfolioOpen && <PortfolioBrowser onBack={()=>setPortfolioOpen(false)}/>}
       <section className="drive-controls" aria-label="Conducción táctil">
         <div className="steering">
           {driveButton("left","Izquierda","↶")}
