@@ -34,13 +34,22 @@ export function WorldScene({
   const truckGroup=useRef<THREE.Group>(null);
   const cameraDesired=useMemo(()=>new THREE.Vector3(),[]);
   const cameraTarget=useMemo(()=>new THREE.Vector3(),[]);
+  const lookAtSmooth=useMemo(()=>new THREE.Vector3(),[]);
+  const initialized=useRef(false);
   const lastNear=useRef<StationId|null>(null);
   const perf=useRef({seconds:0,frames:0});
 
   useFrame(({camera,gl},delta)=>{
-    const dt=Math.max(0,Math.min(delta,.075));
+    // Integrate in small time steps so low frame rates do not slow down the
+    // vehicle in real time. Keep turn input and physics independent of FPS.
+    const dt=Math.max(0,Math.min(delta,.12));
     const pose=truck.current;
-    if(!rescue.current)Object.assign(pose,advanceTruck(pose,controls.current,dt));
+    if(!rescue.current){
+      const slices=Math.max(1,Math.ceil(dt/.025));
+      for(let n=0;n<slices;n++){
+        Object.assign(pose,advanceTruck(pose,controls.current,dt/slices));
+      }
+    }
     if(truckGroup.current){
       truckGroup.current.position.set(pose.x,0,pose.z);
       truckGroup.current.rotation.y=pose.heading;
@@ -68,9 +77,17 @@ export function WorldScene({
         pose.z + Math.cos(pose.heading)*back - Math.sin(pose.heading)*side,
       );
     }
-    camera.position.lerp(cameraDesired,damping(dt,7));
     cameraTarget.set(pose.x,1.55,pose.z);
-    camera.lookAt(cameraTarget);
+    if(!initialized.current){
+      camera.position.copy(cameraDesired);
+      lookAtSmooth.copy(cameraTarget);
+      initialized.current=true;
+    }
+    // Smooth both the chase camera and the point it looks at. Smoothing only
+    // position while snapping the target caused visible shake during turns.
+    camera.position.lerp(cameraDesired,damping(dt,11));
+    lookAtSmooth.lerp(cameraTarget,damping(dt,13));
+    camera.lookAt(lookAtSmooth);
     perf.current.seconds+=dt;
     perf.current.frames++;
     if(perf.current.seconds>=1){
@@ -85,7 +102,7 @@ export function WorldScene({
       <ambientLight intensity={day?1.04:.75}/>
       <hemisphereLight args={[day?"#e6f9ff":"#a4c3dd","#24424c",day?1.12:.84]}/>
       <directionalLight position={[17,26,9]} intensity={day?2.14:1.20}
-        castShadow shadow-mapSize={[1024,1024]}
+        castShadow shadow-mapSize={[768,768]}
         shadow-camera-left={-38} shadow-camera-right={38}
         shadow-camera-top={38} shadow-camera-bottom={-38}/>
       {/* A real traversable four-way road network, not a cosmetic start podium. */}
