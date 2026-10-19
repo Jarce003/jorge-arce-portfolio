@@ -57,7 +57,7 @@ export function WaterSpray({
         midpoint.copy(first).add(second).multiplyScalar(.5);
         dummy.position.copy(midpoint);
         dummy.quaternion.setFromUnitVectors(xAxis,tangent.normalize());
-        const width=(.077+t*.028)*strength*(.90+.10*Math.sin(now*22-index*1.7));
+        const width=(.16+t*.055)*strength*(.90+.10*Math.sin(now*22-index*1.7));
         dummy.scale.set(visible?length*.94:.00001,visible?width:.00001,visible?width:.00001);
         dummy.updateMatrix();
         stream.current.setMatrixAt(index,dummy.matrix);
@@ -78,7 +78,7 @@ export function WaterSpray({
         const t=((index+.3)/25+Math.max(0,age)*1.6)%1;
         jet(t,midpoint);
         const wobble=Math.sin(index*7.7+now*11)*t*.055;
-        const size=(.075+index%3*.017)*strength;
+        const size=(.095+index%3*.025)*strength;
         dummy.position.set(midpoint.x+wobble,midpoint.y,midpoint.z-wobble);
         dummy.quaternion.identity();
         dummy.scale.set(size,size*1.5,size);
@@ -106,17 +106,17 @@ export function WaterSpray({
     <>
       <instancedMesh ref={stream} args={[undefined,undefined,17]} frustumCulled={false}>
         <boxGeometry args={[1,1,1]}/>
-        <meshStandardMaterial color="#36bde0" transparent opacity={.68}
+        <meshStandardMaterial color="#27b8dc" transparent opacity={.87}
           emissive="#138aaa" emissiveIntensity={.37} depthWrite={false} roughness={.29}/>
       </instancedMesh>
       <instancedMesh ref={highlights} args={[undefined,undefined,17]} frustumCulled={false}>
         <boxGeometry args={[1,1,1]}/>
-        <meshStandardMaterial color="#b0ebf5" transparent opacity={.42}
+        <meshStandardMaterial color="#c1f1fa" transparent opacity={.64}
           depthWrite={false} roughness={.31}/>
       </instancedMesh>
       <instancedMesh ref={drops} args={[undefined,undefined,25]} frustumCulled={false}>
         <icosahedronGeometry args={[1,0]}/>
-        <meshStandardMaterial color="#55cae6" transparent opacity={.66}
+        <meshStandardMaterial color="#68d5f0" transparent opacity={.81}
           depthWrite={false} roughness={.35}/>
       </instancedMesh>
       <instancedMesh ref={splash} args={[undefined,undefined,12]} frustumCulled={false}>
