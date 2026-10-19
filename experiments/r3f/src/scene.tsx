@@ -182,7 +182,8 @@ export function WorldScene({
                 <boxGeometry args={[.58, .22, .43]}/>
                 <meshStandardMaterial color="#e5eff1" emissive="#fff2bd" emissiveIntensity={day ? .10 : .8}/>
               </mesh>
-              {!day && <pointLight position={[0, 4.05, 0]} color="#fff0c4" intensity={2.2} distance={9}/>}
+              {/* StreetLights provides the actual night lighting. These eight
+                  decorative fixture bulbs glow without eight extra GPU lights. */}
             </group>
           ))}
         </group>
