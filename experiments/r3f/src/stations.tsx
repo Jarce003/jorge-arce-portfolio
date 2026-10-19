@@ -133,13 +133,24 @@ export function ThemedStations({ modelMode }: {modelMode:boolean}) {
   );
 }
 
+// Flame bases belong to architectural surfaces, not a shared world height.
+// Coordinates match Blender model local X/Y/Z after glTF's Z-up to Y-up conversion.
+// The outer group mirrors the orientation of the imported building on southern lots.
+export const FIRE_ANCHORS: Record<Station["id"], readonly [number,number,number][]> = {
+  firetrack: [[-2.7,5.98,.55],[.1,5.98,1.25],[2.8,5.98,.3]],
+  evacuaplan: [[-3.1,3.63,.20],[0,3.76,1.48],[3.1,3.63,.20]],
+  acreditaciones: [[-2.8,4.05,.45],[0,4.05,1.48],[2.8,4.05,.45]],
+  hidrantes: [[-3.4,2.05,2.45],[0,2.05,2.50],[2.0,2.05,2.45]],
+};
+
 function FireAtStation({
-  station,discovered,rescue,
+  station,discovered,rescue,modelMode,
 }:{
-  station:Station;discovered:boolean;
+  station:Station;discovered:boolean;modelMode:boolean;
   rescue:MutableRefObject<Rescue|null>;
 }) {
   const flames=useRef<(THREE.Group|null)[]>([]);
+  const anchors=FIRE_ANCHORS[station.id];
   useFrame(()=>{
     const r=rescue.current;
     const seconds=r?.stationId===station.id
@@ -149,42 +160,49 @@ function FireAtStation({
     flames.current.forEach((flame,index)=>{
       if(!flame)return;
       flame.visible=strength>.02;
-      const wave=.90+Math.sin(motion+index*1.7)*.10;
+      const wave=.93+Math.sin(motion+index*1.7)*.07;
       flame.scale.setScalar(strength*wave);
     });
   });
   return (
-    <group position={[station.x,0,station.z]}>
-      {[-3.1,-1.0,1.4,3.17].map((offset,index)=>(
-        <group key={offset}
-          ref={node=>{flames.current[index]=node;}}
-          position={[offset,5.8,index%2?-.8:1.1]}>
-          <mesh>
-            <coneGeometry args={[.73,2.12+(index%2)*.47,7]}/>
-            <meshStandardMaterial color="#f76f2a" emissive="#ee4618"
-              emissiveIntensity={1} transparent opacity={.88} depthWrite={false}/>
-          </mesh>
-          <mesh position={[.17,-.30,.13]}>
-            <coneGeometry args={[.46,1.44,6]}/>
-            <meshStandardMaterial color="#ffe19b" emissive="#ffba52"
-              emissiveIntensity={.90} transparent opacity={.88} depthWrite={false}/>
-          </mesh>
-        </group>
-      ))}
+    <group position={[station.x,0,station.z]}
+      rotation={[0,station.z<0?Math.PI:0,0]}>
+      {anchors.map(([x,height,z],index)=>{
+        const fallbackHeight=station.id==="hidrantes"?2.37:
+          station.id==="firetrack"?5.45:station.id==="acreditaciones"?4.50:3.72;
+        const flameY=modelMode?height:fallbackHeight;
+        const heightScale=station.id==="hidrantes"?.75:.87;
+        return (
+          <group key={index} ref={node=>{flames.current[index]=node;}}
+            position={[x,flameY+.64*heightScale,z]}>
+            <mesh>
+              <coneGeometry args={[.51*heightScale,1.32*heightScale,9]}/>
+              <meshStandardMaterial color="#fa722f" emissive="#ee431a"
+                emissiveIntensity={1.05} transparent opacity={.89} depthWrite={false}/>
+            </mesh>
+            <mesh position={[.09,-.14,0]}>
+              <coneGeometry args={[.30*heightScale,.88*heightScale,8]}/>
+              <meshStandardMaterial color="#ffdb87" emissive="#ffb34b"
+                emissiveIntensity={.82} transparent opacity={.86} depthWrite={false}/>
+            </mesh>
+          </group>
+        );
+      })}
     </group>
   );
 }
 
 export function StationFires({
-  rescued,rescue,
+  rescued,rescue,modelMode,
 }:{
   rescued:ReadonlySet<string>;
   rescue:MutableRefObject<Rescue|null>;
+  modelMode:boolean;
 }) {
   return (
     <>
       {stations.map(s=><FireAtStation key={s.id} station={s}
-        discovered={rescued.has(s.id)} rescue={rescue}/>)}
+        discovered={rescued.has(s.id)} rescue={rescue} modelMode={modelMode}/>)}
     </>
   );
 }
