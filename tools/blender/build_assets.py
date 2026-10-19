@@ -172,6 +172,39 @@ def truck(mats):
         b(f"FrontHeadlight_{side}", (side * .89, 3.31, 1.26),
           (.37, .10, .21), white)
 
+    # Recognizable North-American aerial apparatus details: radiator slats,
+    # recessed light clusters, compartment hinges, step plates and stabilizers.
+    for index in range(9):
+        b(f"RadiatorSlat_{index}", (-.49 + index*.122, 3.382, 1.37),
+          (.045, .038, .54), chrome)
+    for side in (-1, 1):
+        b(f"CabDoorSeam_{side}", (side*1.212, 1.56, 1.75),
+          (.036, .048, 1.34), dark)
+        b(f"CabDoorHandle_{side}", (side*1.237, 2.0, 1.71),
+          (.055, .26, .065), chrome)
+        b(f"CabStep_{side}", (side*1.35, 1.88, .93),
+          (.41, 1.09, .115), silver)
+        b(f"RearStep_{side}", (side*1.34, -2.98, .93),
+          (.38, .69, .12), silver)
+        for index in range(4):
+            b(f"CompartmentHinge_{side}_{index}", (side*1.251, -.05-index*.87, 1.53),
+              (.06, .50, .035), dark)
+        b(f"OutriggerHousing_{side}", (side*1.20, -1.32, 1.07),
+          (.47, 1.16, .30), dark)
+        b(f"OutriggerFoot_{side}", (side*1.43, -1.32, .79),
+          (.66, .62, .14), chrome)
+        b(f"WarningStripeLower_{side}", (side*1.203, -.85, 1.15),
+          (.055, 3.85, .095), mats["amber"])
+        b(f"RoofMarker_{side}", (side*.89, 3.04, 2.72),
+          (.26, .16, .115), mats["red_bright"])
+    b("FrontCabSunVisor", (0, 3.30, 2.48), (2.24, .26, .11), red)
+    b("RearChevronBar", (0, -3.36, 1.55), (2.16, .085, .20), mats["amber"])
+    b("PumpControlPanel", (0, -.33, 2.48), (1.13, .84, .09), dark)
+    for index in range(6):
+        cylinder(f"PumpGauge_{index}", (-.45+index*.18, -.31, 2.54),
+                 .055, .055, chrome, target, root,
+                 rotation=(math.pi/2, 0, 0), vertices=12)
+
     # Six independently addressable tire/hub groups for future rotation.
     for axle, y in enumerate((2.20, -.18, -2.35)):
         for side in (-1, 1):
@@ -254,6 +287,24 @@ def firetrack(mats):
         cylinder(f"FireTankCap_{side}", (side*4.98, 1.20, 1.97),
                  .40, .18, silver, target, root)
 
+    # FireTrack is an extinguisher operations centre, not a generic warehouse.
+    # Rows of unmistakable extinguisher silhouettes and a monitored service desk.
+    for index in range(5):
+        x = -3.40 + index*1.70
+        cylinder(f"ExtinguisherBody_{index}", (x, 3.15, .79), .22, 1.08,
+                 mats["red_bright"], target, root, vertices=16)
+        cylinder(f"ExtinguisherValve_{index}", (x, 3.15, 1.42), .13, .15,
+                 chrome, target, root, vertices=12)
+        b(f"ExtinguisherHose_{index}", (x+.23, 3.14, 1.27), (.09, .10, .50), dark)
+    b("ServiceDeskCounter", (0, 3.22, 1.06), (2.30, .54, .19), silver)
+    for index in range(3):
+        b(f"ServiceMonitor_{index}", (-.74+index*.74, 3.08, 1.61),
+          (.54, .10, .67), dark)
+        b(f"ServiceMonitorScreen_{index}", (-.74+index*.74, 3.14, 1.61),
+          (.42, .025, .52), mats["cyan"])
+    for x in (-4.15, 4.15):
+        b(f"FrontFacadePillar_{x}", (x, 2.43, 2.81), (.20, .24, 5.00), white)
+
     # Roof details and a high-tech monitoring mast.
     b("DigitalSignFrame", (0, 2.10, 5.14), (3.95, .18, .57), dark)
     b("DigitalSignScreen", (0, 2.201, 5.14), (3.70, .06, .39), mats["cyan"])
@@ -316,6 +367,14 @@ def evacuaplan(mats):
     b("SampleDoor_Lintel", (3.25, 3.35, 2.40), (2.28, .26, .22), white)
     b("SampleExitGlow", (3.25, 3.21, 2.39), (1.68, .13, .09), mint)
 
+    # Oversized evacuation pictogram, illuminated exit and accessible wayfinding.
+    b("WayfindingTotem", (-4.60, 2.95, 1.63), (.44, .42, 3.25), navy)
+    b("WayfindingSign", (-4.60, 2.75, 2.65), (1.26, .15, .73), mint)
+    b("WayfindingArrowShaft", (-4.60, 2.59, 2.62), (.75, .055, .09), white)
+    b("ExitSymbolDoor", (3.25, 3.19, 1.85), (.71, .09, 1.01), mint)
+    for index in range(5):
+        b(f"PlanGrid_{index}", (-3.2+index*1.57, -1.30, 4.41),
+          (.025, 4.50, .016), cyan)
     for index in range(4):
         b(f"ForecourtEscapeArrow_{index}", (-2.1 + index * 1.3, 3.84, .02),
           (.73, .29, .05), mint)
@@ -372,6 +431,18 @@ def acreditaciones(mats):
         cylinder(f"QualificationMedal_{index}", (x, 3.12, height + .11),
                  .37, .18, mats["amber"], target, root, vertices=12)
 
+    # Academy identity: illuminated qualification levels and a practice course.
+    for index, height in enumerate((1.11, 1.66, 2.24)):
+        x = -3.0 + index*2.9
+        b(f"TrainingColumn_{index}", (x, 4.13, height/2),
+          (.56, .46, height), violet)
+        b(f"TrainingColumnCap_{index}", (x, 4.13, height+.08),
+          (.81, .72, .16), mats["amber"])
+    b("AcademyEntranceCanopy", (0, 2.61, 3.63),
+      (3.74, 1.12, .24), chrome)
+    for x in (-1.5, 1.5):
+        b(f"AcademyEntrancePost_{x}", (x, 3.08, 1.59),
+          (.19, .18, 3.12), light)
     print("Built Acreditaciones AI station:", len(target.objects), "objects")
     return target, root
 
@@ -437,6 +508,20 @@ def hidrantes(mats):
         cylinder(f"GateValve_{index}", (x, 2.82, .69), .43, .18,
                  chrome, target, root, vertices=12)
 
+    # A recognizable valve wheel, flow indicators and water-network junctions.
+    for index, x in enumerate((-2.95, 2.90)):
+        cylinder(f"ValveRiser_{index}", (x, 2.82, 1.03), .10, .58,
+                 chrome, target, root, vertices=12)
+        cylinder(f"ValveHandwheel_{index}", (x, 2.82, 1.34), .47, .095,
+                 red, target, root, vertices=16)
+        for spoke in range(4):
+            angle = spoke * math.pi/2
+            b(f"ValveSpoke_{index}_{spoke}",
+              (x+math.cos(angle)*.22, 2.82+math.sin(angle)*.22, 1.40),
+              (.20, .09, .065), chrome)
+    for index in range(4):
+        b(f"NetworkFlowIndicator_{index}", (-3.0+index*1.65, 1.31, .06),
+          (.91, .14, .085), mats["cyan"])
     print("Built Hidrantes map station:", len(target.objects), "objects")
     return target, root
 
