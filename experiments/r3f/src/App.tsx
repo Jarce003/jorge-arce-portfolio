@@ -138,7 +138,7 @@ export function App(){
           camera={{position:[0,8,13],fov:51,near:.1,far:130}}
           gl={{antialias:true,powerPreference:"high-performance"}}>
           <WorldScene day={day} overview={overview} modelMode={modelMode}
-            lights={lights} rescued={rescued} controls={controls}
+            lights={lights} reducedMotion={reducedMotion} rescued={rescued} controls={controls}
             truck={truck} rescue={rescue} onNearby={setNearby}
             onRescueComplete={complete} onMetrics={()=>{}}/>
         </Canvas>
@@ -161,13 +161,17 @@ export function App(){
       </header>
       <section className="tools" aria-label="Preferencias de exploración">
         <button type="button" onClick={()=>setDay(s=>!s)}>
-          {day?"☀ Día":"☾ Noche"}
+          {day?"☾ Noche":"☀ Día"}
         </button>
         <button type="button" onClick={()=>setOverview(s=>!s)}>
           ◈ {overview?"Seguir camión":"Vista aérea"}
         </button>
         <button type="button" onClick={()=>setLights(s=>!s)}
-          aria-pressed={lights}>🚨 {lights?"Sirena visual":"Luces apagadas"}</button>
+          aria-pressed={lights}
+          title="Controla los destellos luminosos del camión; no produce sonido."
+          aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
+          🚨 {lights?"Luces de emergencia":"Luces apagadas"}
+        </button>
       </section>
       <nav className="stations-dock" aria-label="Proyectos disponibles">
         {projects.map(project=>{
@@ -190,9 +194,9 @@ export function App(){
       </nav>
       <section className="overview" aria-label="Introducción y recorrido">
         <span className="eyebrow">PORTAFOLIO INTERACTIVO</span>
-        <h1>Software que resuelve problemas reales.</h1>
-        <p>Explora cuatro proyectos: herramientas SaaS, diseño de evacuación,
-          análisis inteligente y sistemas de información para emergencias.</p>
+        <h1>Conduce y descubre mis proyectos.</h1>
+        <p>Selecciona uno de los cuatro edificios a la derecha o conduce hasta él.
+          Pulsa «Descubrir» para apagar el incendio y conocer el proyecto.</p>
         <div className="journey-status" role="status">
           <span>Proyectos descubiertos</span>
           <strong>{rescued.size}/4</strong>
@@ -200,7 +204,7 @@ export function App(){
         <div className="journey-track" aria-label={rescued.size+" de 4 proyectos descubiertos"}>
           <span style={{width:(rescued.size/stations.length*100)+"%"}}/>
         </div>
-        <p className="key-hint">WASD para conducir · E para descubrir · C para cámara</p>
+        <p className="key-hint">WASD: conducir · E: apagar fuego · C: cámara · N: día/noche</p>
       </section>
       <section className="interaction" aria-live="polite">
         {selected?(
@@ -239,7 +243,7 @@ export function App(){
                 nearbyProject.title:"Elige una estación y comienza"}</strong>
               <small>{busy?"La ficha del proyecto se abrirá al completar el rescate.":
                 nearby?(rescued.has(nearby)?"Este proyecto ya fue descubierto. Abre su ficha.":
-                "Apaga el fuego para conocer este proyecto."):"Puedes conducir o seleccionar uno de los cuatro proyectos."}</small>
+                "Pulsa Descubrir para apagar el fuego y abrir su ficha."):"Selecciona una estación a la derecha o conduce hasta ella."}</small>
             </div>
             <button type="button" className="discover"
               onClick={discover} disabled={!nearby||busy}>
