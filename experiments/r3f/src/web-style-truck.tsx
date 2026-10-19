@@ -27,7 +27,8 @@ function buildParts(){
   for(let i=-2;i<=2;i++)put(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
   put(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
   put(0,1.39,-2.97,.18,.24,.07,"#202a38");
-  put(0,2.5,-2.16,1.30,.12,.30,"#c5d0df");
+  // Dark roof mount for the ONLY working pair of emergency flashers.
+  put(0,2.5,-2.16,1.30,.12,.30,"#3b5268");
   // Low-profile turntable service deck; the old wide white roof slab hid the ladder.
   put(0,2.48,.49,1.51,.09,3.80,"#8496a8");
   for(const side of [-1,1]){
@@ -45,7 +46,7 @@ function buildParts(){
       put(side*1.24,1.25,compartment,.035,.04,.23,"#36465b");
     }
     put(side*1.13,.65,-2.14,.26,.11,1.13,"#b8c9d6");
-    put(side*1.15,1.82,1.62,.08,.24,.30,"#c63c4b");
+    // Rear-side alert lens belongs to the animated beacon system only.
   }
   // Apparatus turntable and nested ladder.
   put(0,1.85,1.48,1.52,.23,1.65,"#cbd8e0");
@@ -59,7 +60,7 @@ function buildParts(){
   for(const side of [-.39,.39])put(side,2.58,-.41,.08,.10,3.86,"#aabccf");
   for(let index=0;index<9;index++)put(0,2.60,-2.12+index*.39,.82,.052,.10,"#ebf1f5");
   put(0,2.44,-2.68,1.53,.13,.21,"#d7e3e9");
-  for(const x of [-.68,.68])put(x,2.50,-2.68,.17,.18,.19,"#f7c66d");
+  // Duplicate static amber aerial markers removed; flashing lights are in effects.tsx.
   put(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
   return parts;
 }
