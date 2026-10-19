@@ -353,3 +353,48 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
   .drive-reverse{min-height:60px}
 }
 .portfolio-world[data-view="portfolio"] .mobile-progress{display:none}
+
+/* Final simplification: the mobile world is meant to be explored, not read. */
+.steering-wheel-art{display:none}
+.tools .tool-label{display:inline}
+.tools button[aria-pressed="true"]{
+  border-color:#b4c7de88;background:#213b54e8;
+}
+@media(max-width:600px){
+  .stations-dock{display:none!important}
+  .mobile-progress{top:107px;right:12px}
+  .tools{justify-content:flex-end;gap:6px}
+  .tools button{
+    min-height:33px;min-width:0;padding:7px 10px;font-size:11px;
+    border-radius:10px;line-height:1.1;
+  }
+  .tools .tool-label{display:inline}
+  .interaction{bottom:100px}
+  .rescue-card{gap:9px}
+  .rescue-card>span{font-size:16px}
+  .rescue-text small{max-width:235px}
+  .steering{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:122px;height:84px;gap:0;
+    border-radius:48px;
+    background:#0b1c33bf;border:1px solid #a5b5d16c;
+    backdrop-filter:blur(8px);box-shadow:0 8px 22px #03081766;
+    overflow:hidden;
+  }
+  .steering-wheel-art{
+    position:absolute;inset:9px 26px;display:grid;place-items:center;
+    pointer-events:none;color:#bfd3e4;opacity:.92;
+  }
+  .steering-wheel-art svg{width:67px;height:67px}
+  .steering .drive-button{
+    z-index:1;width:50%;height:100%;min-height:0;border:0;
+    border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;
+    padding:0;
+  }
+  .steering .drive-button>span{font-size:14px;line-height:1;color:#e4effa}
+  .steering .drive-button small{display:none}
+  .steering .drive-left{align-items:flex-start;padding-left:5px}
+  .steering .drive-right{align-items:flex-end;padding-right:5px}
+  .steering .drive-button:active{background:#a996ee33}
+  .pedals .drive-button{width:54px}
+}
