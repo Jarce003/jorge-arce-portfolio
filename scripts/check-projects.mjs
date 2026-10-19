@@ -57,7 +57,8 @@ for (const item of entries) {
   assert(!positions.has(x + "," + z), "Overlapping station: " + slug);
   assert(Math.abs(x) <= 23 && Math.abs(z) <= 23, "Station outside drive bounds: " + slug);
   assert(templates.has(structure), "Unsupported structure: " + structure);
-  assert(preview.startsWith("/projects/previews/") && preview.endsWith(".svg"), "Preview must use normalized SVG: " + slug);
+  assert(/^\/projects\/(?:[a-z0-9-]+\/)*[a-z0-9.-]+\.(?:svg|webp|png)$/i.test(preview),
+    "Preview must be a local validated project illustration or app screenshot: " + slug);
   assert(!previews.has(preview), "Duplicated illustration: " + slug);
   ids.add(slug); stations.add(id); positions.add(x + "," + z); previews.add(preview);
   for (const lang of ["es", "en"]) {
@@ -67,12 +68,22 @@ for (const item of entries) {
     }
   }
   await access(path.join(root, "public", preview.slice(1)));
-  const svg = await readFile(path.join(root, "public", preview.slice(1)), "utf8");
-  assert(svg.includes('viewBox="0 0 1200 720"'), "Illustration dimensions differ: " + slug);
-  // Even a valid path and matching dimensions are not enough: a bare '&'
-  // in text invalidates the XML and causes a silent missing image in browsers.
-  const bareAmpersand = /&(?!(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);)/;
-  assert(!bareAmpersand.test(svg), "Unescaped XML entity in preview: " + slug);
-  assert(svg.includes("<svg ") && svg.includes("</svg>"), "Invalid SVG root: " + slug);
+  const bytes = await readFile(path.join(root, "public", preview.slice(1)));
+  // Real screenshots are now preferred to abstract illustrations. Validate
+  // binary signatures so corrupted or mislabeled files cannot silently ship.
+  if (preview.endsWith(".webp")) {
+    assert(bytes.length > 4096, "Project screenshot is too small: " + slug);
+    assert(bytes.toString("ascii", 0, 4) === "RIFF" &&
+      bytes.toString("ascii", 8, 12) === "WEBP", "Invalid WebP screenshot: " + slug);
+  } else if (preview.endsWith(".png")) {
+    assert(bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])),
+      "Invalid PNG screenshot: " + slug);
+  } else {
+    const svg = bytes.toString("utf8");
+    assert(/viewBox="0 0 1200 (?:720|730)"/.test(svg), "Illustration dimensions differ: " + slug);
+    const bareAmpersand = /&(?!(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);)/;
+    assert(!bareAmpersand.test(svg), "Unescaped XML entity in preview: " + slug);
+    assert(svg.includes("<svg ") && svg.includes("</svg>"), "Invalid SVG root: " + slug);
+  }
 }
 console.log("Validated", entries.length, "unique project records, stations, locales and visual assets.");
