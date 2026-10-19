@@ -35,6 +35,51 @@ async function capture(page,filename){
       error instanceof Error?error.message:String(error));
   }
 }
+// Layout correctness cannot be inferred from a successful build or a
+// screenshot alone: assert that the actual 3D shell and essential controls
+// fit within the device's available CSS viewport after rotation.
+async function checkResponsiveWorld(page,width,height,label){
+  await page.setViewportSize({width,height});
+  await page.waitForTimeout(350);
+  const frame=await page.evaluate(()=>{
+    const shell=document.querySelector(".portfolio-world");
+    const canvas=document.querySelector(".viewport canvas");
+    const ids=[".topbar",".tools",".rescue-progress",".drive-controls",".steering",".pedals"];
+    const bbox=node=>{
+      if(!node)return null;
+      const b=node.getBoundingClientRect();
+      return {x:b.x,y:b.y,width:b.width,height:b.height,right:b.right,bottom:b.bottom};
+    };
+    return {
+      innerWidth:window.innerWidth,innerHeight:window.innerHeight,
+      world:bbox(shell),canvas:bbox(canvas),
+      controls:Object.fromEntries(ids.map(selector=>[selector,bbox(document.querySelector(selector))])),
+      scrollHeight:document.documentElement.scrollHeight,
+      wheel:document.querySelector(".steering-wheel-art")?.getBoundingClientRect().width??0,
+      wheelDisplay:document.querySelector(".steering-wheel-art")
+        ?getComputedStyle(document.querySelector(".steering-wheel-art")).display:null,
+    };
+  });
+  assert.equal(frame.innerWidth,width,label+": viewport width");
+  assert.equal(frame.innerHeight,height,label+": viewport height");
+  assert(frame.world && Math.abs(frame.world.height-height)<2,
+    label+": world must fill the display without forcing a minimum height");
+  assert(frame.canvas && Math.abs(frame.canvas.height-height)<2,
+    label+": canvas must fill available height");
+  assert(frame.scrollHeight<=height+2,
+    label+": document must not create a white/blank strip below the world");
+  for(const [selector,box] of Object.entries(frame.controls)){
+    assert(box && box.width>0 && box.height>0,label+": missing "+selector);
+    assert(box.y>=-1 && box.bottom<=height+2,
+      label+": "+selector+" clipped vertically "+JSON.stringify(box));
+    assert(box.x>=-1 && box.right<=width+2,
+      label+": "+selector+" outside left/right edges "+JSON.stringify(box));
+  }
+  assert(frame.wheelDisplay!=="none" && frame.wheel>0,
+    label+": touch steering wheel must be visible");
+  await capture(page,label+".png");
+  console.log(label+": responsive full-height world, canvas and controls OK");
+}
 async function loadPage(page){
   await page.goto(url,{waitUntil:"networkidle",timeout:45000});
   await page.getByText("JARCEDEV",{exact:true}).waitFor();
@@ -247,6 +292,13 @@ try{
   await phoneAward.getByRole("button",{name:"Seguir explorando"}).click();
   console.log("Mobile: four rescues, visible 4/4 award, dismiss and reopen OK.");
 
+  // Rotate the SAME phone after completing the rescues.
+  // Regression: landscape was locked to min-height:460px, cutting the world
+  // and hiding lower controls on 390px-tall phone screens.
+  await checkResponsiveWorld(mobile,844,390,"phone-landscape");
+  // Return to portrait so reward/drive state is not lost after rotation.
+  await checkResponsiveWorld(mobile,390,844,"phone-portrait-after-rotation");
+
   // The English route must use the SAME interactive 3D world, localized
   // project details, gallery, and working touch/keyboard controls.
   await mobile.close();
@@ -269,6 +321,10 @@ try{
   await enGallery.getByText("HOW I WORK").waitFor();
   await enGallery.getByRole("link",{name:/Explore the 3D world/}).click();
   assert.equal(await enGallery.count(),0);
+  // Tablets must not inherit either the desktop-only arrows or the
+  // cramped phone landscape HUD. Verify both orientations in the same scene.
+  await checkResponsiveWorld(english,820,1180,"tablet-portrait");
+  await checkResponsiveWorld(english,1180,820,"tablet-landscape");
   await english.getByRole("button",{name:"Español"}).click();
   await english.getByRole("button",{name:"Ver perfil y proyectos"}).waitFor();
   assert.match(english.url(),/lang=es/);
