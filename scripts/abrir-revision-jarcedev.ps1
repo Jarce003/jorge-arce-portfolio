@@ -8,8 +8,8 @@ $webBranch = "feature/jarcedev-world-first-v3"
 $labBranch = "experiment/jarcedev-blender-r3f-pilot"
 $lab = Join-Path $parent "jorge-arce-portfolio-r3f"
 
-function Git-Checked([string[]]$Args, [string]$Label) {
-    & git @Args
+function Git-Checked([string[]]$GitArguments, [string]$Label) {
+    & git @GitArguments
     if ($LASTEXITCODE -ne 0) { throw "Git: $Label failed (exit $LASTEXITCODE)." }
 }
 function Check-Worktree([string]$Directory, [string]$Expected) {
