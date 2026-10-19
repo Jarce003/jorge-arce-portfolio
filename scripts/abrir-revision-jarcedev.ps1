@@ -1,4 +1,4 @@
-# JarceDev candidate review: keep existing WebGL2 on port 3000; start only the candidate.
+# JarceDev review: run finished Three Fiber candidate in Vite without Turbopack.
 # Existing worktrees, user edits, main and Vercel remain untouched.
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -53,7 +53,7 @@ try {
     $version = [version]((& node --version).Trim().TrimStart("v"))
     if ($version -lt [version]"22.12.0") { throw "Node 22.12+ required." }
 
-    Write-Host "Preparando revision aislada. Tus carpetas actuales no se modifican." -ForegroundColor Cyan
+    Write-Host "Actualizando solo el candidato. La version WebGL2 sigue en puerto 3000." -ForegroundColor Cyan
     Git-Checked @("-C", $repo, "fetch", "origin", $labBranch) "fetch"
     Ensure-Review $lab $labBranch
 
@@ -72,37 +72,35 @@ try {
     }
     if ($null -eq $candidatePort) { throw "No free preview port in 3002..3020." }
 
-    $candidateNextBin = Join-Path $lab "node_modules\next\dist\bin\next"
-    if (-not (Test-Path $candidateNextBin)) {
-        Write-Host "Instalando dependencias del portafolio integrado..." -ForegroundColor Cyan
-        Push-Location $lab
+    # Vite serves the exact React Three Fiber candidate directly. Next dev
+    # activates Turbopack and is unnecessary for this local visual review.
+    # Keep WebGL2 on 3000 and avoid starting, stopping or reconfiguring it.
+    $scene = Join-Path $lab "experiments\r3f"
+    $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
+    if (-not (Test-Path -LiteralPath $viteBin)) {
+        Write-Host "Instalando dependencias 3D (solo si faltan)..." -ForegroundColor Cyan
+        Push-Location $scene
         try {
-            & npm.cmd ci --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "Next.js npm ci failed." }
+            & npm.cmd install --no-package-lock --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { throw "Vite dependency installation failed." }
         } finally { Pop-Location }
     }
-    Write-Host "Preparando la experiencia 3D integrada..." -ForegroundColor Cyan
-    Push-Location $lab
-    try {
-        & npm.cmd run build:experience
-        if ($LASTEXITCODE -ne 0) { throw "3D experience build failed." }
-    } finally { Pop-Location }
 
     $nodeExe = (Get-Command node.exe).Source
-    $labOut = Join-Path $env:TEMP "jarcedev-review-final.stdout.log"
-    $labErr = Join-Path $env:TEMP "jarcedev-review-final.stderr.log"
-    Write-Host "Iniciando solo el candidato, sin abrir nuevas ventanas..." -ForegroundColor Cyan
-    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $lab -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p {1}' -f $candidateNextBin, $candidatePort) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
-
+    $labOut = Join-Path $env:TEMP ("jarcedev-vite-" + $candidatePort + ".stdout.log")
+    $labErr = Join-Path $env:TEMP ("jarcedev-vite-" + $candidatePort + ".stderr.log")
+    Write-Host "Iniciando la version 3D sin Turbopack ni ventanas adicionales..." -ForegroundColor Cyan
+    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $scene -ArgumentList ('"{0}" --host 127.0.0.1 --port {1} --strictPort' -f $viteBin, $candidatePort) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
     $previewBase = "http://127.0.0.1:$candidatePort"
-    Wait-Ready "$previewBase/es" $labProcess $labErr
-    Wait-Ready "$previewBase/experience/index.html" $labProcess $labErr
+    Wait-Ready "$previewBase/" $labProcess $labErr
+    Wait-Ready "$previewBase/models/jarcedev/v1/firetrack-station.glb" $labProcess $labErr
+
     Write-Host ""
     Write-Host "LISTO. Abre en Chrome:" -ForegroundColor Green
-    Write-Host "CANDIDATO BLENDER + R3F: $previewBase/es" -ForegroundColor Yellow
-    Write-Host "WEBGL2 EXISTENTE:      http://127.0.0.1:3000/es (sin cambios)" -ForegroundColor Gray
+    Write-Host "CANDIDATO 3D:  $previewBase/" -ForegroundColor Yellow
+    Write-Host "WEBGL2 ACTUAL: http://127.0.0.1:3000/es (sin cambios)" -ForegroundColor Gray
     Write-Host "Para cerrar solo el candidato: Stop-Process -Id $($labProcess.Id)" -ForegroundColor DarkGray
-    Write-Host "Ningun proceso del puerto 3000 fue modificado." -ForegroundColor DarkGray
+    Write-Host "No se abrio Next.js ni se altero el servidor del puerto 3000." -ForegroundColor DarkGray
     Write-Host "Sin cambios en main ni Vercel." -ForegroundColor DarkGray
 } catch {
     Write-Host ("ERROR: " + $_.Exception.Message) -ForegroundColor Red
