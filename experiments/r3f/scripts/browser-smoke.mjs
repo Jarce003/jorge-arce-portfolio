@@ -185,7 +185,7 @@ try{
   assert.equal(await mobile.locator(".steering-wheel-art").isVisible(),true);
   await mobile.getByRole("status",{name:/Proyectos descubiertos: 0 de 4/}).waitFor();
   for(const name of ["Luces","Vista aérea","Noche"]){
-    const button=mobile.getByRole("button",{name:new RegExp(name)});
+    const button=mobile.getByRole("button",{name:new RegExp(name,"i")});
     assert.equal(await button.isVisible(),true);
   }
   const mobileOrigin=new URL(mobile.url()).origin;
