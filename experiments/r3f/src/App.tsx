@@ -42,6 +42,7 @@ export function App(){
   const [panel,setPanel]=useState<StationId|null>(null);
   const [aiOpen,setAiOpen]=useState(false);
   const [busy,setBusy]=useState(false);
+  const [rewardDismissed,setRewardDismissed]=useState(false);
   const [reducedMotion,setReducedMotion]=useState(false);
   useEffect(()=>{
     let mounted=true;
@@ -64,7 +65,7 @@ export function App(){
     controls.current={forward:false,reverse:false,left:false,right:false};
     Object.assign(truck.current,initialPose());
     rescue.current=null;setNearby(null);setRescued(new Set());
-    setPanel(null);setAiOpen(false);setBusy(false);
+    setPanel(null);setAiOpen(false);setBusy(false);setRewardDismissed(false);
   },[]);
   const discover=useCallback(()=>{
     if(rescue.current)return;
@@ -101,7 +102,11 @@ export function App(){
       if(key==="n")setDay(v=>!v);
       if(key==="c")setOverview(v=>!v);
       if(key==="l")setLights(v=>!v);
-      if(key==="escape")setPanel(null);
+      if(key==="escape"){
+        setRewardDismissed(true);
+        setPanel(null);
+        setAiOpen(false);
+      }
     };
     const keyUp=(event:KeyboardEvent)=>{
       const key=event.key.toLowerCase();
@@ -134,6 +139,8 @@ export function App(){
   const selected=panel?projects.find(project=>project.station.id===panel):null;
   const nearbyProject=nearby?projects.find(project=>project.station.id===nearby):null;
   const modelMode=assetStatus==="ready";
+  const allRescued=rescued.size===stations.length;
+  const showReward=allRescued&&!rewardDismissed;
   return (
     <main className="pilot portfolio-world" data-assets={assetStatus}>
       <div className="viewport" aria-label="Mundo interactivo de proyectos JarceDev">
@@ -265,6 +272,41 @@ export function App(){
           </div>
         )}
       </section>
+      {showReward && (
+        <section className="rescue-reward" role="dialog" aria-modal="false"
+          aria-labelledby="rescue-reward-title" aria-describedby="rescue-reward-detail"
+          data-testid="rescue-reward">
+          <div className="reward-stars" aria-hidden="true">
+            <span>✦</span><span>✧</span><span>✦</span><span>✧</span><span>✦</span>
+          </div>
+          <div className="reward-medal" aria-hidden="true">🏅</div>
+          <p className="eyebrow">MISIÓN COMPLETADA</p>
+          <h2 id="rescue-reward-title">¡Todos los incendios extinguidos!</h2>
+          <p id="rescue-reward-detail">
+            Has recuperado las cuatro estaciones y descubierto los cuatro proyectos de JarceDev.
+          </p>
+          <div className="reward-total" aria-label="Cuatro de cuatro estaciones recuperadas">
+            <strong>4/4</strong><span>Estaciones recuperadas</span>
+          </div>
+          <div className="reward-projects" aria-label="Proyectos descubiertos">
+            {projects.map(project=>(
+              <span key={project.slug}>
+                <span aria-hidden="true">✓</span> {project.title}
+              </span>
+            ))}
+          </div>
+          <div className="reward-actions">
+            <button type="button" onClick={()=>setRewardDismissed(true)}>
+              Ver último proyecto
+            </button>
+            <button type="button" onClick={()=>{
+              setRewardDismissed(true);setPanel(null);setAiOpen(false);
+            }}>
+              Seguir explorando
+            </button>
+          </div>
+        </section>
+      )}
       <section className="drive-controls" aria-label="Conducción táctil">
         <div className="steering">
           {driveButton("left","Izquierda","↶")}
