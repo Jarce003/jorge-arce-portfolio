@@ -8,6 +8,16 @@ on:
       - "experiments/r3f/**"
       - "tools/blender/**"
       - "src/app/[lang]/page.tsx"
+      - "src/app/[lang]/layout.tsx"
+      - "src/app/[lang]/opengraph-image.tsx"
+      - "src/app/[lang]/portfolio/page.tsx"
+      - "src/app/[lang]/projects/[slug]/page.tsx"
+      - "src/content/site-content.ts"
+      - "src/components/portfolio/compact-portfolio.tsx"
+      - "src/lib/site-url.ts"
+      - "src/app/manifest.ts"
+      - "public/cv/**"
+      - "scripts/check-social-preview.mjs"
       - "scripts/build-experience.mjs"
       - "package.json"
       - ".github/workflows/r3f-laboratory-checks.yml"
@@ -16,6 +26,16 @@ on:
       - "experiments/r3f/**"
       - "tools/blender/**"
       - "src/app/[lang]/page.tsx"
+      - "src/app/[lang]/layout.tsx"
+      - "src/app/[lang]/opengraph-image.tsx"
+      - "src/app/[lang]/portfolio/page.tsx"
+      - "src/app/[lang]/projects/[slug]/page.tsx"
+      - "src/content/site-content.ts"
+      - "src/components/portfolio/compact-portfolio.tsx"
+      - "src/lib/site-url.ts"
+      - "src/app/manifest.ts"
+      - "public/cv/**"
+      - "scripts/check-social-preview.mjs"
       - "scripts/build-experience.mjs"
       - "package.json"
       - "scripts/pilot-3d-local.ps1"
@@ -83,6 +103,8 @@ jobs:
           grep -q '/experience/assets/' public/experience/index.html
           test -f src/components/world/world-renderer.ts
           test -f src/app/\[lang\]/portfolio/page.tsx
+      - name: Verify WhatsApp share preview, OG images and absence of CV downloads
+        run: node scripts/check-social-preview.mjs
 
   blender-model-export:
     name: Generate and validate actual Blender GLB assets (no deployment)
