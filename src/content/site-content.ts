@@ -112,9 +112,9 @@ export type SiteContent = {
 export const siteContent = {
   es: {
     metadata: {
-      title: "JarceDev | Portafolio interactivo 3D de Jorge Arce",
+      title: "JarceDev | Jorge Arce",
       description:
-        "Explora FireTrack, EvacuaPlan Studio, Acreditaciones e Hidrantes en un mundo 3D interactivo. Soluciones digitales para problemas reales.",
+        "Un recorrido por mis proyectos: FireTrack, EvacuaPlan Studio, Acreditaciones e Hidrantes.",
     },
     navigation: [
       { label: "Mundo 3D", href: "#mundo" },
@@ -281,9 +281,9 @@ export const siteContent = {
   },
   en: {
     metadata: {
-      title: "JarceDev | Interactive 3D Portfolio by Jorge Arce",
+      title: "JarceDev | Jorge Arce",
       description:
-        "Explore FireTrack, EvacuaPlan Studio, Accreditations and Hydrants in an interactive 3D world. Digital solutions to real operational problems.",
+        "A look at my projects: FireTrack, EvacuaPlan Studio, Accreditations and Hydrants.",
     },
     navigation: [
       { label: "3D World", href: "#mundo" },
