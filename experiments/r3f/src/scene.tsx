@@ -1,17 +1,15 @@
 import { Suspense, useMemo, useRef, type MutableRefObject } from "react";
-import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 import { RedEmergencyLights, WaterSpray } from "./effects";
+import { WebStyleTruck } from "./web-style-truck";
 import { ThemedStations, StationFires } from "./stations";
 import {
   RESCUE_DURATION, advanceTruck, closestStation, damping,
   initialPose, stations, type Controls, type TruckPose,
   type Rescue, type StationId,
 } from "./physics";
-
-const TRUCK_GLB = "/models/jarcedev/v1/ladder-truck.glb";
 
 export type SceneProps = {
   day:boolean;
@@ -26,133 +24,6 @@ export type SceneProps = {
   onRescueComplete:(stationId:StationId)=>void;
   onMetrics:(fps:number,calls:number)=>void;
 };
-
-function LowPolyWheel({ x, z }: { x: number; z: number }) {
-  return (
-    <group position={[x, .62, z]} rotation={[0, 0, Math.PI / 2]}>
-      <mesh castShadow>
-        <cylinderGeometry args={[.53, .53, .31, 12]} />
-        <meshStandardMaterial color="#141923" roughness={.94} />
-      </mesh>
-      <mesh position={[0, x < 0 ? .18 : -.18, 0]}>
-        <cylinderGeometry args={[.27, .27, .04, 12]} />
-        <meshStandardMaterial color="#b7cbd5" metalness={.68} roughness={.33} />
-      </mesh>
-    </group>
-  );
-}
-
-function LowPolyTruck({ lights }: { lights: boolean }) {
-  return (
-    <group>
-      <mesh castShadow position={[0, 1.02, 0]}>
-        <boxGeometry args={[2.38, .36, 6.6]} />
-        <meshStandardMaterial color="#182839" />
-      </mesh>
-      <mesh castShadow position={[0, 1.74, .52]}>
-        <boxGeometry args={[2.40, 1.39, 4.42]} />
-        <meshStandardMaterial color="#b72737" metalness={.22} roughness={.45} />
-      </mesh>
-      <mesh castShadow position={[0, 1.73, -2.31]}>
-        <boxGeometry args={[2.48, 1.87, 2.12]} />
-        <meshStandardMaterial color="#cb2d40" metalness={.17} roughness={.51} />
-      </mesh>
-      <mesh castShadow position={[0, 2.77, -2.23]}>
-        <boxGeometry args={[2.46, .21, 2.20]} />
-        <meshStandardMaterial color="#f0f3f7" metalness={.14} roughness={.43} />
-      </mesh>
-      <mesh position={[0, 2.25, -3.405]}>
-        <boxGeometry args={[2.08, .70, .08]} />
-        <meshStandardMaterial color="#2f607a" metalness={.38} roughness={.33} />
-      </mesh>
-      <mesh position={[0, 1.53, -3.43]}>
-        <boxGeometry args={[1.16, .52, .09]} />
-        <meshStandardMaterial color="#bfd1da" metalness={.75} roughness={.28} />
-      </mesh>
-      <mesh castShadow position={[0, .89, -3.56]}>
-        <boxGeometry args={[2.68, .3, .42]} />
-        <meshStandardMaterial color="#d7e5ea" metalness={.68} roughness={.34} />
-      </mesh>
-      <mesh position={[0, 2.52, .49]} castShadow>
-        <boxGeometry args={[2.41, .16, 4.43]} />
-        <meshStandardMaterial color="#f0f4f7" roughness={.46} />
-      </mesh>
-      {[-1, 1].map((side) => (
-        <group key={side}>
-          <mesh position={[side * 1.25, 1.75, -2.23]}>
-            <boxGeometry args={[.08, .54, .94]} />
-            <meshStandardMaterial color="#3b6a83" metalness={.25} roughness={.39} />
-          </mesh>
-          <mesh position={[side * 1.23, 1.51, .44]}>
-            <boxGeometry args={[.045, .13, 4.12]} />
-            <meshStandardMaterial color="#f0f4f7" />
-          </mesh>
-          {[-.2, .67, 1.54].map((z) => (
-            <mesh key={z} position={[side * 1.25, 1.91, z]}>
-              <boxGeometry args={[.05, .58, .68]} />
-              <meshStandardMaterial color="#b4c9d3" metalness={.7} roughness={.33} />
-            </mesh>
-          ))}
-          <mesh position={[side * .88, 1.39, -3.49]}>
-            <boxGeometry args={[.37, .23, .08]} />
-            <meshStandardMaterial color="#f8f3e8" emissive="#fff3cc" emissiveIntensity={.24} />
-          </mesh>
-          <mesh position={[side * .80, 2.97, -2.44]}>
-            <cylinderGeometry args={[.17, .17, .14, 10]} />
-            <meshStandardMaterial color="#f23c4d" emissive={lights ? "#ff2537" : "#9c1b31"}
-              emissiveIntensity={lights ? 1.65 : .08} />
-          </mesh>
-        </group>
-      ))}
-      {[-2.2, .15, 2.30].flatMap((z) => [-1, 1].map((side) => (
-        <LowPolyWheel key={z + ":" + side} x={side * 1.25} z={z} />
-      )))}
-      <group position={[0, 2.85, .45]}>
-        {[-.54, .54].map((side) => (
-          <mesh key={side} position={[side, .12, -.22]} castShadow>
-            <boxGeometry args={[.10, .15, 4.48]} />
-            <meshStandardMaterial color="#cbdde4" metalness={.77} roughness={.29} />
-          </mesh>
-        ))}
-        {Array.from({ length: 12 }, (_, index) => (
-          <mesh key={index} position={[0, .17, -2.09 + index * .34]}>
-            <boxGeometry args={[1.15, .075, .10]} />
-            <meshStandardMaterial color="#e3edf1" metalness={.68} roughness={.32} />
-          </mesh>
-        ))}
-        <mesh position={[0, .17, -2.52]}>
-          <boxGeometry args={[.25, .26, .36]} />
-          <meshStandardMaterial color="#2d4759" metalness={.34} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function LoadedTruck({ truck }: { truck: MutableRefObject<TruckPose> }) {
-  const { scene } = useGLTF(TRUCK_GLB);
-  const instance = useMemo(() => {
-    const clone = scene.clone(true);
-    clone.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-    return clone;
-  }, [scene]);
-  const wheelNodes=useMemo(
-    ()=>["Axle1_L","Axle1_R","Axle2_L","Axle2_R","Axle3_L","Axle3_R"]
-      .map(key=>instance.getObjectByName(key+"_WheelPivot")).filter((obj):obj is THREE.Object3D=>Boolean(obj)),
-    [instance],
-  );
-  useFrame((_,delta)=>{
-    const spin=truck.current.speed*Math.min(delta,.07)/.56;
-    for(const wheel of wheelNodes)wheel.rotation.x+=spin;
-  });
-  return <primitive object={instance}/>;
-}
-
 
 export function WorldScene({
   day,overview,modelMode,lights,rescued,controls,truck,rescue,
@@ -296,11 +167,9 @@ export function WorldScene({
           ))}
         </group>
       ))}
-      <StationFires rescued={rescued} rescue={rescue}/>
+      <StationFires rescued={rescued} rescue={rescue} modelMode={modelMode}/>
       <group ref={truckGroup} position={[0,0,initialPose().z]}>
-        <Suspense fallback={<LowPolyTruck lights={lights}/>}>
-          {modelMode?<LoadedTruck truck={truck}/>:<LowPolyTruck lights={lights}/>}
-        </Suspense>
+        <WebStyleTruck truck={truck}/>
         <RedEmergencyLights active={lights}/>
       </group>
       <WaterSpray truck={truck} rescue={rescue}/>
