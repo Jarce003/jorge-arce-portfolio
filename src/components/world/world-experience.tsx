@@ -1,118 +1,28 @@
 "use client";
 
 import Link from "next/link";
+
+import { getProjects } from "@/content/projects";
+import { rescueIsFinished } from "@/lib/world-fire";
+import { closestDiscoverableStation, isInDiscoveryRange } from "@/lib/world-proximity";
+import { ProjectPanel } from "@/components/projects/project-panel";
+import { ProjectArtwork } from "@/components/projects/project-artwork";
+import { ContactStudio } from "@/components/portfolio/contact-studio";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createWorldRenderer,
   worldStations,
-  type WorldPosition,
 } from "./world-renderer";
+import type { WorldPosition, WorldRescueEffect } from "./world-contract";
 import { MobileDriveControls } from "./mobile-drive-controls";
 
 type Language = "es" | "en";
-type StationId = (typeof worldStations)[number]["id"];
+type StationId = string;
 type ControlKey = "forward" | "reverse" | "left" | "right";
 type ViewMode = "world" | "directory";
 type SceneStatus = "loading" | "ready" | "fallback";
 
-type StationCopy = {
-  id: StationId;
-  name: string;
-  icon: string;
-  type: string;
-  problem: string;
-  answer: string;
-  technology: string;
-  slug?: string;
-};
-
-const stationCopy: Record<Language, StationCopy[]> = {
-  es: [
-    {
-      id: "firetrack",
-      name: "FireTrack",
-      icon: "🧯",
-      type: "Gestión y trazabilidad",
-      problem: "Inventarios, inspecciones y registros dispersos entre documentos y procesos manuales.",
-      answer: "Una solución multiempresa que concentra controles, estados, registros, alertas y acceso QR.",
-      technology: "Next.js · PostgreSQL · Supabase",
-      slug: "firetrack",
-    },
-    {
-      id: "evacuaplan",
-      name: "EvacuaPlan Studio",
-      icon: "🏢",
-      type: "Herramientas especializadas",
-      problem: "Crear croquis de evacuación con herramientas genéricas puede ser lento y complejo.",
-      answer: "Un editor enfocado en símbolos, estructuras, transformaciones y documentos técnicos.",
-      technology: "React · TypeScript · Konva",
-      slug: "evacuaplan-studio",
-    },
-    {
-      id: "acreditaciones",
-      name: "Acreditaciones",
-      icon: "🎓",
-      type: "Asistente IA · Planificación",
-      problem: "Históricos extensos y reglas distintas para calcular ciclos, vigencias y prioridades.",
-      answer: "Consultas en lenguaje natural con IA, cálculos verificados y planificación sobre reglas de acreditación. La demostración usa datos ficticios.",
-      technology: "Python · FastAPI · DuckDB · OR-Tools",
-      slug: "acreditaciones-app",
-    },
-    {
-      id: "hidrantes",
-      name: "Hidrantes",
-      icon: "📍",
-      type: "Geolocalización operativa",
-      problem: "Consultar la ubicación y características de hidrantes sobre el terreno.",
-      answer: "Una aplicación con mapa público accesible mediante QR y gestión privada de ubicaciones.",
-      technology: "Next.js · Supabase · Geolocalización",
-      slug: "hidrantes-app",
-    },
-  ],
-  en: [
-    {
-      id: "firetrack",
-      name: "FireTrack",
-      icon: "🧯",
-      type: "Operational traceability",
-      problem: "Inventory, inspection and maintenance data scattered across documents and manual workflows.",
-      answer: "A multi-company product that brings inspections, records, alerts and QR access together.",
-      technology: "Next.js · PostgreSQL · Supabase",
-      slug: "firetrack",
-    },
-    {
-      id: "evacuaplan",
-      name: "EvacuaPlan Studio",
-      icon: "🏢",
-      type: "Specialized tools",
-      problem: "Designing evacuation plans with generic tools is often slow and unnecessarily complex.",
-      answer: "A purpose-built editor for symbols, structures, transformations and technical documents.",
-      technology: "React · TypeScript · Konva",
-      slug: "evacuaplan-studio",
-    },
-    {
-      id: "acreditaciones",
-      name: "Accreditations",
-      icon: "🎓",
-      type: "AI assistant · Planning",
-      problem: "Extensive historical records and multiple rules for calculating validity, cycles and priorities.",
-      answer: "Natural-language queries with AI, validated calculations and planning based on accreditation rules. The public preview uses fictional data.",
-      technology: "Python · FastAPI · DuckDB · OR-Tools",
-      slug: "acreditaciones-app",
-    },
-    {
-      id: "hidrantes",
-      name: "Hydrants",
-      icon: "📍",
-      type: "Operational mapping",
-      problem: "Finding the location and characteristics of hydrants while working in the field.",
-      answer: "A public QR-accessible map with a private location management module.",
-      technology: "Next.js · Supabase · Geolocation",
-      slug: "hidrantes-app",
-    },
-  ],
-};
 
 const copy = {
   es: {
@@ -123,7 +33,7 @@ const copy = {
     directory: "Ver proyectos directamente",
     controls: "WASD o flechas · conducir el camión escalera",
     keyboard: "E · abrir proyecto",
-    reset: "R · reiniciar",
+    reset: "R · reiniciar rescate",
     camera: "Cambiar cámara",
     cameraChase: "Vista trasera",
     cameraOverview: "Vista aérea",
@@ -131,7 +41,7 @@ const copy = {
     accelerate: "Avanzar",
     reverse: "Retroceder",
     guide: "Guía",
-    guideText: "Conduce hacia las cuatro estaciones. Al acercarte, pulsa E o el botón «Descubrir» para conocer el problema y la solución. También puedes seleccionar una estación de la lista para viajar directamente.",
+    guideText: "Acércate a una estación: no necesitas tocar el edificio. Pulsa Descubrir para lanzar agua, apagar las llamas y revelar el proyecto. También puedes elegirlo en la lista.",
     close: "Cerrar",
     discover: "Descubrir",
     visit: "Ir a la estación",
@@ -159,13 +69,22 @@ const copy = {
     stations: "Estaciones",
     quickAccess: "Elige qué proyecto descubrir",
     profile: "Mi perfil y proyectos",
-    shortInstructions: "WASD / Flechas: conducir · E: descubrir · C: cámara · L: luces · R: reiniciar",
+    shortInstructions: "WASD / Flechas: conducir · E: agua y descubrir · C: cámara · L: luces · N: día/noche · R: reiniciar",
     mobileInstructions: "Usa el volante y los pedales para conducir. Pulsa 🚨 para las luces y ▦ para elegir proyectos.",
     interaction: "Conduce el camión escalera para descubrir cómo convierto problemas reales en soluciones.",
     loading: "Cargando el mundo...",
     noWebgl: "Este dispositivo no pudo cargar el mundo 3D. Puedes descubrir todos los proyectos desde esta vista.",
     lightsAnnouncement: "Iluminación del camión",
     closeProjects: "Cerrar estaciones",
+    dayMode: "Día / noche",
+    day: "Día",
+    night: "Noche",
+    dayModeInstructions: "N · cambiar día y noche",
+    fireStatus: "Incendio pendiente",
+    recovery: "Estación recuperada",
+    extinguishing: "El camión está lanzando agua para apagar las llamas…",
+    rescued: "Estaciones recuperadas",
+    replay: "Reiniciar rescate",
   },
   en: {
     eyebrow: "JARCEDEV / INTERACTIVE WORLD",
@@ -175,7 +94,7 @@ const copy = {
     directory: "Browse projects directly",
     controls: "WASD or arrow keys · drive the ladder truck",
     keyboard: "E · open project",
-    reset: "R · restart",
+    reset: "R · restart rescue",
     camera: "Change camera",
     cameraChase: "Chase view",
     cameraOverview: "Bird's-eye view",
@@ -183,7 +102,7 @@ const copy = {
     accelerate: "Accelerate",
     reverse: "Reverse",
     guide: "Guide",
-    guideText: "Drive towards any of the four stations. When nearby, press E or Discover to see the problem and solution. You can also select a station to travel there directly.",
+    guideText: "Drive near a station; you don’t have to touch the building. Press Discover to spray water, extinguish the flames and reveal the project. You can also use the station list.",
     close: "Close",
     discover: "Discover",
     visit: "Travel to station",
@@ -211,38 +130,52 @@ const copy = {
     stations: "Stations",
     quickAccess: "Choose a project to discover",
     profile: "Profile and projects",
-    shortInstructions: "WASD / Arrows: drive · E: discover · C: camera · L: lights · R: reset",
+    shortInstructions: "WASD / Arrows: drive · E: spray and discover · C: camera · L: lights · N: day/night · R: restart",
     mobileInstructions: "Use the steering wheel and pedals to drive. Press 🚨 for the lights and ▦ to browse projects.",
     interaction: "Drive the aerial ladder truck and discover how I turn real operational problems into digital solutions.",
     loading: "Loading the world...",
     noWebgl: "This device could not load the 3D world. You can still browse every project here.",
     lightsAnnouncement: "Truck lighting",
     closeProjects: "Close stations",
+    dayMode: "Day / night",
+    day: "Day",
+    night: "Night",
+    dayModeInstructions: "N · toggle day and night",
+    fireStatus: "Fire still burning",
+    recovery: "Station recovered",
+    extinguishing: "The ladder truck is spraying water to extinguish the flames…",
+    rescued: "Stations recovered",
+    replay: "Restart rescue",
   },
 } as const;
 
 function closestStation(position: WorldPosition): StationId | null {
-  const close = worldStations
-    .map((station) => ({
-      id: station.id,
-      distance: Math.hypot(station.x - position.x, station.z - position.z),
-    }))
-    .sort((a, b) => a.distance - b.distance)[0];
-  return close?.distance < 7.3 ? close.id : null;
+  return closestDiscoverableStation(position, worldStations);
 }
 
-export function WorldExperience({ lang }: { lang: Language }) {
+export function WorldExperience({ lang, siteKey = "" }: { lang: Language; siteKey?: string }) {
   const t = copy[lang];
-  const stations = stationCopy[lang];
+  // All station panels and navigation labels come from the shared project manifest.
+  const stations = getProjects(lang).map((project) => ({
+    ...project,
+    id: project.station.id,
+    name: project.title,
+    type: project.category,
+    answer: project.solution,
+    technology: project.technologies.join(" · "),
+  }));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const vehicleRef = useRef({ x: 0, z: 0, heading: 0, speed: 0 });
   const inputRef = useRef(new Set<ControlKey>());
   const touchSteeringRef = useRef(0);
   const nearbyRef = useRef<StationId | null>(null);
+  const extinguishedRef = useRef<Set<StationId>>(new Set());
+  const rescueRef = useRef<WorldRescueEffect | null>(null);
   const stationMarkerRefs = useRef<Partial<Record<StationId, HTMLButtonElement | null>>>({});
   const cameraModeRef = useRef<"chase" | "overview">("chase");
   const overlayOpenRef = useRef(false);
   const lightsOnRef = useRef(false);
+  const daytimeRef = useRef<"day" | "night">("day");
 
   const [mode, setMode] = useState<ViewMode>("world");
   const [sceneStatus, setSceneStatus] = useState<SceneStatus>("loading");
@@ -250,8 +183,10 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const [activeStation, setActiveStation] = useState<StationId | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [visited, setVisited] = useState<StationId[]>([]);
+  const [rescuing, setRescuing] = useState(false);
   const [cameraMode, setCameraMode] = useState<"chase" | "overview">("chase");
   const [lightsOn, setLightsOn] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<"day" | "night">("day");
   const [stationMenuOpen, setStationMenuOpen] = useState(false);
 
   const setMobileSteering = useCallback((value: number) => {
@@ -261,6 +196,11 @@ export function WorldExperience({ lang }: { lang: Language }) {
   const setMobilePedal = useCallback((pedal: "forward" | "reverse", pressed: boolean) => {
     if (pressed) inputRef.current.add(pedal);
     else inputRef.current.delete(pedal);
+  }, []);
+
+  const toggleDay = useCallback(() => {
+    daytimeRef.current = daytimeRef.current === "day" ? "night" : "day";
+    setTimeOfDay(daytimeRef.current);
   }, []);
 
   const toggleLights = useCallback(() => {
@@ -274,26 +214,67 @@ export function WorldExperience({ lang }: { lang: Language }) {
   }, []);
 
   useEffect(() => {
-    overlayOpenRef.current = Boolean(activeStation) || guideOpen || stationMenuOpen || mode === "directory";
+    overlayOpenRef.current = rescuing || Boolean(activeStation) || guideOpen || stationMenuOpen || mode === "directory";
     if (overlayOpenRef.current) {
       inputRef.current.clear();
       touchSteeringRef.current = 0;
     }
-  }, [activeStation, guideOpen, stationMenuOpen, mode]);
+  }, [activeStation, guideOpen, stationMenuOpen, mode, rescuing]);
 
   const activeCopy = stations.find((station) => station.id === activeStation);
   const nearestCopy = stations.find((station) => station.id === nearby);
 
   const openStation = useCallback((id: StationId) => {
-    setActiveStation(id);
+    const location = worldStations.find((station) => station.id === id);
+    if (!location || rescueRef.current) return;
+
     setStationMenuOpen(false);
-    setVisited((previous) => previous.includes(id) ? previous : [...previous, id]);
+    setGuideOpen(false);
     inputRef.current.clear();
+    touchSteeringRef.current = 0;
+
+    // Previously recovered stations may always be reopened immediately.
+    if (extinguishedRef.current.has(id) ||
+      mode === "directory" || sceneStatus !== "ready" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      extinguishedRef.current.add(id);
+      setVisited((previous) => previous.includes(id) ? previous : [...previous, id]);
+      setActiveStation(id);
+      return;
+    }
+
+    // Direct selection also remains possible for keyboard/touch accessibility:
+    // position the vehicle near the building before launching its water jet.
+    const truck = vehicleRef.current;
+    if (!isInDiscoveryRange(truck, location)) {
+      truck.x = location.x;
+      truck.z = location.z + (location.z < 0 ? 7 : -7);
+      truck.heading = location.z < 0 ? 0 : Math.PI;
+    }
+    truck.speed = 0;
+    rescueRef.current = { stationId: id, startedAt: performance.now() / 1000 };
+    setActiveStation(null);
+    setRescuing(true);
+  }, [mode, sceneStatus]);
+
+  const resetJourney = useCallback(() => {
+    rescueRef.current = null;
+    extinguishedRef.current.clear();
+    Object.assign(vehicleRef.current, { x: 0, z: 0, heading: 0, speed: 0 });
+    nearbyRef.current = null;
+    inputRef.current.clear();
+    touchSteeringRef.current = 0;
+    setNearby(null);
+    setVisited([]);
+    setActiveStation(null);
+    setStationMenuOpen(false);
+    setGuideOpen(false);
+    setRescuing(false);
   }, []);
 
   const travelTo = useCallback((id: StationId) => {
     const location = worldStations.find((station) => station.id === id);
-    if (!location) return;
+    if (!location || rescueRef.current) return;
     const vehicle = vehicleRef.current;
     vehicle.x = location.x;
     vehicle.z = location.z + (location.z < 0 ? 7 : -7);
@@ -327,7 +308,6 @@ export function WorldExperience({ lang }: { lang: Language }) {
     let running = true;
     let raf = 0;
     let previousTime = 0;
-    let lastPaint = 0;
     let sceneIsVisible = true;
     const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
     const observer = new IntersectionObserver(([entry]) => {
@@ -342,20 +322,17 @@ export function WorldExperience({ lang }: { lang: Language }) {
 
     function frame(time: number) {
       if (!running) return;
-      // Limit drawing on narrow mobile screens, and stop using the GPU when
-      // the visitor scrolls down to detailed case studies.
-      if (canvasElement.clientWidth < 640 && time - lastPaint < 30) {
-        raf = window.requestAnimationFrame(frame);
-        return;
-      }
-      lastPaint = time;
-      const dt = previousTime ? Math.min((time - previousTime) / 1000, .055) : .016;
+      // Draw on every available display refresh, including portrait mobile.
+      // The previous 30ms mobile throttle dropped alternating frames on
+      // 60Hz displays, visibly stepping the truck and its chase camera.
+      // Cap only unusually long background/frame stalls to avoid jumps.
+      const dt = previousTime ? Math.max(0, Math.min((time - previousTime) / 1000, .10)) : 1 / 60;
       previousTime = time;
 
       if (document.visibilityState === "visible" && sceneIsVisible) {
         const v = vehicleRef.current;
         const input = inputRef.current;
-        const acceptingControls = !overlayOpenRef.current;
+        const acceptingControls = !overlayOpenRef.current && !rescueRef.current;
         const accelerating = acceptingControls && input.has("forward") ? 1 : 0;
         const reversing = acceptingControls && input.has("reverse") ? 1 : 0;
         const direction = accelerating - reversing;
@@ -380,7 +357,21 @@ export function WorldExperience({ lang }: { lang: Language }) {
           nearbyRef.current = station;
           setNearby(station);
         }
-        renderer.render(v, v.heading, time / 1000, motionMedia.matches, cameraModeRef.current, lightsOnRef.current);
+        const rescue = rescueRef.current;
+        const seconds = time / 1000;
+        if (rescue && rescueIsFinished(seconds, rescue.startedAt)) {
+          extinguishedRef.current.add(rescue.stationId);
+          rescueRef.current = null;
+          setVisited((previous) => previous.includes(rescue.stationId)
+            ? previous : [...previous, rescue.stationId]);
+          setRescuing(false);
+          setActiveStation(rescue.stationId);
+        }
+        renderer.render(
+          v, v.heading, seconds, motionMedia.matches, cameraModeRef.current,
+          lightsOnRef.current, daytimeRef.current, extinguishedRef.current,
+          rescueRef.current,
+        );
         for (const station of worldStations) {
           const element = stationMarkerRefs.current[station.id];
           if (!element) continue;
@@ -423,14 +414,16 @@ export function WorldExperience({ lang }: { lang: Language }) {
         openStation(nearbyRef.current);
       }
       if (key === "r" && !event.repeat) {
-        Object.assign(vehicleRef.current, { x: 0, z: 0, heading: 0, speed: 0 });
-        setActiveStation(null);
+        resetJourney();
       }
       if (key === "c" && !event.repeat) {
         toggleCamera();
       }
       if (key === "l" && !event.repeat) {
         toggleLights();
+      }
+      if (key === "n" && !event.repeat) {
+        toggleDay();
       }
       if (key === "m" && !event.repeat) {
         setStationMenuOpen(true);
@@ -466,7 +459,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
       touchSteeringRef.current = 0;
       renderer.dispose();
     };
-  }, [mode, openStation, toggleCamera, toggleLights]);
+  }, [mode, openStation, toggleCamera, toggleLights, toggleDay, resetJourney]);
 
 
   return (
@@ -511,21 +504,31 @@ export function WorldExperience({ lang }: { lang: Language }) {
 
       <div className="absolute inset-x-3 top-3 z-20 flex items-start justify-between gap-2 sm:inset-x-8 sm:top-7 lg:inset-x-12">
         <div className="min-w-0 max-w-lg">
-          <h1 className="inline-flex rounded-full border border-violet-300/30 bg-[#0a152b]/80 px-3 py-2 text-[10px] font-bold tracking-[.17em] text-violet-100 shadow-lg backdrop-blur-md sm:text-xs">
-            {t.brand}
+          <h1 className="inline-flex rounded-full border border-violet-300/30 bg-[#0a152b]/80 px-2.5 py-2 text-[10px] font-bold tracking-[.13em] text-violet-100 shadow-lg backdrop-blur-md sm:px-3 sm:text-xs">
+            <span className="sm:hidden">JD · 3D</span><span className="hidden sm:inline">{t.brand}</span>
           </h1>
-          <div className="hidden rounded-2xl border border-white/10 bg-slate-950/45 p-4 shadow-xl backdrop-blur-md md:mt-4 md:block lg:max-w-md lg:p-5">
-            <h2 className="max-w-md text-balance text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">{t.headline}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-200">{t.interaction}</p>
-            <Link href={"/" + lang + "/portfolio"} className="mt-4 inline-flex min-h-10 items-center rounded-full border border-violet-200/40 bg-violet-400/15 px-4 text-xs font-semibold text-white hover:bg-violet-400/25">
-              {t.profile} <span className="ml-2" aria-hidden="true">↗</span>
-            </Link>
-          </div>
+          <span aria-live="polite" className="ml-2 inline-flex rounded-full border border-emerald-300/25 bg-slate-950/60 px-2.5 py-2 text-[10px] font-semibold text-emerald-200 backdrop-blur">
+            {visited.length}/{stations.length} ✓
+          </span>
+          <p className="mt-2 hidden max-w-xs rounded-xl bg-slate-950/50 px-3 py-2 text-xs text-slate-200 backdrop-blur lg:block">
+            {lang === "es" ? "Explora problemas convertidos en soluciones." : "Explore problems turned into solutions."}
+          </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2" role="group" aria-label={t.orientation}>
           {mode === "world" && (
             <>
+              <button
+                type="button"
+                onClick={toggleDay}
+                aria-label={t.dayMode + ": " + (timeOfDay === "day" ? t.day : t.night)}
+                aria-pressed={timeOfDay === "day"}
+                title={t.dayMode + " (N)"}
+                className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
+              >
+                <span aria-hidden="true" className="text-lg leading-5">{timeOfDay === "day" ? "☀" : "☾"}</span>
+                <span className="text-[9px] font-semibold sm:text-[11px]">{timeOfDay === "day" ? t.day : t.night}</span>
+              </button>
               <button
                 type="button"
                 onClick={toggleLights}
@@ -565,7 +568,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
             onClick={() => { setGuideOpen(true); setStationMenuOpen(false); }}
             aria-label={t.info}
             title={t.info}
-            className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
+            className="hidden sm:flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl border border-white/20 bg-[#0a152b]/80 px-2 text-white shadow-lg backdrop-blur-md hover:bg-white/15 sm:min-w-16 sm:px-3"
           >
             <span aria-hidden="true" className="text-lg leading-5">ⓘ</span>
             <span className="text-[9px] font-semibold sm:text-[11px]">{lang === "es" ? "Info" : "Info"}</span>
@@ -573,12 +576,19 @@ export function WorldExperience({ lang }: { lang: Language }) {
         </div>
       </div>
 
-      {mode === "world" && sceneStatus === "ready" && nearby && !activeCopy && !stationMenuOpen && !guideOpen && (
+      {mode === "world" && sceneStatus === "ready" && nearby && !activeCopy && !stationMenuOpen && !guideOpen && !rescuing && (
         <div role="status" className="absolute inset-x-4 bottom-[155px] z-20 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-xl border border-violet-200/35 bg-[#0a152b]/90 px-3 py-2 text-xs shadow-xl backdrop-blur sm:bottom-24">
           <span className="font-semibold">{nearestCopy?.icon} {nearestCopy?.name}</span>
           <button type="button" onClick={() => openStation(nearby)} className="min-h-10 rounded-lg bg-violet-300 px-4 text-xs font-bold text-slate-950 hover:bg-violet-200">
-            {t.discover} ↗
+            💧 {t.discover} ↗
           </button>
+        </div>
+      )}
+
+      {mode === "world" && rescuing && (
+        <div role="status" aria-live="polite"
+          className="pointer-events-none absolute inset-x-4 bottom-[170px] z-30 mx-auto max-w-sm rounded-xl border border-cyan-200/45 bg-[#071b31]/90 px-4 py-3 text-center text-xs font-semibold text-cyan-100 shadow-2xl backdrop-blur-sm sm:bottom-28">
+          <span aria-hidden="true">💧 </span>{t.extinguishing}
         </div>
       )}
 
@@ -600,7 +610,7 @@ export function WorldExperience({ lang }: { lang: Language }) {
               lang={lang}
               onSteer={setMobileSteering}
               onPedal={setMobilePedal}
-              disabled={sceneStatus !== "ready" || Boolean(activeStation) || guideOpen || stationMenuOpen}
+              disabled={sceneStatus !== "ready" || Boolean(activeStation) || guideOpen || stationMenuOpen || rescuing}
             />
           </div>
           <div className="hidden items-center justify-between gap-4 rounded-xl border border-white/15 bg-slate-950/65 px-5 py-3 text-xs text-slate-200 shadow-lg backdrop-blur-lg lg:flex">
@@ -655,7 +665,9 @@ export function WorldExperience({ lang }: { lang: Language }) {
                   onClick={() => { travelTo(station.id); openStation(station.id); }}
                   className="flex min-h-16 items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:border-violet-300/50 hover:bg-violet-400/10"
                 >
-                  <span aria-hidden="true" className="text-2xl">{station.icon}</span>
+                  <span className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg bg-[#091525]">
+                    <ProjectArtwork key={station.slug} project={station} decorative sizes="80px" />
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{station.name}</span>
                     <span className="block text-[11px] text-slate-400">{station.type}</span>
@@ -664,38 +676,26 @@ export function WorldExperience({ lang }: { lang: Language }) {
                 </button>
               ))}
             </div>
-            <Link href={"/" + lang + "/portfolio"} className="mt-4 inline-flex min-h-11 items-center rounded-full border border-violet-200/30 px-5 text-sm font-semibold text-white hover:bg-violet-400/10">{t.profile} ↗</Link>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href={"/" + lang + "/portfolio"} className="inline-flex min-h-11 items-center rounded-full border border-violet-200/30 px-5 text-sm font-semibold text-white hover:bg-violet-400/10">{t.profile} ↗</Link>
+              <button type="button" onClick={() => { setStationMenuOpen(false); setGuideOpen(true); }} className="inline-flex min-h-11 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-slate-200 hover:bg-white/10">ⓘ {t.guide}</button>
+              <button type="button" onClick={resetJourney} className="inline-flex min-h-11 items-center rounded-full border border-rose-300/25 px-4 text-sm font-semibold text-rose-200 hover:bg-rose-400/10">↻ {t.replay}</button>
+            </div>
           </div>
         </div>
       )}
 
       {activeCopy && (
-        <div className="absolute inset-0 z-50 flex items-end justify-center bg-[#071221]/85 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="world-station-title">
-          <article className="max-h-[87svh] w-full max-w-lg overflow-y-auto rounded-2xl border border-violet-200/25 bg-[#101d34] p-5 shadow-2xl sm:rounded-3xl sm:p-8">
-            <div className="flex items-start justify-between gap-3">
-              <span aria-hidden="true" className="flex size-12 items-center justify-center rounded-xl bg-white/10 text-2xl">{activeCopy.icon}</span>
-              <button type="button" onClick={() => setActiveStation(null)} aria-label={t.close} className="min-h-11 min-w-11 rounded-xl border border-white/15 text-xl hover:bg-white/15">×</button>
-            </div>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[.14em] text-violet-300">{activeCopy.type}</p>
-            <h2 id="world-station-title" className="mt-1 text-2xl font-semibold sm:text-3xl">{activeCopy.name}</h2>
-            <div className="mt-5 space-y-4">
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-amber-300">{t.problem}</h3><p className="mt-1 text-sm leading-6 text-slate-200">{activeCopy.problem}</p></div>
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-emerald-300">{t.answer}</h3><p className="mt-1 text-sm leading-6 text-slate-200">{activeCopy.answer}</p></div>
-              <div><h3 className="text-[11px] font-bold uppercase tracking-[.15em] text-slate-400">{t.technologies}</h3><p className="mt-1 text-xs leading-6 text-slate-300">{activeCopy.technology}</p></div>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {activeCopy.slug ? (
-                <Link href={"/" + lang + "/projects/" + activeCopy.slug} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950 hover:bg-violet-200">
-                  {activeCopy.id === "acreditaciones" ? (lang === "es" ? "Probar asistente IA" : "Try AI assistant") : t.caseStudy} ↗
-                </Link>
-              ) : (
-                <Link href={"/" + lang + "/portfolio#"+(lang==="es"?"proyectos":"projects")} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-violet-300 px-4 text-center text-sm font-bold text-slate-950">{t.moreProjects} ↗</Link>
-              )}
-              <button type="button" onClick={() => setActiveStation(null)} className="min-h-11 rounded-full border border-white/20 px-4 text-sm font-semibold hover:bg-white/10">{t.back}</button>
-            </div>
-          </article>
+        <div className="absolute inset-0 z-50 flex items-end justify-center bg-[#071221]/85 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center"
+          role="dialog" aria-modal="true" aria-label={activeCopy.title}>
+          <div className="max-h-[92svh] w-full max-w-3xl overflow-y-auto rounded-[1.3rem]">
+            <ProjectPanel lang={lang} project={activeCopy} onClose={() => setActiveStation(null)}
+              directLink={false} />
+          </div>
         </div>
       )}
+
+      <ContactStudio lang={lang} siteKey={siteKey} worldLauncher />
 
       {guideOpen && (
         <div className="absolute inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="world-guide-title">

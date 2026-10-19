@@ -47,10 +47,10 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(siteUrl),
-    applicationName: "Jorge Arce Portfolio",
+    applicationName: "JarceDev",
     title: {
       default: content.metadata.title,
-      template: `%s | Jorge Arce`,
+      template: `%s | JarceDev`,
     },
     description: content.metadata.description,
     authors: [{ name: "Jorge Arce Solano" }],
@@ -67,15 +67,18 @@ export async function generateMetadata({
       type: "website",
       locale: lang === "es" ? "es_CR" : "en_US",
       url: canonicalUrl,
-      siteName: "Jorge Arce Solano",
+      siteName: "JarceDev",
       title: content.metadata.title,
       description: content.metadata.description,
       images: [
         {
-          url: "/og/portfolio-og-2026.png",
+          url: `/${lang}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: "Jorge Arce Solano — Digital Solutions & Process Improvement",
+          type: "image/png",
+          alt: lang === "es"
+            ? "JarceDev — Portafolio interactivo 3D de ingeniería de software"
+            : "JarceDev — Interactive 3D software portfolio",
         },
       ],
     },
@@ -83,7 +86,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: content.metadata.title,
       description: content.metadata.description,
-      images: ["/og/portfolio-og-2026.png"],
+      images: [`/${lang}/opengraph-image`],
     },
     icons: {
       icon: [

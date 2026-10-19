@@ -42,3 +42,14 @@ next-env.d.ts
 
 # public environment variable template
 !/.env.example
+
+# Built production 3D experience is generated during Next.js build
+/public/experience/
+
+# Standalone R3F source
+/experiments/r3f/node_modules/
+/experiments/r3f/dist/
+
+# Blender source outputs: hand-reviewed exports can be committed later
+/tools/blender/output/
+*.blend1

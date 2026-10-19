@@ -1,0 +1,229 @@
+name: JarceDev 3D Portfolio Quality Checks
+
+on:
+  push:
+    branches:
+      - experiment/jarcedev-blender-r3f-pilot
+    paths:
+      - "experiments/r3f/**"
+      - "tools/blender/**"
+      - "src/app/[lang]/page.tsx"
+      - "src/app/[lang]/layout.tsx"
+      - "src/app/[lang]/opengraph-image.tsx"
+      - "src/app/[lang]/portfolio/page.tsx"
+      - "src/app/[lang]/projects/[slug]/page.tsx"
+      - "src/content/site-content.ts"
+      - "src/components/portfolio/compact-portfolio.tsx"
+      - "src/lib/site-url.ts"
+      - "src/app/manifest.ts"
+      - "public/cv/**"
+      - "scripts/check-social-preview.mjs"
+      - "scripts/build-experience.mjs"
+      - "package.json"
+      - ".github/workflows/r3f-laboratory-checks.yml"
+  pull_request:
+    paths:
+      - "experiments/r3f/**"
+      - "tools/blender/**"
+      - "src/app/[lang]/page.tsx"
+      - "src/app/[lang]/layout.tsx"
+      - "src/app/[lang]/opengraph-image.tsx"
+      - "src/app/[lang]/portfolio/page.tsx"
+      - "src/app/[lang]/projects/[slug]/page.tsx"
+      - "src/content/site-content.ts"
+      - "src/components/portfolio/compact-portfolio.tsx"
+      - "src/lib/site-url.ts"
+      - "src/app/manifest.ts"
+      - "public/cv/**"
+      - "scripts/check-social-preview.mjs"
+      - "scripts/build-experience.mjs"
+      - "package.json"
+      - "scripts/pilot-3d-local.ps1"
+      - "scripts/review-jarcedev-final.ps1"
+      - "scripts/abrir-revision-jarcedev.ps1"
+      - "tsconfig.json"
+      - ".github/workflows/r3f-laboratory-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  experimental-scene:
+    name: React Three Fiber interactive experience build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: experiments/r3f
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static Blender Python syntax check
+        working-directory: .
+        run: python3 -m py_compile tools/blender/build_assets.py
+      - name: Install only sandbox dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check and build isolated R3F scene
+        run: npm run build
+      - name: Verify existing WebGL2 renderer is preserved
+        working-directory: .
+        run: |
+          git diff --exit-code -- package.json package-lock.json
+          test -f src/components/world/world-renderer.ts
+
+  production-portfolio:
+    name: Integrated Next.js production build with 3D experience
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install portfolio dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify project data and WebGL2 physics
+        run: |
+          npm run check:encoding
+          npm run check:projects
+          npm run test:world
+      - name: Build integrated Next.js and Three Fiber portfolio
+        run: npm run build
+      - name: Confirm static 3D application and current website
+        run: |
+          test -f public/experience/index.html
+          grep -q '/experience/assets/' public/experience/index.html
+          test -f src/components/world/world-renderer.ts
+          test -f src/app/\[lang\]/portfolio/page.tsx
+      - name: Verify WhatsApp share preview, OG images and absence of CV downloads
+        run: node scripts/check-social-preview.mjs
+
+  blender-model-export:
+    name: Generate and validate actual Blender GLB assets (no deployment)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Blender 4 from Ubuntu repositories
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender python3-numpy
+          blender --version | head -1
+      - name: Export original ladder truck and FireTrack station
+        run: |
+          blender --background --factory-startup --python tools/blender/build_assets.py
+      - name: Validate generated GLB signatures, parts and mobile budgets
+        run: |
+          node tools/blender/verify_glb.mjs public/models/jarcedev/v1/ladder-truck.glb public/models/jarcedev/v1/firetrack-station.glb public/models/jarcedev/v1/evacuaplan-station.glb public/models/jarcedev/v1/acreditaciones-station.glb public/models/jarcedev/v1/hidrantes-station.glb
+      - name: Keep the five generated GLB models in the isolated experiment branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/experiment/jarcedev-blender-r3f-pilot'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/models/jarcedev/v1/*.glb
+          if ! git diff --cached --quiet; then
+            git commit -m "build(blender): refresh five generated 3D models [skip ci]"
+            git push origin HEAD:experiment/jarcedev-blender-r3f-pilot
+          fi
+      - name: Archive reviewable Blender and GLB assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarcedev-blender-models
+          path: |
+            public/models/jarcedev/v1/*.glb
+            tools/blender/output/*.blend
+          retention-days: 7
+          if-no-files-found: error
+
+  interactive-browser:
+    name: Chromium driving and fire-rescue screenshots
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    needs: [experimental-scene, blender-model-export]
+    defaults:
+      run:
+        working-directory: experiments/r3f
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get generated original 3D models
+        uses: actions/download-artifact@v4
+        with:
+          name: jarcedev-blender-models
+          path: .
+      - name: Install isolated R3F and browser test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run pilot in headless Chromium
+        run: npm run test:browser
+      - name: Preserve screenshots for visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarcedev-r3f-browser-screenshots
+          path: experiments/r3f/test-artifacts/*.png
+          if-no-files-found: warn
+          retention-days: 7
+
+  windows-powershell-startup:
+    name: Windows PowerShell 5.1 script parser and encoding
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js 22 on Windows
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install lab dependencies on Windows
+        working-directory: experiments/r3f
+        run: npm install --no-audit --no-fund
+      - name: Build lab with parent Next.js PostCSS config on Windows
+        working-directory: experiments/r3f
+        run: npm run build
+      - name: Parse and verify ASCII-safe startup scripts
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $paths = @(
+            'scripts/pilot-3d-local.ps1',
+            'scripts/review-jarcedev-final.ps1',
+            'scripts/abrir-revision-jarcedev.ps1',
+            'scripts/validate-local.ps1'
+          )
+          foreach ($path in $paths) {
+            $full = (Resolve-Path -LiteralPath $path).Path
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $full, [ref]$tokens, [ref]$parseErrors
+            ) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error $_.Message }
+              throw "PowerShell parse error in $path"
+            }
+            if ($path -eq 'scripts/pilot-3d-local.ps1') {
+              $nonAscii = @([System.IO.File]::ReadAllBytes($full) | Where-Object { $_ -gt 127 })
+              if ($nonAscii.Count -ne 0) {
+                throw "Windows PowerShell 5.1 requires ASCII or UTF-8 BOM: $path"
+              }
+            }
+            Write-Host "Windows PowerShell 5.1 parser OK: $path" -ForegroundColor Green
+          }
