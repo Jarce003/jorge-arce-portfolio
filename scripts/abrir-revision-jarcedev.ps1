@@ -1,13 +1,11 @@
-# JarceDev visual review: two isolated Git worktrees, one VS Code terminal.
+# JarceDev candidate review: keep existing WebGL2 on port 3000; start only the candidate.
 # Existing worktrees, user edits, main and Vercel remain untouched.
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $parent = Join-Path $env:USERPROFILE "nodeJsProyects\Ejercicios python"
 $repo = Join-Path $parent "jorge-arce-portfolio"
-$web = Join-Path $parent "jarcedev-review-webgl2"
 $lab = Join-Path $parent "jarcedev-review-blender-r3f"
-$webBranch = "feature/jarcedev-world-first-v3"
 $labBranch = "experiment/jarcedev-blender-r3f-pilot"
 
 function Git-Checked([string[]]$GitArguments, [string]$Step) {
@@ -56,29 +54,24 @@ try {
     if ($version -lt [version]"22.12.0") { throw "Node 22.12+ required." }
 
     Write-Host "Preparando revision aislada. Tus carpetas actuales no se modifican." -ForegroundColor Cyan
-    Git-Checked @("-C", $repo, "fetch", "origin", $webBranch, $labBranch) "fetch"
-    Ensure-Review $web $webBranch
+    Git-Checked @("-C", $repo, "fetch", "origin", $labBranch) "fetch"
     Ensure-Review $lab $labBranch
 
     $modelDirectory = Join-Path $lab "public\models\jarcedev\v1"
     foreach ($name in @("ladder-truck.glb", "firetrack-station.glb", "evacuaplan-station.glb", "acreditaciones-station.glb", "hidrantes-station.glb")) {
         if (-not (Test-Path (Join-Path $modelDirectory $name))) { throw "Missing Blender model: $name" }
     }
-    foreach ($port in @(3000, 3001)) {
-        if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
-            throw "Port $port already in use. Stop the other server using this port."
+    # Port 3000 belongs to the already-running WebGL2 portfolio.
+    # Never stop, reuse, or start another process on that port.
+    $candidatePort = $null
+    foreach ($port in 3002..3020) {
+        if (-not (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)) {
+            $candidatePort = $port
+            break
         }
     }
+    if ($null -eq $candidatePort) { throw "No free preview port in 3002..3020." }
 
-    $nextBin = Join-Path $web "node_modules\next\dist\bin\next"
-    if (-not (Test-Path $nextBin)) {
-        Write-Host "Instalando dependencias WebGL2..." -ForegroundColor Cyan
-        Push-Location $web
-        try {
-            & npm.cmd ci --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "WebGL2 npm ci failed." }
-        } finally { Pop-Location }
-    }
     $candidateNextBin = Join-Path $lab "node_modules\next\dist\bin\next"
     if (-not (Test-Path $candidateNextBin)) {
         Write-Host "Instalando dependencias del portafolio integrado..." -ForegroundColor Cyan
@@ -96,23 +89,21 @@ try {
     } finally { Pop-Location }
 
     $nodeExe = (Get-Command node.exe).Source
-    $webOut = Join-Path $env:TEMP "jarcedev-review-webgl2.stdout.log"
-    $webErr = Join-Path $env:TEMP "jarcedev-review-webgl2.stderr.log"
     $labOut = Join-Path $env:TEMP "jarcedev-review-final.stdout.log"
     $labErr = Join-Path $env:TEMP "jarcedev-review-final.stderr.log"
-    Write-Host "Iniciando portafolio final y referencia WebGL2 sin nuevas ventanas..." -ForegroundColor Cyan
-    $webProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $web -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3001' -f $nextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $webOut -RedirectStandardError $webErr
-    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $lab -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3000' -f $candidateNextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
+    Write-Host "Iniciando solo el candidato, sin abrir nuevas ventanas..." -ForegroundColor Cyan
+    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $lab -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p {1}' -f $candidateNextBin, $candidatePort) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
 
-    Wait-Ready "http://127.0.0.1:3000/es" $labProcess $labErr
-    Wait-Ready "http://127.0.0.1:3001/es" $webProcess $webErr
-    Wait-Ready "http://127.0.0.1:3000/experience/index.html" $labProcess $labErr
+    $previewBase = "http://127.0.0.1:$candidatePort"
+    Wait-Ready "$previewBase/es" $labProcess $labErr
+    Wait-Ready "$previewBase/experience/index.html" $labProcess $labErr
     Write-Host ""
     Write-Host "LISTO. Abre en Chrome:" -ForegroundColor Green
-    Write-Host "CANDIDATO FINAL: http://127.0.0.1:3000/es" -ForegroundColor Yellow
-    Write-Host "WEBGL2 ANTERIOR: http://127.0.0.1:3001/es" -ForegroundColor Gray
-    Write-Host "Para cerrar: Stop-Process -Id $($webProcess.Id),$($labProcess.Id)" -ForegroundColor DarkGray
-    Write-Host "Sin modificar main, tus cambios locales o Vercel." -ForegroundColor DarkGray
+    Write-Host "CANDIDATO BLENDER + R3F: $previewBase/es" -ForegroundColor Yellow
+    Write-Host "WEBGL2 EXISTENTE:      http://127.0.0.1:3000/es (sin cambios)" -ForegroundColor Gray
+    Write-Host "Para cerrar solo el candidato: Stop-Process -Id $($labProcess.Id)" -ForegroundColor DarkGray
+    Write-Host "Ningun proceso del puerto 3000 fue modificado." -ForegroundColor DarkGray
+    Write-Host "Sin cambios en main ni Vercel." -ForegroundColor DarkGray
 } catch {
     Write-Host ("ERROR: " + $_.Exception.Message) -ForegroundColor Red
     exit 1
