@@ -1,6 +1,13 @@
 name: JarceDev R3F Laboratory Checks
 
 on:
+  push:
+    branches:
+      - experiment/jarcedev-blender-r3f-pilot
+    paths:
+      - "experiments/r3f/**"
+      - "tools/blender/**"
+      - ".github/workflows/r3f-laboratory-checks.yml"
   pull_request:
     paths:
       - "experiments/r3f/**"
