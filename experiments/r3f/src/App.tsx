@@ -288,7 +288,7 @@ export function App(){
                 onClick={discover} disabled={!nearby||busy}>
                 {nearby&&rescued.has(nearby)?"Ver proyecto":"Descubrir"}
               </button>
-            )
+            )}
           </div>
         )}
       </section>
