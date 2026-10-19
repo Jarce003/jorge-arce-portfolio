@@ -217,8 +217,9 @@ try{
   await mobileGallery.getByText("CÓMO TRABAJO").waitFor();
   await mobileGallery.getByRole("link",{name:/Explorar mundo 3D/}).click();
   assert.equal(new URL(mobile.url()).origin,mobileOrigin);
-  await mobile.getByRole("button",{name:"Acelerar"}).dispatchEvent("pointerdown");
-  await mobile.getByRole("button",{name:"Acelerar"}).dispatchEvent("pointerup");
+  // A real touchscreen tap exercises browser-managed pointer capture;
+  // synthetic pointerdown has no active pointer ID in headless Chromium.
+  await mobile.getByRole("button",{name:"Acelerar"}).tap();
   // Completing ALL FOUR in portrait used to fail silently. Verify actual
   // visibility and ability to revisit the reward after closing it.
   for(const number of ["2","3","1","4"]){
