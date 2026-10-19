@@ -137,6 +137,8 @@ try{
       if(node.naturalWidth===0)throw Error("Project art failed to load");
     }));
   });
+  await gallery.getByText("CÓMO TRABAJO").waitFor();
+  await gallery.locator("p").filter({hasText:"Conozco el trabajo diario"}).waitFor();
   await gallery.getByRole("button",{name:/Consultar/}).click();
   await gallery.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
   await gallery.getByRole("link",{name:/Explorar mundo 3D/}).click();
@@ -177,12 +179,25 @@ try{
   await capture(mobile,"mobile-portrait.png");
   assert.equal(await mobile.getByRole("button",{name:"Acelerar"}).count(),1);
   assert.equal(await mobile.getByRole("button",{name:"Izquierda"}).count(),1);
-  assert.equal(await mobile.locator(".stations-dock button").count(),4);
-  const nav=mobile.getByRole("button",{name:/Acreditaciones/}).first();
-  await nav.click();
-  await mobile.getByRole("button",{name:/Descubrir/}).click();
-  await mobile.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
-  console.log("Portrait viewport, touch controls and mobile discovery OK.");
+  // Mobile uses a wheel and a rescue counter. Project navigation lives
+  // inside the world rather than in a second horizontal list of cards.
+  assert.equal(await mobile.locator(".stations-dock").isVisible(),false);
+  assert.equal(await mobile.locator(".steering-wheel-art").isVisible(),true);
+  await mobile.getByRole("status",{name:/Proyectos descubiertos: 0 de 4/}).waitFor();
+  for(const name of ["Luces","Vista aérea","Noche"]){
+    const button=mobile.getByRole("button",{name:new RegExp(name)});
+    assert.equal(await button.isVisible(),true);
+  }
+  const mobileOrigin=new URL(mobile.url()).origin;
+  await mobile.getByRole("button",{name:/Proyectos/}).first().click();
+  const mobileGallery=mobile.locator('[data-testid="inline-portfolio"]');
+  await mobileGallery.waitFor();
+  await mobileGallery.getByText("CÓMO TRABAJO").waitFor();
+  await mobileGallery.getByRole("link",{name:/Explorar mundo 3D/}).click();
+  assert.equal(new URL(mobile.url()).origin,mobileOrigin);
+  await mobile.getByRole("button",{name:"Acelerar"}).dispatchEvent("pointerdown");
+  await mobile.getByRole("button",{name:"Acelerar"}).dispatchEvent("pointerup");
+  console.log("Portrait viewport, steering wheel, labeled controls and restored gallery OK.");
 
   if(errors.length)throw Error("JavaScript errors:\n"+errors.join("\n"));
   console.log("All four-project R3F browser checks passed; screenshots: "+screenshots);
