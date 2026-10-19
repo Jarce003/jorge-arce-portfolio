@@ -7,6 +7,7 @@ import { CompactPortfolio } from "@/components/portfolio/compact-portfolio";
 import { ContactStudio } from "@/components/portfolio/contact-studio";
 import { siteContent } from "@/content/site-content";
 import { isLocale } from "@/lib/i18n";
+import { SOCIAL_PREVIEW_IMAGE, SOCIAL_PREVIEW_WIDTH, SOCIAL_PREVIEW_HEIGHT } from "@/lib/social-preview";
 
 type Props = { params: Promise<{ lang: string }> };
 
@@ -21,12 +22,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: "/" + lang + "/portfolio",
       title: lang === "es" ? "Proyectos y método de trabajo | JarceDev" : "Projects and process | JarceDev",
       description: siteContent[lang].projectsSection.description,
-      images: [{ url: "/" + lang + "/opengraph-image", width: 1200, height: 630,
+      images: [{ url: SOCIAL_PREVIEW_IMAGE, width: SOCIAL_PREVIEW_WIDTH, height: SOCIAL_PREVIEW_HEIGHT,
         alt: lang === "es" ? "Cuatro proyectos de JarceDev" : "Four JarceDev projects" }],
     },
     twitter: {
       card: "summary_large_image",
-      images: ["/" + lang + "/opengraph-image"],
+      images: [SOCIAL_PREVIEW_IMAGE],
     },
     alternates: {
       canonical: "/" + lang + "/portfolio",
