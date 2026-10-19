@@ -134,8 +134,8 @@ export function WaterSpray({
  */
 const BEACONS = [
   // Two cab roof groups and front grille warning lights.
-  {at:[-.43,2.65,-2.16], size:[.35,.18,.23], phase:0, light:true},
-  {at:[ .43,2.65,-2.16], size:[.35,.18,.23], phase:1, light:true},
+  {at:[-.75,2.66,-2.50], size:[.34,.18,.23], phase:0, light:true},
+  {at:[ .75,2.66,-2.50], size:[.34,.18,.23], phase:1, light:true},
   {at:[-.69,1.13,-3.02], size:[.36,.23,.10], phase:0, light:false},
   {at:[ .69,1.13,-3.02], size:[.36,.23,.10], phase:1, light:false},
   // Lower body-mounted side lights, clear of cab windows; no floating lenses.
