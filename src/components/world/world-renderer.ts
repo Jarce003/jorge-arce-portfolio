@@ -854,6 +854,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     elapsed: number,
     reducedMotion: boolean,
     lightsOn: boolean,
+    lowDetail: boolean,
   ) {
     const { x, z } = position;
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 2.1) * .015;
@@ -916,20 +917,44 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         wheel(wheelX, wheelZ);
       }
     }
-    // Tail end carries utility deck and warning reflectors.
-    part(0,.73,2.78,2.18,.42,.30,"#29384a");
-    part(-.72,.84,2.98,.39,.17,.09,"#ffb482");
-    part(.72,.84,2.98,.39,.17,.09,"#ffb482");
+    // Tail end: more substantial American ladder-truck rear face.
+    part(0,.73,2.78,2.25,.42,.32,"#29384a");
+    part(0,1.14,2.91,2.16,.75,.10,"#bd2639");
+    part(0,1.54,2.93,1.90,.085,.11,"#f2e9c7");
+    part(0,.90,3.00,1.94,.09,.12,"#f2e9c7");
+    for (const side of [-1,1]) {
+      part(side*.91,1.17,3.02,.22,.36,.13,"#ff4c50",Number(lightsOn));
+      part(side*.91,.73,3.02,.28,.14,.13,"#ffbd75");
+    }
 
-    // Wide American forward cab, windshield, upper white roof.
-    part(0,1.51,-1.89,2.20,1.52,1.73,"#e8464f");
+    // Original, deliberately stylized American cab (no FDNY insignia).
+    // Broad flat windshield, cab-over-engine roof and bold red/white mass.
+    part(0,1.51,-1.89,2.20,1.52,1.73,"#c72c3e");
     part(0,2.34,-1.88,2.29,.20,1.87,"#f5f7fc");
-    part(0,1.76,-2.79,1.83,.62,.09,"#92c9df");
-    part(0,1.48,-2.85,2.03,.13,.15,"#e8f0f8");
-    // Silver chrome grille and heavy-duty front bumper.
-    part(0,.84,-2.96,1.54,.39,.12,"#9faec0");
-    for(let i=-2;i<=2;i++) part(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
-    part(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
+    part(0,2.19,-1.89,2.26,.24,1.85,"#f1f6f7");
+    part(0,1.79,-2.79,1.94,.70,.09,"#315b74");
+    part(0,1.45,-2.85,2.04,.12,.15,"#e8f0f8");
+    // Deep silver front surround and center windshield divider.
+    part(0,1.80,-2.853,.09,.77,.075,"#e0e6eb");
+    part(-.97,1.79,-2.853,.07,.81,.07,"#f2f7f8");
+    part(.97,1.79,-2.853,.07,.81,.07,"#f2f7f8");
+    // Black wipers and sun visor give depth without any bitmap texture.
+    for (const side of [-1,1]) {
+      part(side*.48,1.56,-2.873,.67,.035,.052,"#192939");
+    }
+    part(0,2.37,-2.75,2.10,.11,.24,"#edf4f5");
+    // Recognizable broad chrome American pumper/ladder nose.
+    part(0,.89,-2.99,1.45,.53,.14,"#233744");
+    for(let i=-3;i<=3;i++) part(i*.19,.88,-3.081,.06,.48,.04,"#d7e3e9");
+    part(0,1.20,-3.049,1.58,.065,.14,"#dce8ed");
+    part(0,.58,-3.10,2.48,.31,.35,"#b7c6d0");
+    part(0,.74,-3.30,2.27,.055,.06,"#eef4f6");
+    for (const side of [-1,1]) {
+      part(side*1.08,.78,-3.30,.17,.28,.10,"#283744");
+      part(side*.88,1.34,-2.97,.43,.42,.14,"#e7eef3");
+      part(side*.88,1.37,-3.06,.32,.15,.05,"#ffe9a0");
+      part(side*.88,1.16,-3.06,.32,.10,.05,"#f8f8fb");
+    }
     for(const side of [-1,1]) {
       part(side*.78,1.11,-2.97,.36,.24,.09,lightsOn ? "#fff1b3" : "#8d8871",lightsOn ? 1 : 0);
       part(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
@@ -939,8 +964,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       part(side*1.48,1.79,-2.46,.21,.29,.15,"#c7d7e6");
     }
     part(0,1.39,-2.97,.18,.24,.07,"#202a38");
-    // Emergency warning light bar: generic red / blue.
-    part(0,2.50,-2.16,1.30,.12,.30,"#c5d0df");
+    // ALL emergency warning lamps are red; alternating left/right banks.
+    part(0,2.50,-2.16,1.58,.12,.32,"#c5d0df");
     part(-.38,2.61,-2.16,.43,.19,.32,redBright ? "#ff243b" : "#7c3443",redBright ? 1 : 0);
     part(.38,2.61,-2.16,.43,.19,.32,rightBright ? "#ff3447" : "#71303a",rightBright ? 1 : 0);
     // Additional side and rear flashers keep the light toggle visible from
@@ -954,6 +979,38 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         side === -1 ? Number(redBright) : Number(rightBright));
     }
 
+    // Distinctive cab profile and compartment faces; keep geometries few
+    // on portrait devices, where each WebGL draw call has greater cost.
+    if (!lowDetail) {
+      for (const side of [-1, 1]) {
+        // Window frame, door seam and cab step on the two flanks.
+        part(side*1.14,1.90,-1.89,.065,.53,.78,"#294759");
+        part(side*1.20,1.90,-1.89,.065,.39,.61,"#6ca2b4");
+        part(side*1.18,1.27,-1.97,.06,.13,.83,"#f6e7af");
+        part(side*1.20,.65,-1.93,.35,.14,1.12,"#738b9b");
+        part(side*1.43,1.85,-2.48,.20,.24,.12,"#253747");
+        for (const wheelPosition of [.90,2.05]) {
+          part(side*1.14,.83,wheelPosition,.22,.17,1.08,"#d6e1e5");
+        }
+        // Louvered stainless steel compartments and dark handles.
+        for (const compartment of [-.15,.77,1.69]) {
+          for (const y of [.96,1.09,1.22,1.35]) {
+            part(side*1.26,y,compartment,.035,.025,.55,"#ebf0f1");
+          }
+        }
+        part(side*1.22,1.69,.78,.09,.09,2.10,"#f7cf60");
+      }
+      // Checkerboard-like safety grip plates on rear equipment deck.
+      for (const zOffset of [1.48,1.81,2.14]) {
+        part(0,2.17,zOffset,1.16,.035,.13,"#e8eef2");
+      }
+      // Pneumatic gear storage and raised floodlight supports.
+      for (const side of [-.8,.8]) {
+        part(side,2.62,1.97,.12,.49,.11,"#d4dfe5");
+        part(side,2.88,1.97,.55,.17,.27,"#c6d5df");
+        part(side,2.91,1.80,.43,.10,.075,"#fff1c3",0.35);
+      }
+    }
     // Bright horizontal emergency-apparatus reflectors.
     for(const side of [-1,1]) {
       part(side*1.11,1.27,.98,.055,.12,3.03,"#f3edca");
@@ -998,6 +1055,22 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
 
     // Distinctive white roof-mounted rescue rack.
     part(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
+
+    // Costa Rican flag as five static color strips (blue, white, broad red,
+    // white, blue). No waving cloth simulation, extra textures or logos.
+    // Rear location keeps it visible from the default chase camera.
+    const flagX = -.71;
+    const flagZ = 3.14;
+    part(flagX-.38,2.72,flagZ,.05,1.36,.07,"#d3dce2");
+    for (const [atY, thickness, color] of [
+      [3.225,.14,"#174e9a"],
+      [3.085,.14,"#f8f9fc"],
+      [2.875,.28,"#cf243b"],
+      [2.665,.14,"#f8f9fc"],
+      [2.525,.14,"#174e9a"],
+    ] as const) {
+      part(flagX,atY,flagZ,.75,thickness,.055,color);
+    }
 
     if (lightsOn) {
       // Lens blooms at the lamp positions and visible pools on the road.
@@ -1064,7 +1137,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         drawStationFire(station, elapsed, lowDetail, reducedMotion,
           extinguishedStations.has(station.id) || waterHasReachedFlames);
       }
-      drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
+      drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn, lowDetail);
       if (rescue) {
         const station = worldStations.find((item) => item.id === rescue.stationId);
         if (station && !reducedMotion) {
