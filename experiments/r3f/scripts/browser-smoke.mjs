@@ -39,7 +39,12 @@ async function capture(page,filename){
 // screenshot alone: assert that the actual 3D shell and essential controls
 // fit within the device's available CSS viewport after rotation.
 async function checkResponsiveWorld(page,width,height,label){
-  await page.setViewportSize({width,height});
+  // New device contexts must be created at the target orientation. Changing
+  // viewport size on an isMobile:true Chromium context leaves its layout
+  // viewport locked to the ORIGINAL phone width despite updating height.
+  // That is an emulator limitation, not an actual orientation test.
+  const size=page.viewportSize();
+  assert.deepEqual(size,{width,height},label+": wrong emulated device dimensions");
   await page.waitForTimeout(350);
   // React Three Fiber measures its parent with ResizeObserver. On headless
   // SwiftShader it can take several frames to process an orientation change;
@@ -312,16 +317,30 @@ try{
   await phoneAward.getByRole("button",{name:"Seguir explorando"}).click();
   console.log("Mobile: four rescues, visible 4/4 award, dismiss and reopen OK.");
 
-  // Rotate the SAME phone after completing the rescues.
-  // Regression: landscape was locked to min-height:460px, cutting the world
-  // and hiding lower controls on 390px-tall phone screens.
-  await checkResponsiveWorld(mobile,844,390,"phone-landscape");
-  // Return to portrait so reward/drive state is not lost after rotation.
-  await checkResponsiveWorld(mobile,390,844,"phone-portrait-after-rotation");
+  // Independent device contexts emulate the TRUE viewport dimensions of a
+  // physical landscape phone and portrait/landscape tablets. Each should be
+  // fully visible immediately on page load, without a blank strip or clipping.
+  await mobile.close();
+
+  const devices=[
+    {width:844,height:390,label:"phone-landscape"},
+    {width:820,height:1180,label:"tablet-portrait"},
+    {width:1180,height:820,label:"tablet-landscape"},
+  ];
+  for(const device of devices){
+    const page=await browser.newPage({
+      viewport:{width:device.width,height:device.height},
+      isMobile:true,hasTouch:true,deviceScaleFactor:1,
+    });
+    page.on("pageerror",error=>errors.push(device.label+": "+error.message));
+    await loadPage(page);
+    await checkResponsiveWorld(page,device.width,device.height,device.label);
+    await page.getByRole("button",{name:"Acelerar"}).tap();
+    await page.close();
+  }
 
   // The English route must use the SAME interactive 3D world, localized
   // project details, gallery, and working touch/keyboard controls.
-  await mobile.close();
   const english=await browser.newPage({viewport:{width:1200,height:790}});
   english.on("pageerror",error=>errors.push("English: "+error.message));
   await english.goto(url+"?lang=en",{waitUntil:"networkidle",timeout:45000});
@@ -341,10 +360,6 @@ try{
   await enGallery.getByText("HOW I WORK").waitFor();
   await enGallery.getByRole("link",{name:/Explore the 3D world/}).click();
   assert.equal(await enGallery.count(),0);
-  // Tablets must not inherit either the desktop-only arrows or the
-  // cramped phone landscape HUD. Verify both orientations in the same scene.
-  await checkResponsiveWorld(english,820,1180,"tablet-portrait");
-  await checkResponsiveWorld(english,1180,820,"tablet-landscape");
   await english.getByRole("button",{name:"Español"}).click();
   await english.getByRole("button",{name:"Ver perfil y proyectos"}).waitFor();
   assert.match(english.url(),/lang=es/);
