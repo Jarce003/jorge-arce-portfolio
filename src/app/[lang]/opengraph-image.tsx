@@ -34,12 +34,9 @@ export default async function OpenGraphImage({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div style={{
-              display: "flex", width: 62, height: 62, justifyContent: "center",
-              alignItems: "center", borderRadius: 16, background: "#544b98",
-              fontSize: 26, fontWeight: 900,
-            }}>JD</div>
-            <div style={{ display: "flex", fontSize: 31, fontWeight: 800,
-              letterSpacing: 5, marginLeft: 20 }}>JARCEDEV</div>
+              display: "flex", fontSize: 34, fontWeight: 800,
+              letterSpacing: 5,
+            }}>JARCEDEV</div>
           </div>
           <div style={{
             display: "flex", border: "1px solid #7585b0", borderRadius: 30,
@@ -51,19 +48,19 @@ export default async function OpenGraphImage({
         }}>
           <div style={{ display: "flex", color: "#c1abfa",
             fontSize: 19, fontWeight: 700, letterSpacing: 3 }}>
-            {english ? "REAL PROBLEMS · DIGITAL PRODUCTS" : "PROBLEMAS REALES · SOLUCIONES DIGITALES"}
+            {english ? "A SELECTION OF MY WORK" : "UNA MUESTRA DE MI TRABAJO"}
           </div>
           <div style={{
             display: "flex", fontSize: 61, fontWeight: 800, lineHeight: 1.12,
             letterSpacing: -2, marginTop: 19, maxWidth: 1000,
           }}>
-            {english ? "Explore the projects behind JarceDev." : "Explora los proyectos de JarceDev."}
+            {english ? "Ideas turned into software." : "Ideas que se convierten en software."}
           </div>
           <div style={{
             display: "flex", color: "#c1cddd", fontSize: 25, marginTop: 21,
           }}>
-            {english ? "Systems engineering · Product design · AI-assisted development" :
-              "Ingeniería en Sistemas · Diseño de productos · Desarrollo asistido por IA"}
+            {english ? "Engineering · Digital products · Costa Rica" :
+              "Ingeniería · Productos digitales · Costa Rica"}
           </div>
         </div>
         <div style={{
