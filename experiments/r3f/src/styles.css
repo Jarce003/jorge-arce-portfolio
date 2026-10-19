@@ -13,7 +13,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bbadff; outline-offs
 .pilot { position: relative; width: 100vw; height: 100svh; min-height: 410px; overflow: hidden; isolation: isolate; }
 .viewport { position: absolute; inset: 0; z-index: 0; }
 .viewport canvas { display: block; touch-action: none; }
-.topbar, .tools, .overview, .interaction, .drive-controls, .footnote { position: absolute; z-index: 5; }
+.topbar, .tools, .overview, .interaction, .drive-controls, .footnote, .stations-dock { position: absolute; z-index: 5; }
 .topbar {
   top: 0; left: 0; right: 0; min-height: 74px;
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -33,6 +33,23 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bbadff; outline-offs
 }
 .tools button:hover:not(:disabled) { border-color: #ab9ae5; background: #242c4a; }
 .mini-state { display: flex; align-items: center; color: #9ce3d0; border-color: #5eb6a140; }
+.stations-dock {
+  top: 154px; right: 18px; display: flex; flex-direction: column;
+  gap: 7px; width: min(205px, 25vw);
+}
+.stations-dock button {
+  display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+  border:1px solid #8ea2be48; border-radius:12px; min-height:42px;
+  padding:9px 11px; background:#0c1c33db; color:#e2eafa;
+  font-size:11px; font-weight:700; backdrop-filter:blur(8px);
+}
+.stations-dock button.current,.stations-dock button:hover:not(:disabled) {
+  border-color:#c2b0f5; background:#302b4d;
+}
+.stations-dock button[aria-current="location"]{box-shadow:0 0 0 1px #a8a1e16b}
+.stations-dock button span:last-child:not(:first-child){margin-left:auto;color:#99ecd4}
+.project-info-head{display:flex;justify-content:space-between;align-items:center}
+.project-info-head button{color:#fff;background:#23354e;border:1px solid #ffffff38;border-radius:9px;min-width:31px;min-height:31px}
 .overview { top: 142px; left: 19px; max-width: 300px; padding: 16px; background: #0b192edc; border: 1px solid #9aa5c42b; border-radius: 18px; backdrop-filter: blur(10px); }
 .eyebrow { color: #bbaafb; letter-spacing: .17em; font-size: 10px; font-weight: 800; }
 .overview h1 { margin: 8px 0; font-size: 21px; line-height: 1.14; letter-spacing: -.045em; }
@@ -82,6 +99,16 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bbadff; outline-offs
   .tools { top: 70px; right: 9px; left: 9px; max-width: none; gap: 5px; justify-content: center; }
   .tools button, .mini-state { padding: 7px 8px; font-size: 10px; min-height: 35px; }
   .mini-state { display: none; }
+  .stations-dock {
+    top: 113px; left: 10px; right: 10px; width: auto;
+    flex-direction: row; overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: thin; padding: 0 0 5px;
+  }
+  .stations-dock button {
+    flex: 0 0 auto; width: auto; max-width: 165px; min-height: 39px;
+    font-size:10px; padding: 7px 9px; gap:5px; white-space:nowrap;
+  }
+  .stations-dock button span:last-child:not(:first-child) { margin-left:3px }
   /* Phone/tablet view stays immersive: detailed benchmark panel is desktop-only. */
   .overview { display: none; }
   .overview h1 { font-size: 16px; margin: 5px 0; }
