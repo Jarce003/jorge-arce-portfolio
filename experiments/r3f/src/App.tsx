@@ -12,13 +12,13 @@ const projects=getProjects("es");
 const assets=Object.values(MODEL_FILES);
 type Direction="forward"|"reverse"|"left"|"right";
 function projectUrl(slug:string){
-  // When reviewed directly from Vite (/, ports 3002+ or 4174), the
-  // real project case studies remain on the existing WebGL2 site at 3000.
-  // Inside Next.js (/experience/index.html), stay on the same origin.
+  // The standalone Vite preview may occupy port 3000 itself. Send its case
+  // study links to the actual deployed site, never back to the Vite SPA.
+  // The integrated Next.js experience continues to use relative paths.
   if(typeof window!=="undefined" &&
       window.location.pathname==="/" &&
       ["localhost","127.0.0.1"].includes(window.location.hostname)){
-    return "http://127.0.0.1:3000/es/projects/"+slug;
+    return "https://www.jarcedev.com/es/projects/"+slug;
   }
   return "/es/projects/"+slug;
 }
