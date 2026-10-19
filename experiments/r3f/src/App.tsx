@@ -191,7 +191,7 @@ export function App(){
           aria-pressed={lights}
           title="Controla los destellos luminosos del camión; no produce sonido."
           aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
-          <span className="tool-label">{lights?"Luces encendidas":"Luces apagadas"}</span>
+          <span className="tool-label">Luces</span>
         </button>
       </section>
       <nav className="stations-dock" aria-label="Proyectos disponibles">
