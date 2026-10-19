@@ -8,7 +8,9 @@ export type Rescue = { stationId: StationId; startedAt: number };
 export const stations = getWorldStations();
 export const DISCOVERY_DISTANCE = 11.5;
 export const RESCUE_DURATION = 2.35;
-export const initialPose = (): TruckPose => ({ x: 0, z: 0, heading: 0, speed: 0 });
+// Arrive from the west side road, already facing the four buildings.
+// Heading -π/2 points east along the road. Same origin for restart on mobile.
+export const initialPose = (): TruckPose => ({ x: -22, z: 0, heading: -Math.PI/2, speed: 0 });
 
 export function closestStation(pose: TruckPose): StationId | null {
   let best = DISCOVERY_DISTANCE * DISCOVERY_DISTANCE;
