@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 // completely isolated and cannot change Next.js or Vercel builds.
 export default defineConfig({
   publicDir: fileURLToPath(new URL("../../public", import.meta.url)),
+  resolve: { alias: { "@": fileURLToPath(new URL("../../src", import.meta.url)) } },
   // Do not search upward for the Next.js root postcss.config.mjs.
   // The standalone lab uses plain CSS, not @tailwindcss/postcss.
   css: { postcss: { plugins: [] } },
