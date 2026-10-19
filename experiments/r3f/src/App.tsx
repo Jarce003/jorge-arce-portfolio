@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getProjects, type ProjectId } from "@/content/projects";
 import { AcreditacionesDemo } from "./acreditaciones-demo";
 import { PortfolioBrowser } from "./portfolio-browser";
+import { WorldIcon } from "./world-icons";
 import {
   initialPose, closestStation, isAtStation, travelToStation,
   stations, type Controls, type Rescue, type StationId, type TruckPose,
@@ -37,6 +38,7 @@ export function App(){
   const [rewardDismissed,setRewardDismissed]=useState(false);
   const [reducedMotion,setReducedMotion]=useState(false);
   const [mobileGraphics,setMobileGraphics]=useState(false);
+  const [hintVisible,setHintVisible]=useState(true);
   useEffect(()=>{
     let mounted=true;
     Promise.all(assets.map(assetExists)).then(exists=>{
@@ -56,9 +58,15 @@ export function App(){
       narrow.removeEventListener("change",syncNarrow);
     };
   },[]);
+  useEffect(()=>{
+    const timeout=window.setTimeout(()=>setHintVisible(false),6500);
+    return ()=>window.clearTimeout(timeout);
+  },[]);
   const complete=useCallback((id:StationId)=>{
     setBusy(false);
     setRescued(before=>new Set([...before,id]));
+    // A previous Escape must never suppress the final 4/4 award.
+    setRewardDismissed(false);
     setPanel(id);
     setAiOpen(false);
   },[]);
@@ -67,7 +75,8 @@ export function App(){
     Object.assign(truck.current,initialPose());
     rescue.current=null;setNearby(null);setRescued(new Set());
     setPanel(null);setAiOpen(false);setBusy(false);setRewardDismissed(false);
-    setPortfolioOpen(false);
+    setPortfolioOpen(false);setHintVisible(true);
+    window.setTimeout(()=>setHintVisible(false),5500);
   },[]);
   const discover=useCallback(()=>{
     if(rescue.current)return;
@@ -84,7 +93,7 @@ export function App(){
     if(rescue.current)return;
     Object.assign(truck.current,travelToStation(truck.current,id));
     controls.current={forward:false,reverse:false,left:false,right:false};
-    setPanel(null);setAiOpen(false);setNearby(id);
+    setPanel(null);setAiOpen(false);setNearby(id);setHintVisible(false);
   },[]);
   useEffect(()=>{
     const map:Record<string,Direction>={
@@ -97,7 +106,12 @@ export function App(){
       if(target instanceof HTMLElement &&
           (target.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)))return;
       const key=event.key.toLowerCase();
-      if(map[key]){controls.current[map[key]]=true;event.preventDefault();}
+      if(portfolioOpen)return;
+      if(map[key]){controls.current[map[key]]=true;event.preventDefault();setHintVisible(false);}
+      if(/^[1-4]$/.test(key)&&!event.repeat){
+        const station=stations[Number(key)-1];
+        if(station)travel(station.id);
+      }
       if(event.repeat)return;
       if(key==="e")discover();
       if(key==="r")restart();
@@ -105,7 +119,6 @@ export function App(){
       if(key==="c")setOverview(v=>!v);
       if(key==="l")setLights(v=>!v);
       if(key==="escape"){
-        setRewardDismissed(true);
         setPanel(null);
         setAiOpen(false);
       }
@@ -123,12 +136,13 @@ export function App(){
       window.removeEventListener("keyup",keyUp);
       window.removeEventListener("blur",release);
     };
-  },[discover,restart]);
+  },[discover,restart,travel,portfolioOpen]);
   const driveButton=(action:Direction,label:string,glyph:string)=>(
     <button type="button" className={"drive-button drive-"+action}
       aria-label={label} disabled={busy}
       onPointerDown={e=>{
         e.preventDefault();
+        setHintVisible(false);
         e.currentTarget.setPointerCapture(e.pointerId);
         controls.current[action]=true;
       }}
@@ -153,7 +167,7 @@ export function App(){
           gl={{antialias:true,powerPreference:"high-performance"}}>
           <WorldScene day={day} overview={overview} modelMode={modelMode}
             lights={lights} reducedMotion={reducedMotion} rescued={rescued} controls={controls}
-            truck={truck} rescue={rescue} onNearby={setNearby}
+            truck={truck} rescue={rescue} onNearby={setNearby} onStationSelect={travel}
             onRescueComplete={complete} onMetrics={()=>{}}/>
         </Canvas>
       </div>
@@ -169,66 +183,62 @@ export function App(){
           <button type="button" className="go-back" onClick={()=>{
             setFocusedProject("acreditaciones-app");
             setPortfolioOpen(true);
-          }}>
-            <span className="full-label">Mi perfil y proyectos</span>
-            <span className="mobile-label">Proyectos</span>
+          }} aria-label="Ver perfil y proyectos">
+            <WorldIcon name="grid" size={17}/>
+            <span>Proyectos</span>
           </button>
-          <button type="button" className="reset-button" onClick={restart}>Reiniciar</button>
+          <button type="button" className="reset-button" onClick={restart}
+            title="Reiniciar recorrido" aria-label="Reiniciar recorrido">
+            <WorldIcon name="reset" size={17}/>
+            <span>Reiniciar</span>
+          </button>
         </div>
       </header>
-      <section className="tools" aria-label="Preferencias de exploración">
-        <button type="button" onClick={()=>setDay(s=>!s)}
-          aria-label={day?"Noche: activar modo nocturno":"Día: activar modo diurno"}
-          title={day?"Activar modo noche":"Activar modo día"}>
-          <span className="tool-label">{day?"Noche":"Día"}</span>
+      <section className="tools" aria-label="Controles del mundo">
+        <button type="button" onClick={()=>setDay(value=>!value)}
+          aria-label={day?"Activar modo noche":"Activar modo día"}
+          title={day?"Modo noche":"Modo día"}>
+          <WorldIcon name={day?"moon":"sun"} size={20}/>
         </button>
-        <button type="button" onClick={()=>setOverview(s=>!s)}
-          aria-label={overview?"Seguir camión":"Vista aérea"}
-          title={overview?"Seguir camión":"Vista aérea"}>
-          <span className="tool-label">{overview?"Seguir":"Cámara"}</span>
+        <button type="button" onClick={()=>setOverview(value=>!value)}
+          aria-pressed={overview}
+          aria-label={overview?"Volver a cámara del camión":"Activar vista aérea"}
+          title={overview?"Cámara del camión":"Vista aérea"}>
+          <WorldIcon name="camera" size={20}/>
         </button>
-        <button type="button" onClick={()=>setLights(s=>!s)}
+        <button type="button" onClick={()=>setLights(value=>!value)}
           aria-pressed={lights}
-          title="Controla los destellos luminosos del camión; no produce sonido."
+          title={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}
           aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
-          <span className="tool-label">Luces</span>
+          <WorldIcon name="siren" size={20}/>
         </button>
       </section>
-      <nav className="stations-dock" aria-label="Proyectos disponibles">
-        {projects.map(project=>{
-          const id=project.station.id as StationId;
-          const done=rescued.has(id);
-          return (
-            <button key={id} type="button" disabled={busy}
-              aria-current={nearby===id?"location":undefined}
-              onClick={()=>travel(id)} className={nearby===id?"current":""}>
-              <span className="station-icon" aria-hidden="true">{project.icon}</span>
-              <span className="station-details">
-                <strong>{project.title}</strong>
-                <small>{done?"Proyecto descubierto":"Por descubrir"}</small>
-              </span>
-              <span className={"station-progress "+(done?"completed":"pending")}
-                aria-label={done?"Completado":"Pendiente"}>{done?"✓":"○"}</span>
-            </button>
-          );
-        })}
+      <button type="button" className={"rescue-progress "+(allRescued?"is-complete":"")}
+        onClick={()=>{if(allRescued)setRewardDismissed(false);}}
+        disabled={!allRescued} aria-label={allRescued
+          ?"Rescates completados: "+rescued.size+" de "+stations.length+". Ver recompensa"
+          :"Rescates completados: "+rescued.size+" de "+stations.length}
+        title={allRescued?"Ver recompensa":"Rescates completados"}>
+        {allRescued && <WorldIcon name="reset" size={15}/>}
+        <span>{allRescued?"Recompensa":"Rescates"}</span>
+        <strong>{rescued.size}/{stations.length}</strong>
+      </button>
+      {/* Kept in the accessibility tree but offscreen: projects are chosen
+          by approaching/clicking a building or shortcuts 1–4, not a sidebar. */}
+      <nav className="stations-dock" aria-label="Acceso directo a estaciones">
+        {projects.map(project=>(
+          <button key={project.station.id} type="button" disabled={busy}
+            onClick={()=>travel(project.station.id as StationId)}
+            aria-label={"Ir a "+project.title}>{project.title}</button>
+        ))}
       </nav>
-      <section className="overview" aria-label="Introducción y recorrido">
-        <span className="eyebrow">JARCEDEV · MUNDO 3D</span>
-        <h1>Mis proyectos, en un mapa.</h1>
-        <p>Conduce y acércate a cada estación.</p>
-        <div className="journey-status" role="status">
-          <span>Proyectos descubiertos</span>
-          <strong>{rescued.size}/4</strong>
+      {hintVisible && !panel && !busy && !nearby && !showReward && (
+        <div className="drive-hint" role="status">
+          <span>Acércate a una estación</span>
+          <button type="button" onClick={()=>setHintVisible(false)}
+            aria-label="Ocultar ayuda">×</button>
         </div>
-        <div className="journey-track" aria-label={rescued.size+" de 4 proyectos descubiertos"}>
-          <span style={{width:(rescued.size/stations.length*100)+"%"}}/>
-        </div>
-        <p className="key-hint">WASD o flechas para conducir · E para descubrir</p>
-      </section>
-      <div className="mobile-progress" role="status" aria-label={"Proyectos descubiertos: "+rescued.size+" de 4"}>
-        <span>Rescates</span> <strong>{rescued.size}/4</strong>
-      </div>
+      )}
       <section className="interaction" aria-live="polite">
         {selected?(
           <article className="project-info" aria-label={"Proyecto "+selected.title}>
@@ -273,12 +283,12 @@ export function App(){
               </div>
             )}
           </article>
-        ):(
+        ):nearby||busy?(
           <div className="rescue-card">
-            <span aria-hidden="true">{busy?"💧":nearby?"🔥":"🚒"}</span>
+            <span aria-hidden="true">🔥</span>
             <div className="rescue-text">
               <strong>{busy?"Extinguiendo el incendio…":nearbyProject?
-                nearbyProject.title:"Recorre el mapa"}</strong>
+                nearbyProject.title:"Estación cercana"}</strong>
               <small>{busy?"Al terminar conocerás el proyecto.":
                 nearby?(rescued.has(nearby)?"Este proyecto ya fue descubierto. Abre su ficha.":
                 "Apaga el fuego para conocer el proyecto."):"Acércate a una estación."}</small>
@@ -290,10 +300,11 @@ export function App(){
               </button>
             )}
           </div>
-        )}
+        ):null}
       </section>
       {showReward && (
-        <section className="rescue-reward" role="dialog" aria-modal="false"
+        <div className="reward-backdrop" data-testid="reward-backdrop">
+        <section className="rescue-reward" role="dialog" aria-modal="true"
           aria-labelledby="rescue-reward-title" aria-describedby="rescue-reward-detail"
           data-testid="rescue-reward">
           <div className="reward-stars" aria-hidden="true">
@@ -326,6 +337,7 @@ export function App(){
             </button>
           </div>
         </section>
+        </div>
       )}
       {portfolioOpen && <PortfolioBrowser key={focusedProject}
         initialProject={focusedProject} onBack={()=>setPortfolioOpen(false)}/>}
