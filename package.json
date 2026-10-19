@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:encoding": "node scripts/check-encoding.mjs"
+    "check:encoding": "node scripts/check-encoding.mjs",
+    "check:projects": "node scripts/check-projects.mjs",
+    "test:demo": "node --test scripts/test-sample-demo.mjs",
+    "test:world": "node --test scripts/test-world-rescue.mjs",
+    "test:motion": "node --test scripts/test-world-motion.mjs"
   },
   "dependencies": {
     "next": "16.2.12",

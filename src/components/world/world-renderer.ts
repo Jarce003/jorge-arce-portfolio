@@ -1,3 +1,9 @@
+import { getWorldStations, type StructureType } from "@/content/projects";
+import { stationFireStrength, WATER_REACHES_FIRE_SECONDS, waterStreamStrength } from "@/lib/world-fire";
+import { dampingFactor } from "@/lib/world-motion";
+
+import type { WorldPosition, WorldRenderer, WorldRescueEffect } from "./world-contract";
+
 /**
  * JarceDev exploration world — dependency-free WebGL2 prototype.
  *
@@ -5,25 +11,11 @@
  * It intentionally avoids downloading assets or collecting visitor data.
  * A later art-production phase can replace the primitive meshes with GLB.
  */
-export type WorldPosition = { x: number; z: number };
-
 type Vec3 = [number, number, number];
 type Mat4 = Float32Array;
 type Geometry = { buffer: WebGLBuffer; vertices: number };
 type ObjectShape = "cube" | "cone" | "cylinder";
 
-export type WorldRenderer = {
-  render: (
-    position: WorldPosition,
-    heading: number,
-    elapsed: number,
-    reducedMotion: boolean,
-    cameraMode?: "chase" | "overview",
-    lightsOn?: boolean,
-  ) => void;
-  project: (position: WorldPosition, elevation?: number) => { x: number; y: number; visible: boolean };
-  dispose: () => void;
-};
 
 const palette = {
   ground: "#101f30",
@@ -39,12 +31,7 @@ const palette = {
   white: "#e8f0ff",
 };
 
-export const worldStations = [
-  { id: "firetrack", x: -14, z: -12, color: palette.fire },
-  { id: "evacuaplan", x: 14, z: -12, color: palette.cyan },
-  { id: "acreditaciones", x: -14, z: 12, color: palette.purple },
-  { id: "hidrantes", x: 14, z: 12, color: palette.mint },
-] as const;
+export const worldStations = getWorldStations();
 
 function hexColor(hex: string): Vec3 {
   return [
@@ -116,19 +103,21 @@ function modelMatrix(
   sy: number,
   sz: number,
   angle: number,
-  roll = 0,
+  roll: number,
+  result: Mat4,
 ): Mat4 {
+  // Fill a reusable matrix in-place. Allocating a Float32Array for every
+  // building, flame and truck part created hundreds of objects per frame
+  // and intermittent garbage-collection pauses during driving.
   const s = Math.sin(angle);
   const c = Math.cos(angle);
   const cr = Math.cos(roll);
   const sr = Math.sin(roll);
-  // R_y(heading) * R_z(roll) * scale: wheels can rotate around their axle.
-  return new Float32Array([
-    c * cr * sx, sr * sx, -s * cr * sx, 0,
-    -c * sr * sy, cr * sy, s * sr * sy, 0,
-    s * sz, 0, c * sz, 0,
-    x, y, z, 1,
-  ]);
+  result[0] = c * cr * sx; result[1] = sr * sx; result[2] = -s * cr * sx; result[3] = 0;
+  result[4] = -c * sr * sy; result[5] = cr * sy; result[6] = s * sr * sy; result[7] = 0;
+  result[8] = s * sz; result[9] = 0; result[10] = c * sz; result[11] = 0;
+  result[12] = x; result[13] = y; result[14] = z; result[15] = 1;
+  return result;
 }
 
 function makeCube(): Float32Array {
@@ -212,13 +201,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     "uniform vec3 uColor;",
     "uniform float uEmissive;",
     "uniform float uOpacity;",
+    "uniform float uDaylight;",
     "in float vLight;",
     "in float vDepth;",
     "out vec4 outColor;",
     "void main(){",
-    " vec3 color = uColor * mix(vLight, 1.85, clamp(uEmissive, 0.0, 1.0));",
-    " float fog = smoothstep(28.0, 85.0, vDepth) * .30 * (1.0 - clamp(uEmissive, 0.0, 1.0));",
-    " outColor = vec4(mix(color, vec3(0.07, 0.12, 0.20), fog), uOpacity);",
+    " float ambient = mix(0.80, 1.23, uDaylight);",
+    " vec3 color = uColor * mix(vLight * ambient, 1.75, clamp(uEmissive, 0.0, 1.0));",
+    " float fog = smoothstep(28.0, 85.0, vDepth) * .24 * (1.0 - clamp(uEmissive, 0.0, 1.0));",
+    " vec3 horizon = mix(vec3(0.06, 0.11, 0.19), vec3(0.61, 0.73, 0.78), uDaylight);",
+    " outColor = vec4(mix(color, horizon, fog), uOpacity);",
     "}",
   ].join("\n"));
 
@@ -238,6 +230,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   const colorUniform = gl.getUniformLocation(program, "uColor");
   const emissiveUniform = gl.getUniformLocation(program, "uEmissive");
   const opacityUniform = gl.getUniformLocation(program, "uOpacity");
+  const daylightUniform = gl.getUniformLocation(program, "uDaylight");
   const shapes = new Map<ObjectShape, Geometry>();
   for (const [shape, vertices] of [
     ["cube", makeCube()],
@@ -259,6 +252,11 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   let cameraZ = 10;
   let latestVP: Mat4 = new Float32Array(16);
   let lastShape: ObjectShape | null = null;
+  const modelScratch = new Float32Array(16);
+  let lastFrameSeconds: number | null = null;
+  let daylight = 0;
+  let daylightTarget = 0;
+  const fireFadeStart = new Map<string, number>();
   const colors = new Map<string, Vec3>();
   function tint(hex: string): Vec3 {
     if (!colors.has(hex)) colors.set(hex, hexColor(hex));
@@ -287,7 +285,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.vertexAttribPointer(normalAttrib, 3, gl.FLOAT, false, 24, 12);
       lastShape = shape;
     }
-    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll));
+    gl.uniformMatrix4fv(modelUniform, false, modelMatrix(x, y, z, sx, sy, sz, angle, roll, modelScratch));
     gl.uniform3fv(colorUniform, tint(color));
     gl.uniform1f(emissiveUniform, emissive);
     gl.uniform1f(opacityUniform, opacity);
@@ -334,7 +332,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     cylinder(x, .25, z, .36, .42, .36, "#485c70");
     cylinder(x, 1.75, z, .105, 3.2, .105, "#aebfd0");
     cylinder(x, 3.30, z, .48, .15, .48, "#d4dae3");
-    draw("cone", x, 3.10, z, .70, .28, .70, "#ffc77d");
+    draw("cone", x, 3.10, z, .70, .28, .70, daylightTarget > .5 ? "#8bafbd" : "#ffc77d", 0, 0, daylightTarget > .5 ? 0 : 1);
     cylinder(x, .037, z, 1.55, .025, 1.55, "#405a65");
   }
   function skyline() {
@@ -355,9 +353,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       }
     }
   }
-  function fireStation() {
-    const x = -14, z = -12;
-    plot(x,z,palette.fire);
+  function fireStation(x: number, z: number, accent: string, lowDetail: boolean) {
+    plot(x,z,accent);
     box(x, 1.6, z - 1.15, 5.8, 3.2, 4.2, "#dce0e8");
     box(x, 3.45, z - 1.15, 6.35, .45, 4.7, palette.fire);
     for (let i = 0; i < 3; i += 1) {
@@ -370,10 +367,82 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     cylinder(x+3.95, 1.3, z-2.6, .45, 2.6, .45, palette.fire);
     cylinder(x+3.95, 2.75, z-2.6, .70, .35, .70, palette.gold);
+    // Workshop gantry, tool cabinets and a distinct operational beacon.
+    box(x, 3.85, z-1.3, 3.9, .25, 3.0, "#f9fafb");
+    for(const side of [-1,1]) {
+      box(x+side*2.6, 1.25, z+3.55, 1.2, 1.95, .5, "#b9cad8");
+      box(x+side*2.6, 2.1, z+3.85, .9, .15, .10, accent);
+    }
+    box(x, .48, z+3.75, 3.4, .15, 2.1, "#263f57");
+    box(x, .59, z+3.75, 2.75, .08, 1.55, "#4f7188");
+    box(x+3.68, 3.4, z-1.95, .2, 1.0, .2, "#f3f8fc");
+    draw("cone",x+3.68,4.04,z-1.95,.7,.55,.7,accent,0,0,1);
+
+    // Architectural identity: the ladder-operations hall has a recognizable
+    // double-height canopy, service gantry and raised red warning mast.
+    for (const side of [-1, 1]) {
+      box(x+side*2.35, 3.55, z+1.25, .35, 1.95, .34, "#ecf2f6");
+      box(x+side*2.35, 4.52, z+1.25, .56, .17, .6, accent);
+      box(x+side*2.65, 1.06, z-2.95, .17, 1.85, .15, "#a4c6d3");
+    }
+    box(x, 4.57, z+1.25, 5.8, .23, 1.35, "#cddce4");
+    box(x, 4.74, z+1.25, 5.2, .11, 1.05, accent);
+    for (const stripe of [-1.7,-.56,.56,1.7]) {
+      box(x+stripe, 4.77, z+1.76, .15, .07, .22, "#fff0ec");
+    }
+    // Small extinguishers at the front make its subject readable from the
+    // overview camera without labels or extra textures.
+    for (const offset of [-1.1, 0, 1.1]) {
+      cylinder(x+offset, .59, z+4.5, .34, .76, .34, "#c62d41");
+      cylinder(x+offset, 1.01, z+4.5, .27, .13, .27, "#d9e0e6");
+      box(x+offset, 1.18, z+4.5, .22, .10, .22, "#253a4e");
+    }
+    draw("cube",x+3.68,4.36,z-1.95,.62,.18,.62,accent,0,0,daylightTarget > .5 ? .12 : 1);
+
+    // FireTrack: a playful inspection workshop, with oversized equipment
+    // that immediately reads as fire-extinguisher management at road speed.
+    const equipmentX = x - 4.12;
+    const equipmentZ = z + 2.45;
+    box(equipmentX, .46, equipmentZ, 1.65, .14, 2.6, "#294456");
+    for (const zShift of [-.70, .15, .93]) {
+      cylinder(equipmentX, 1.18, equipmentZ+zShift, .63, 1.25, .63, "#c52d3d");
+      cylinder(equipmentX, 1.83, equipmentZ+zShift, .51, .16, .51, "#cbd8e0");
+      box(equipmentX, 1.55, equipmentZ+zShift+.33, .36, .24, .06, "#eaf4f7");
+      box(equipmentX, 1.96, equipmentZ+zShift, .48, .08, .12, "#364e63");
+    }
+    // Front-of-building inventory terminal / QR motif.
+    box(x+3.62, 1.9, z+1.38, 1.36, 2.35, .18, "#162c3e");
+    box(x+3.62, 2.02, z+1.50, 1.15, 1.75, .07, "#59bac5");
+    for (const [dx, dy] of [[-.35,.47],[.35,.47],[-.35,-.3],[.02,.02],[.36,-.42]]) {
+      box(x+3.62+dx,2.02+dy,z+1.57,.21,.21,.04,"#153445");
+    }
+    // Larger but still light-weight architectural elements (desktop only).
+    if (!lowDetail) {
+      // Roof-mounted inspection icon, hose storage and color-coded bays.
+      cylinder(x-1.65, 4.07, z-1.15, 1.45, .20, 1.45, "#eff4f5");
+      cylinder(x-1.65, 4.30, z-1.15, 1.00, .24, 1.00, "#d23646");
+      cylinder(x-1.65, 4.46, z-1.15, .50, .20, .50, "#f7c67b");
+      for (const side of [-1, 1]) {
+        box(x+side*3.03, 1.95, z-1.25, .28, 2.20, 2.95, "#e3eff1");
+        for (const band of [.92, 1.35, 1.78, 2.21]) {
+          box(x+side*3.20, band, z-1.30, .10, .10, 2.5, "#7b9eae");
+        }
+      }
+      for (const offset of [-1.75, 0, 1.75]) {
+        // White maintenance lamps above each service bay.
+        box(x+offset, 2.24, z+1.31, .90, .11, .16, "#f5f8fa");
+        box(x+offset, 2.27, z+1.41, .58, .06, .05, accent);
+      }
+      // Equipment racks and hose coils on the far side of the plot.
+      for (const offset of [-.66, .66]) {
+        cylinder(x+4.04, 1.15, z-.72+offset, .78, .15, .78, "#d1dce2");
+        cylinder(x+4.04, 1.16, z-.72+offset, .42, .20, .42, "#354b5c");
+      }
+      box(x, 4.18, z-3.03, 5.45, .12, .14, "#f8e5a9");
+    }
   }
-  function evacuaStation() {
-    const x = 14, z = -12;
-    plot(x,z,palette.cyan);
+  function evacuaStation(x: number, z: number, accent: string, lowDetail: boolean) {
+    plot(x,z,accent);
     box(x, 1.25, z - 1.6, 6.0, 2.5, 3.5, "#cadde4");
     box(x - 2.7, 1.3, z + 1.4, .34, 2.6, 4, "#70b7cb");
     box(x + 2.7, 1.3, z + 1.4, .34, 2.6, 4, "#70b7cb");
@@ -386,10 +455,90 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     box(x+1, .8, z+2.1, .2, 1.4, 2.3, "#83cee0");
     cylinder(x-1.9, .65, z+3.3, .46, 1.3, .46, palette.mint);
     draw("cone", x-1.9, 1.5, z+3.3, .92, .75, .92, palette.white);
+    // Transparent drafting studio and large model table.
+    box(x, 2.75, z-1.6, 6.7, .19, 4.4, "#a6dce7");
+    box(x, 3.06, z-1.6, 5.8, .25, 3.55, "#daedf3");
+    for(const side of [-1,1]) {
+      box(x+side*3.25,1.45,z-1.5,.10,2.5,3.25,accent);
+    }
+    box(x-.30,.62,z+3.05,3.4,.16,1.75,"#d6edf4");
+    box(x-.30,.73,z+3.05,2.85,.07,1.2,"#5486a4");
+    for(let i=0;i<4;i++){
+      box(x-1.5+i*.75,.80,z+3.1,.12,.10,.9,"#bedee8");
+    }
+    box(x+1.90,2.85,z+1.05,.15,.9,.15,accent);
+    cylinder(x+1.90,3.38,z+1.05,.6,.22,.6,"#f4f8fd");
+
+    // An open drafting bay displays a stylized evacuation route directly on
+    // its floor plan. All shapes are geometry, not potentially illegible text.
+    box(x, .86, z+3.05, 3.45, .15, 2.05, "#eaf5f9");
+    for (const offset of [-1.35, -.45, .45, 1.35]) {
+      box(x+offset, .95, z+3.05, .055, .025, 1.78, "#8cbbc9");
+    }
+    for (const offset of [-.78, 0, .78]) {
+      box(x, .95, z+3.05+offset, 3.2, .025, .05, "#8cbbc9");
+    }
+    box(x-.72, .986, z+3.06, 1.25, .027, .13, "#2caf9c");
+    box(x-.12, .986, z+2.66, .13, .027, .82, "#2caf9c");
+    draw("cone", x-.10, 1.02, z+2.27, .45, .13, .45, "#39d8b7");
+
+    // Rooftop drafting light and tilted visual design fins.
+    for (const side of [-1, 1]) {
+      box(x+side*2.7, 3.62, z-1.45, .15, 1.1, 3.35, "#88c4d4");
+      draw("cube", x+side*2.7, 4.19, z-1.45, .17, .16, 3.1,
+        accent, 0, 0, daylightTarget > .5 ? .1 : .9);
+    }
+    box(x, 3.70, z-1.55, 3.95, .20, .60, "#d6f2f6");
+    for (let index=0; index<3; index++) {
+      draw("cube", x-1.15+index*1.15, 3.82, z-1.55,
+        .70, .12, .48, accent, 0, 0, daylightTarget > .5 ? .12 : .85);
+    }
+
+    // Giant open cutaway blueprint on the rooftop. The cyan safe-exit
+    // corridor is legible from the chase camera; no text or tiny texture.
+    box(x-.10, 4.12, z-1.55, 5.55, .13, 3.42, "#eaf4f7");
+    box(x-.10, 4.21, z-1.55, 5.18, .045, 3.13, "#264e65");
+    for (const offset of [-1.38, .28, 1.66]) {
+      box(x+offset, 4.27, z-1.55, .095, .12, 2.70, "#c7e9eb");
+    }
+    for (const offset of [-.83, .45]) {
+      box(x-.10, 4.27, z-1.55+offset, 4.75, .12, .085, "#c7e9eb");
+    }
+    // "You are here" marker, bent bright green escape route and exit gate.
+    cylinder(x-1.80, 4.40, z-2.68, .35, .26, .35, "#ffcb79");
+    cylinder(x-1.80, 4.59, z-2.68, .16, .09, .16, "#ffffff");
+    box(x-.80, 4.34, z-2.60, 1.90, .035, .15, "#4ef6b2");
+    box(x+.13, 4.34, z-1.98, .15, .035, 1.33, "#4ef6b2");
+    box(x+.92, 4.34, z-1.33, 1.65, .035, .15, "#4ef6b2");
+    box(x+1.77, 4.44, z-1.35, .14, .42, .82, "#78ffd4");
+    // Oversized schematic door and freestanding wayfinding arch: obvious
+    // thematic objects even without reading the project's description.
+    box(x+3.65, 1.40, z+2.36, .30, 2.65, 2.14, "#d0ecf0");
+    box(x+3.69, 1.45, z+2.36, .11, 2.32, 1.77, "#29516a");
+    box(x+3.76, 1.45, z+2.36, .065, 1.89, 1.29, "#83e2e4");
+    cylinder(x+3.85, 1.31, z+1.76, .12, .13, .12, "#fef7c4");
+    if (!lowDetail) {
+      // Blueprint frame, drafting rulers, cutaway room dividers and a
+      // translucent-looking roof canopy, without extra texture downloads.
+      for (const side of [-1,1]) {
+        box(x+side*2.77, 4.35, z-1.55, .19, .38, 3.66, accent);
+        box(x+side*2.90, 1.38, z+1.12, .14, 2.2, 2.30, "#f0f6fa");
+      }
+      for (let index=0; index<5; index++) {
+        box(x-2.12+index*1.02,4.29,z-3.08,.065,.04,.24,"#9dd7e6");
+      }
+      for (const offset of [-1.7,-.58,.58,1.7]) {
+        box(x+offset,.22,z+4.21,.68,.07,.18,"#f5fcfc");
+      }
+      // Model architecture: two-scale façades on a working design board.
+      for (const [px,pz,height] of [[-1.13,2.22,.46],[.55,2.38,.65],[1.48,3.40,.48]] as const) {
+        box(x+px,.43+height*.5,z+pz,.53,height,.52,"#a8dae7");
+        box(x+px,.49+height,z+pz,.60,.08,.60,accent);
+      }
+    }
   }
-  function accreditationStation() {
-    const x = -14, z = 12;
-    plot(x,z,palette.purple);
+  function accreditationStation(x: number, z: number, accent: string, lowDetail: boolean) {
+    plot(x,z,accent);
     box(x, 1.4, z-1.4, 6.5, 2.8, 4.2, "#d2cde8");
     for(let i=-2; i<=2; i+=1) {
       cylinder(x+i*1.1, 1.25, z+1.05, .27, 2.5, .27, "#a48dd8");
@@ -400,10 +549,80 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       box(x-2.0+i*2, .55 + i*.35, z+3.45, 1.5, 1 + i*.7, 1.5, ["#6c60ad","#8b74c9","#b69df0"][i]);
       cylinder(x-2.0+i*2, 1.2+i*.7, z+3.45, .62, .10, .62, palette.gold);
     }
+    // A data-analytics tower makes the Academy recognizable at a distance.
+    cylinder(x,3.85,z-1.45,1.05,.95,1.05,"#e0daff");
+    cylinder(x,4.32,z-1.45,1.50,.12,1.50,accent);
+    draw("cone",x,5.04,z-1.45,1.5,1.45,1.5,"#9f89d5");
+    cylinder(x,5.70,z-1.45,.18,.70,.18,"#f7f3ff");
+    for(const side of [-2.35,2.35]) {
+      box(x+side,2.05,z+1.1,.48,1.2,.14,"#e9e4ff");
+      box(x+side,2.46,z+1.24,.30,.18,.07,accent);
+    }
+
+    // Layered academy wings and analytical tower cap, with luminous
+    // ring-shaped data nodes for a clearer AI / decision-support silhouette.
+    for (const side of [-1, 1]) {
+      box(x+side*3.48, 2.1, z-1.35, .48, 3.10, 4.30, "#c8bfe8");
+      box(x+side*3.52, 3.66, z-1.35, .78, .15, 4.5, accent);
+      for (let band=0; band<3; band++) {
+        box(x+side*3.70, 1.25+band*.75, z-1.35, .12, .22, 3.75, "#f3eafc");
+      }
+    }
+    cylinder(x, 4.96, z-1.45, 2.45, .12, 2.45, "#f1e4fd");
+    cylinder(x, 5.16, z-1.45, 1.95, .10, 1.95, accent);
+    for (const side of [-1, 1]) {
+      cylinder(x+side*1.55, 3.84, z+2.30, .22, 1.25, .22, "#eee9ff");
+      draw("cone",x+side*1.55,4.58,z+2.30,.78,.47,.78,accent);
+    }
+    draw("cylinder", x, 5.85, z-1.45, .77, .16, .77, accent,
+      0, 0, daylightTarget > .5 ? .12 : 1);
+
+    // Giant readable analytics screen, deliberately free of personal data:
+    // fake bars and luminous nodes visually communicate the AI assistant.
+    box(x,2.05,z+1.62,3.85,2.65,.20,"#253450");
+    box(x,2.12,z+1.78,3.48,2.31,.075,"#14273e");
+    box(x-1.36,2.93,z+1.84,.46,.17,.05,"#6ee7e5");
+    box(x-.49,2.93,z+1.84,.91,.17,.05,"#bda9fa");
+    for (const [offset,height,color] of [
+      [-1.19,.60,"#78dfdb"],[-.47,.99,"#8ce1ff"],
+      [.25,1.29,"#bba6f7"],[.97,.80,"#8ef0cf"],
+    ] as const) {
+      box(x+offset,1.40+height*.5,z+1.87,.38,height,.065,color);
+    }
+    // Distinct network/AI marker towering over the training blocks.
+    const aiX=x-3.09,aiZ=z+2.34;
+    cylinder(aiX,2.49,aiZ,.13,3.25,.13,"#e9eaff");
+    cylinder(aiX,4.20,aiZ,.93,.18,.93,"#d6cbfa");
+    cylinder(aiX,4.39,aiZ,.64,.24,.64,accent);
+    for (const offset of [-.57,.57]) {
+      cylinder(aiX+offset,4.88,aiZ,.22,.82,.22,"#e3dcfd");
+      cylinder(aiX+offset,5.33,aiZ,.29,.15,.29,"#91eff2");
+    }
+    box(aiX,5.25,aiZ,1.28,.12,.12,"#a5f4e7");
+    // Colored qualification blocks form a recognizable learning podium.
+    for (const [index,shade] of ["#9a8bdd","#bda9f4","#e0cafa"].entries()) {
+      const bx=x+2.55+index*.45;
+      box(bx,.84+index*.37,z+3.46,.38,.83+index*.70,.45,shade);
+    }
+    if (!lowDetail) {
+      // More visible circuit wiring from the academy display, not dense text.
+      for (const side of [-1,1]) {
+        box(x+side*2.05,1.92,z+1.70,.12,1.49,.09,"#d3e5fa");
+        box(x+side*2.08,2.82,z+1.72,.39,.12,.09,accent);
+      }
+      for (let i=0;i<4;i++) {
+        const panelX=x-2.1+i*1.40;
+        box(panelX,3.38,z+2.17,.81,.11,.38,"#faf5ff");
+        cylinder(panelX,3.60,z+2.17,.28,.14,.28, i%2?accent:"#65dfd3");
+      }
+      // Distinct fake nodes: do not expose actual accreditation records.
+      for (const [px,py] of [[-1.2,4.35],[.42,4.04],[1.4,4.56]] as const) {
+        cylinder(x+px,py,z-2.75,.18,.12,.18,accent);
+      }
+    }
   }
-  function hydrantsStation() {
-    const x = 14, z = 12;
-    plot(x,z,palette.mint);
+  function hydrantsStation(x: number, z: number, accent: string, lowDetail: boolean) {
+    plot(x,z,accent);
     box(x, .65, z-2.2, 7.1, 1.3, 2.0, "#69879b");
     for(let i=0;i<3;i+=1) {
       cylinder(x-2.5+i*2.5, 1.0, z + 1, .58, 1.8, .58, i===1 ? palette.fire : palette.mint);
@@ -414,12 +633,309 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       cylinder(x-3.4+i*2.3, .25, z+3.7, .42, .5, .42, "#4ea29c");
     }
     box(x, 2.05, z-2.2, 7.8, .40, 2.8, "#4ad3b5");
+    // Elevated tank and mapping mast distinguish the hydrant location.
+    cylinder(x+3.25,1.8,z-2.1,.25,3.2,.25,"#b2c8d3");
+    cylinder(x+3.25,3.2,z-2.1,1.45,1.0,1.45,"#74d8bf");
+    cylinder(x+3.25,3.76,z-2.1,1.7,.18,1.7,"#e5faf7");
+    draw("cone",x+3.25,4.1,z-2.1,1.65,.45,1.65,"#4ea995");
+    box(x-2.1,1.6,z-1.1,.18,2.05,1.8,"#90aebe");
+    box(x-2.1,2.32,z-1.0,.25,.28,1.3,accent);
+    for(let i=0;i<3;i++) {
+      cylinder(x-2.1+i*2.15,.11,z+4.25,.50,.12,.50,"#378b77");
+    }
+
+    // Oversized hydrant emblem and pipe couplings: a memorable destination
+    // shape that doesn't depend on tiny annotations to explain the product.
+    const hx = x-1.7, hz = z+3.05;
+    cylinder(hx, .98, hz, 1.05, 1.55, 1.05, "#dd364c");
+    cylinder(hx, 1.84, hz, 1.26, .30, 1.26, "#f4c9ac");
+    cylinder(hx, 2.12, hz, .48, .43, .48, "#d33347");
+    for (const side of [-1,1]) {
+      box(hx+side*.72, 1.21, hz, .95, .38, .42, "#d63d51");
+      cylinder(hx+side*1.15, 1.21, hz, .56, .26, .56, "#c5d8d9");
+      box(hx+side*1.16, 1.21, hz, .16, .56, .58, "#9eb7c0");
+    }
+    cylinder(hx, .18, hz, 1.70, .24, 1.70, "#4f7f7b");
+    // Elevated mapping node with glowing rim, visible from the truck.
+    box(x+3.25, 4.23, z-2.1, 2.2, .17, 2.2, "#e1f6f1");
+    draw("cylinder", x+3.25, 4.33, z-2.1, 2.6, .08, 2.6,
+      accent, 0, 0, daylightTarget > .5 ? .08 : .9);
+
+    // Stylized city-waterworks: oversized pipes and a public hydrant plaza
+    // make the app's QR/map/flow concept instantly readable from the road.
+    box(x+.20,.31,z+2.90,5.30,.32,.38,"#57a4b5");
+    box(x+2.54,.55,z+2.90,.36,.52,.38,"#c5d9dc");
+    box(x+2.54,.75,z+1.82,.36,.32,2.24,"#55b8b1");
+    cylinder(x+2.54,.81,z+.84,.46,.26,.46,"#f5d69c");
+    // Sculpted map board shows blocks, streets and two map pins.
+    box(x-1.38,3.39,z-2.05,3.18,2.37,.26,"#1b3e51");
+    box(x-1.38,3.40,z-1.89,2.90,2.07,.065,"#376578");
+    for (const offset of [-.76,.11,.77]) {
+      box(x-1.38+offset,3.44,z-1.81,.065,1.79,.04,"#b5dedc");
+    }
+    for (const offset of [-.51,.49]) {
+      box(x-1.39,3.40+offset,z-1.80,2.71,.066,.04,"#b5dedc");
+    }
+    for (const [dx,dy,shade] of [[-.63,-.24,"#f0c76d"],[.62,.39,"#72e6c8"]] as const) {
+      cylinder(x-1.38+dx,3.40+dy,z-1.75,.22,.13,.22,shade);
+      draw("cone",x-1.38+dx,3.17+dy,z-1.73,.46,.33,.46,shade);
+    }
+    // Raised indicator/beacon, without displaying real flow numbers.
+    cylinder(x+3.20,4.74,z-2.02,.35,.43,.35,"#f3fbfb");
+    draw("cone",x+3.20,5.16,z-2.02,.76,.51,.76,accent);
+    if (!lowDetail) {
+      // Visible side pipes, valve wheels and pavement marking stones.
+      for (const side of [-1,1]) {
+        box(x+side*3.56,1.06,z+.78,.44,.40,2.72,"#a8d8d7");
+        cylinder(x+side*3.48,1.19,z+2.05,.62,.16,.62,"#e2eeed");
+        cylinder(x+side*3.48,1.29,z+2.05,.30,.18,.30,accent);
+      }
+      for (const offset of [-1.85,-.95,-.05,.85,1.75]) {
+        box(x+offset,.14,z+4.55,.20,.06,.75,"#b3cdd0");
+      }
+      for (const index of [-1,0,1]) {
+        cylinder(x+index*1.25,.20,z-3.9,.38,.14,.38,"#4cc5ad");
+      }
+    }
   }
+  // Additional projects use a reusable structure template without new renderer code.
+  function genericStation(x: number, z: number, accent: string) {
+    plot(x, z, accent);
+    box(x, 1.1, z - 1.3, 6.4, 2.2, 4.4, "#d1dee5");
+    box(x, 2.45, z - 1.3, 7.1, .35, 5.0, accent);
+    box(x, 1.45, z + 1.0, 3.5, 1.4, .12, "#507b9e");
+    cylinder(x, 3.0, z - 1.3, 1.2, 1.2, 1.2, accent);
+    for (const offset of [-2.35, 2.35]) {
+      box(x + offset, 1.35, z + 1.0, .45, 1.65, .18, "#b1d7e6");
+    }
+  }
+
+  function drawStation(structure: StructureType, x: number, z: number, accent: string, lowDetail: boolean) {
+    switch (structure) {
+      case "operations": fireStation(x, z, accent, lowDetail); break;
+      case "design-studio": evacuaStation(x, z, accent, lowDetail); break;
+      case "academy": accreditationStation(x, z, accent, lowDetail); break;
+      case "mapping-hub": hydrantsStation(x, z, accent, lowDetail); break;
+      default: genericStation(x, z, accent);
+    }
+  }
+
+  /**
+   * Render inexpensive, deliberately stylized flames above each undiscovered
+   * project building. Each fire receives a brief fade after Discover; graphics
+   * have no audio and make no claims about real-world firefighting practice.
+   *
+   * A small fixed number of low-poly meshes keeps mobile drawing affordable.
+   */
+  function drawStationFire(
+    station: (typeof worldStations)[number],
+    elapsed: number,
+    lowDetail: boolean,
+    reducedMotion: boolean,
+    extinguished: boolean,
+  ) {
+    if (extinguished && !fireFadeStart.has(station.id)) {
+      fireFadeStart.set(station.id, elapsed);
+    } else if (!extinguished) {
+      fireFadeStart.delete(station.id);
+    }
+    const strength = stationFireStrength(
+      extinguished,
+      elapsed,
+      fireFadeStart.get(station.id),
+      reducedMotion,
+    );
+    if (strength <= 0.005) return;
+
+    // FireTrack has one taller central plume, visible from the approach road;
+    // all other buildings retain the compact fire layout already approved.
+    const fireTrack = station.structure === "operations";
+    const locations = fireTrack
+      ? (lowDetail ? [[0, -1.25], [2.10, 1.45]]
+        : [[0, -1.25], [-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]])
+      : (lowDetail ? [[-2.15, 1.55], [2.15, -1.80]]
+        : [[-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]]);
+
+    for (let index = 0; index < locations.length; index++) {
+      const [offsetX, offsetZ] = locations[index];
+      const x = station.x + offsetX;
+      const z = station.z + offsetZ;
+      const motion = reducedMotion
+        ? 1
+        : 0.86 + Math.sin(elapsed * 4.1 + index * 1.53 + station.x) * 0.14;
+      const heroPlume = fireTrack && index === 0;
+      const height = (heroPlume ? 3.25 : 1.65 + (index % 2) * .48) * motion * strength;
+      const baseHeight = heroPlume ? 4.48 : index % 2 ? 4.05 : 3.36;
+      const y = baseHeight + height * .30;
+      const sway = reducedMotion ? 0 : Math.sin(elapsed * 5.0 + index * 1.91) * .14;
+      // Several irregular moving flame tongues give a softer silhouette
+      // than a single geometrically perfect triangular flame.
+      draw("cone", x + sway, y, z,
+        (heroPlume ? 1.28 : .88) * strength, height,
+        (heroPlume ? 1.28 : .88) * strength,
+        "#ef6532", 0, 0, .7);
+      draw("cone", x - .15 - sway * .7, y - .22, z + .20,
+        .52 * strength, height * .73, .52 * strength, "#ffb24e", 0, 0, .85);
+      draw("cone", x + .22 + sway, y - .14, z - .11,
+        .36 * strength, height * .65, .36 * strength,
+        "#f9d17b", 0, 0, .8);
+      if (!lowDetail) {
+        draw("cone", x - .36 + sway * .5, y - .17, z - .16,
+          .39 * strength, height * .59, .39 * strength,
+          "#ff4538", 0, 0, .6);
+        // Sparse flickering embers suggest rising heat without a costly
+        // particle engine or a full-screen glow effect.
+        for (let ember = 0; ember < 2; ember++) {
+          const lift = (elapsed * (.77 + ember * .12) + index * .36 + ember * .53) % 1;
+          draw("cube", x + sway + Math.sin(index + ember * 2.6) * .24,
+            baseHeight + .7 + lift * (height + .45),
+            z - .2 + ember * .26,
+            .075 * strength, .11 * strength, .075 * strength,
+            "#ffb56d", 0, 0, .85, .45 * strength);
+        }
+      }
+      // The ground glow is deliberately subtle in daylight. At night it
+      // reads from both the chase and the overview camera.
+      draw("cylinder", x, baseHeight - .32, z,
+        1.50 * strength, .035, 1.50 * strength, "#ff8b45",
+        0, 0, 1, (daylightTarget > .5 ? .11 : .23) * strength);
+
+      if (!lowDetail) {
+        // Sparse layered smoke and warm embers, no textures or post-processing.
+        // Fade to a pale steam plume when a fire is being extinguished.
+        const rise = reducedMotion ? .65 : (elapsed * .72 + index * .31) % 1.3;
+        const cooling = extinguished && strength < .9;
+        draw("cone", x + .16, baseHeight + 1.5 + rise,
+          z + .04, (1.05 + rise * .35) * strength, .48 * strength,
+          (1.05 + rise * .35) * strength,
+          cooling ? "#c1d8db" : "#889ba8",
+          0, 0, 0, (cooling ? .12 : .075) * strength);
+      }
+    }
+  }
+
+  /**
+   * A lightweight stylized water jet emitted from the aerial ladder tip.
+   * Curved segmented geometry follows the destination project station. No
+   * particle library, physics engine, downloaded textures or extra assets.
+   */
+  /**
+   * Light, cyan water spray from the aerial tip. The curved translucent
+   * stream is deliberately broken into short moving ribbons and droplets;
+   * this avoids a visually rigid, opaque white tube in high-angle cameras.
+   * The impact is a restrained mist rather than an oversized white stain.
+   */
+  function drawWaterJet(
+    truck: WorldPosition,
+    heading: number,
+    station: (typeof worldStations)[number],
+    elapsed: number,
+    rescue: WorldRescueEffect,
+    lowDetail: boolean,
+  ) {
+    const age = elapsed - rescue.startedAt;
+    const strength = waterStreamStrength(elapsed, rescue.startedAt);
+    if (strength < .02) return;
+
+    const sourceX = truck.x - Math.sin(heading) * 2.78;
+    const sourceZ = truck.z - Math.cos(heading) * 2.78;
+    const sourceY = 2.68;
+    const targetX = station.x + Math.sin(age * 2.3) * .44;
+    const targetZ = station.z + Math.cos(age * 2.1) * .40;
+    const targetY = 4.12;
+    const segments = lowDetail ? 10 : 17;
+
+    function jetPoint(t: number): [number, number, number] {
+      // Smooth parabola: strong initial nozzle pressure and light gravity
+      // drop before impact. Animated perpendicular turbulence is subtle.
+      const arch = Math.sin(t * Math.PI) * 1.6;
+      const wiggle = Math.sin(t * 16 - elapsed * 17) * .06 * t;
+      return [
+        sourceX + (targetX - sourceX) * t + wiggle,
+        sourceY + (targetY - sourceY) * t + arch,
+        sourceZ + (targetZ - sourceZ) * t - wiggle,
+      ];
+    }
+
+    for (let index = 0; index < segments; index++) {
+      // Tiny moving gaps make the stream read as fast-flowing water rather
+      // than a single solid pole. Keep the nozzle segment visible.
+      if (index > 1 && (index + Math.floor(elapsed * 19)) % 6 === 0) continue;
+      const start = jetPoint(index / segments);
+      const end = jetPoint((index + 1) / segments);
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const dz = end[2] - start[2];
+      const length = Math.hypot(dx, dy, dz);
+      if (length < .01) continue;
+
+      const yaw = Math.atan2(-dz, dx);
+      const pitch = Math.asin(Math.max(-1, Math.min(1, dy / length)));
+      const centerX = (start[0] + end[0]) * .5;
+      const centerY = (start[1] + end[1]) * .5;
+      const centerZ = (start[2] + end[2]) * .5;
+      const pulse = .88 + .12 * Math.sin(elapsed * 22 - index * 1.7);
+      const taper = 1 + index / segments * .27;
+
+      draw("cube", centerX, centerY, centerZ,
+        length * .94, .085 * taper * pulse * strength,
+        .085 * taper * strength, "#36bde0",
+        yaw, pitch, .52, .48 * strength);
+
+      if (index % 3 === 0) {
+        draw("cube", centerX, centerY + .035, centerZ,
+          length * .56, .035 * strength, .035 * strength,
+          "#b0ebf5", yaw, pitch, .35, .27 * strength);
+      }
+    }
+
+    // Small distinct droplets travel along the stream, contributing the
+    // appearance of flow without a general-purpose particle system.
+    const drops = lowDetail ? 12 : 25;
+    for (let index = 0; index < drops; index++) {
+      const t = ((index + .3) / drops + age * 1.6) % 1;
+      const [px, py, pz] = jetPoint(t);
+      const jitter = .055 * Math.sin(index * 7.7 + elapsed * 11) * t;
+      const size = (.08 + index % 3 * .022) * strength;
+      draw("cylinder", px + jitter, py, pz - jitter,
+        size, size * 1.6, size, index % 4 === 0 ? "#c5f5fd" : "#55cae6",
+        0, 0, .5, .57 * strength);
+    }
+
+    // Impact is a fine fan of little splashes plus blue-gray mist.
+    // A broad white opaque disk was distracting in the earlier recording.
+    const splashes = lowDetail ? 5 : 9;
+    for (let index = 0; index < splashes; index++) {
+      const theta = index * 2.399 + elapsed * 2.5;
+      const radius = .18 + (index % 4) * .14;
+      const rise = .15 + Math.abs(Math.sin(elapsed * 6.7 + index)) * .46;
+      const size = (.09 + (index % 3) * .03) * strength;
+      draw("cylinder",
+        targetX + Math.cos(theta) * radius,
+        targetY + rise,
+        targetZ + Math.sin(theta) * radius,
+        size, .16 * strength, size,
+        "#7edaf0", 0, 0, .45, .39 * strength);
+    }
+    const mist = lowDetail ? 2 : 4;
+    for (let index = 0; index < mist; index++) {
+      const drift = (age * .38 + index * .23) % 1;
+      draw("cone",
+        targetX + Math.sin(index * 2.1 + elapsed * .8) * .39,
+        targetY + .26 + drift * .65,
+        targetZ + Math.cos(index * 2.2) * .32,
+        (.56 + drift * .45) * strength,
+        (.24 + drift * .26) * strength,
+        (.56 + drift * .45) * strength,
+        "#8faeb9", 0, 0, 0, .07 * strength);
+    }
+  }
+
   function drawRoadNetwork(lowDetail = false) {
-    box(0, -.05, 0, 94, .14, 94, palette.ground);
-    box(0, -.047, 0, 66, .016, 66, "#162b3c");
-    box(0, .035, 0, 7, .08, 53, palette.road);
-    box(0, .041, 0, 53, .08, 7, palette.road);
+    box(0, -.05, 0, 94, .14, 94, daylightTarget > .5 ? "#91bcb4" : palette.ground);
+    box(0, -.047, 0, 66, .016, 66, daylightTarget > .5 ? "#79a6a4" : "#162b3c");
+    box(0, .035, 0, 7, .08, 53, daylightTarget > .5 ? "#748fa6" : palette.road);
+    box(0, .041, 0, 53, .08, 7, daylightTarget > .5 ? "#748fa6" : palette.road);
     // Reflective curbs edge the cross-shaped road.
     for (const side of [-1, 1]) {
       box(side * 3.67, .07, 0, .18, .17, 50.5, "#42576c");
@@ -438,14 +954,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         box(i, .094, 0, 1.55, .025, .13, palette.markings);
       }
     }
-    cylinder(0, .12, 0, 8.6, .14, 8.6, "#334764");
-    cylinder(0, .23, 0, 6.9, .12, 6.9, "#182b45");
-    cylinder(0, .29, 0, 5.4, .1, 5.4, "#6659a7");
-    cylinder(0, .35, 0, 4.75, .12, 4.75, "#233b58");
-    for(let i=0;i<16;i+=1) {
-      const angle = i/16*Math.PI*2;
-      cylinder(Math.cos(angle)*3.1, .38, Math.sin(angle)*3.1, .16, .12, .16, palette.purple);
-    }
+    // Keep the starting intersection unobstructed. The ladder truck now
+    // begins directly on the roadway rather than a circular podium.
     const treeSpacing = lowDetail ? 9 : 4.5;
     for(let x=-25;x<=25;x+=treeSpacing){
       for(let z=-25;z<=25;z+=treeSpacing){
@@ -457,7 +967,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     // Each site gets its own colored perimeter, with the structural plot above it.
     for(const st of worldStations) {
       cylinder(st.x, .015, st.z, 12.9, .065, 12.9, st.color);
-      cylinder(st.x, .060, st.z, 12.2, .06, 12.2, "#172b3f");
+      cylinder(st.x, .060, st.z, 12.2, .06, 12.2, daylightTarget > .5 ? "#c4d5d3" : "#172b3f");
     }
     const lamps = lowDetail
       ? [[-4.6,-9.2],[4.6,-9.2],[-4.6,9.2],[4.6,9.2]]
@@ -478,6 +988,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     elapsed: number,
     reducedMotion: boolean,
     lightsOn: boolean,
+    lowDetail: boolean,
   ) {
     const { x, z } = position;
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 2.1) * .015;
@@ -540,20 +1051,44 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         wheel(wheelX, wheelZ);
       }
     }
-    // Tail end carries utility deck and warning reflectors.
-    part(0,.73,2.78,2.18,.42,.30,"#29384a");
-    part(-.72,.84,2.98,.39,.17,.09,"#ffb482");
-    part(.72,.84,2.98,.39,.17,.09,"#ffb482");
+    // Tail end: more substantial American ladder-truck rear face.
+    part(0,.73,2.78,2.25,.42,.32,"#29384a");
+    part(0,1.14,2.91,2.16,.75,.10,"#bd2639");
+    part(0,1.54,2.93,1.90,.085,.11,"#f2e9c7");
+    part(0,.90,3.00,1.94,.09,.12,"#f2e9c7");
+    for (const side of [-1,1]) {
+      part(side*.91,1.17,3.02,.22,.36,.13,"#ff4c50",Number(lightsOn));
+      part(side*.91,.73,3.02,.28,.14,.13,"#ffbd75");
+    }
 
-    // Wide American forward cab, windshield, upper white roof.
-    part(0,1.51,-1.89,2.20,1.52,1.73,"#e8464f");
+    // Original, deliberately stylized American cab (no FDNY insignia).
+    // Broad flat windshield, cab-over-engine roof and bold red/white mass.
+    part(0,1.51,-1.89,2.20,1.52,1.73,"#c72c3e");
     part(0,2.34,-1.88,2.29,.20,1.87,"#f5f7fc");
-    part(0,1.76,-2.79,1.83,.62,.09,"#92c9df");
-    part(0,1.48,-2.85,2.03,.13,.15,"#e8f0f8");
-    // Silver chrome grille and heavy-duty front bumper.
-    part(0,.84,-2.96,1.54,.39,.12,"#9faec0");
-    for(let i=-2;i<=2;i++) part(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
-    part(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
+    part(0,2.19,-1.89,2.26,.24,1.85,"#f1f6f7");
+    part(0,1.79,-2.79,1.94,.70,.09,"#315b74");
+    part(0,1.45,-2.85,2.04,.12,.15,"#e8f0f8");
+    // Deep silver front surround and center windshield divider.
+    part(0,1.80,-2.853,.09,.77,.075,"#e0e6eb");
+    part(-.97,1.79,-2.853,.07,.81,.07,"#f2f7f8");
+    part(.97,1.79,-2.853,.07,.81,.07,"#f2f7f8");
+    // Black wipers and sun visor give depth without any bitmap texture.
+    for (const side of [-1,1]) {
+      part(side*.48,1.56,-2.873,.67,.035,.052,"#192939");
+    }
+    part(0,2.37,-2.75,2.10,.11,.24,"#edf4f5");
+    // Recognizable broad chrome American pumper/ladder nose.
+    part(0,.89,-2.99,1.45,.53,.14,"#233744");
+    for(let i=-3;i<=3;i++) part(i*.19,.88,-3.081,.06,.48,.04,"#d7e3e9");
+    part(0,1.20,-3.049,1.58,.065,.14,"#dce8ed");
+    part(0,.58,-3.10,2.48,.31,.35,"#b7c6d0");
+    part(0,.74,-3.30,2.27,.055,.06,"#eef4f6");
+    for (const side of [-1,1]) {
+      part(side*1.08,.78,-3.30,.17,.28,.10,"#283744");
+      part(side*.88,1.34,-2.97,.43,.42,.14,"#e7eef3");
+      part(side*.88,1.37,-3.06,.32,.15,.05,"#ffe9a0");
+      part(side*.88,1.16,-3.06,.32,.10,.05,"#f8f8fb");
+    }
     for(const side of [-1,1]) {
       part(side*.78,1.11,-2.97,.36,.24,.09,lightsOn ? "#fff1b3" : "#8d8871",lightsOn ? 1 : 0);
       part(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
@@ -563,8 +1098,8 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       part(side*1.48,1.79,-2.46,.21,.29,.15,"#c7d7e6");
     }
     part(0,1.39,-2.97,.18,.24,.07,"#202a38");
-    // Emergency warning light bar: generic red / blue.
-    part(0,2.50,-2.16,1.30,.12,.30,"#c5d0df");
+    // ALL emergency warning lamps are red; alternating left/right banks.
+    part(0,2.50,-2.16,1.58,.12,.32,"#c5d0df");
     part(-.38,2.61,-2.16,.43,.19,.32,redBright ? "#ff243b" : "#7c3443",redBright ? 1 : 0);
     part(.38,2.61,-2.16,.43,.19,.32,rightBright ? "#ff3447" : "#71303a",rightBright ? 1 : 0);
     // Additional side and rear flashers keep the light toggle visible from
@@ -578,6 +1113,38 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         side === -1 ? Number(redBright) : Number(rightBright));
     }
 
+    // Distinctive cab profile and compartment faces; keep geometries few
+    // on portrait devices, where each WebGL draw call has greater cost.
+    if (!lowDetail) {
+      for (const side of [-1, 1]) {
+        // Window frame, door seam and cab step on the two flanks.
+        part(side*1.14,1.90,-1.89,.065,.53,.78,"#294759");
+        part(side*1.20,1.90,-1.89,.065,.39,.61,"#6ca2b4");
+        part(side*1.18,1.27,-1.97,.06,.13,.83,"#f6e7af");
+        part(side*1.20,.65,-1.93,.35,.14,1.12,"#738b9b");
+        part(side*1.43,1.85,-2.48,.20,.24,.12,"#253747");
+        for (const wheelPosition of [.90,2.05]) {
+          part(side*1.14,.83,wheelPosition,.22,.17,1.08,"#d6e1e5");
+        }
+        // Louvered stainless steel compartments and dark handles.
+        for (const compartment of [-.15,.77,1.69]) {
+          for (const y of [.96,1.09,1.22,1.35]) {
+            part(side*1.26,y,compartment,.035,.025,.55,"#ebf0f1");
+          }
+        }
+        part(side*1.22,1.69,.78,.09,.09,2.10,"#f7cf60");
+      }
+      // Checkerboard-like safety grip plates on rear equipment deck.
+      for (const zOffset of [1.48,1.81,2.14]) {
+        part(0,2.17,zOffset,1.16,.035,.13,"#e8eef2");
+      }
+      // Pneumatic gear storage and raised floodlight supports.
+      for (const side of [-.8,.8]) {
+        part(side,2.62,1.97,.12,.49,.11,"#d4dfe5");
+        part(side,2.88,1.97,.55,.17,.27,"#c6d5df");
+        part(side,2.91,1.80,.43,.10,.075,"#fff1c3",0.35);
+      }
+    }
     // Bright horizontal emergency-apparatus reflectors.
     for(const side of [-1,1]) {
       part(side*1.11,1.27,.98,.055,.12,3.03,"#f3edca");
@@ -623,6 +1190,22 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     // Distinctive white roof-mounted rescue rack.
     part(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
 
+    // Costa Rican flag as five static color strips (blue, white, broad red,
+    // white, blue). No waving cloth simulation, extra textures or logos.
+    // Rear location keeps it visible from the default chase camera.
+    const flagX = -.71;
+    const flagZ = 3.14;
+    part(flagX-.38,2.72,flagZ,.05,1.36,.07,"#d3dce2");
+    for (const [atY, thickness, color] of [
+      [3.225,.14,"#174e9a"],
+      [3.085,.14,"#f8f9fc"],
+      [2.875,.28,"#cf243b"],
+      [2.665,.14,"#f8f9fc"],
+      [2.525,.14,"#174e9a"],
+    ] as const) {
+      part(flagX,atY,flagZ,.75,thickness,.055,color);
+    }
+
     if (lightsOn) {
       // Lens blooms at the lamp positions and visible pools on the road.
       for (const side of [-.78, .78]) {
@@ -644,7 +1227,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   }
 
   return {
-    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false) {
+    render(position, heading, elapsed, reducedMotion, cameraMode = "chase", lightsOn = false, timeOfDay = "night", extinguishedStations: ReadonlySet<string> = new Set(), rescue: WorldRescueEffect | null = null) {
       const width = Math.max(1, canvas.clientWidth);
       const height = Math.max(1, canvas.clientHeight);
       const lowDetail = width < 640;
@@ -658,12 +1241,21 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         canvas.height = rh;
       }
       gl.viewport(0, 0, rw, rh);
+      const frameDelta = lastFrameSeconds === null
+        ? 1 / 60
+        : Math.max(0, Math.min(elapsed - lastFrameSeconds, .10));
+      lastFrameSeconds = elapsed;
+      daylightTarget = timeOfDay === "day" ? 1 : 0;
+      daylight += (daylightTarget - daylight) * (reducedMotion ? 1 : dampingFactor(frameDelta, 5.35));
+      // The daylight uniform is shared across every object in this frame.
+      gl.uniform1f(daylightUniform, daylight);
+      gl.clearColor(.035 + .55 * daylight, .065 + .68 * daylight, .12 + .72 * daylight, 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       const overview = cameraMode === "overview";
       const desiredX = position.x + (overview ? 5.5 : Math.sin(heading) * 10.5);
       const desiredZ = position.z + (overview ? 9.2 : Math.cos(heading) * 10.5);
       const desiredY = overview ? 18.0 : 8.4;
-      const factor = reducedMotion ? 1 : .11;
+      const factor = reducedMotion ? 1 : dampingFactor(frameDelta, 7.0);
       cameraX += (desiredX - cameraX) * factor;
       cameraZ += (desiredZ - cameraZ) * factor;
       cameraY += (desiredY - cameraY) * factor;
@@ -672,11 +1264,20 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       gl.uniformMatrix4fv(vpUniform, false, latestVP);
       lastShape = null;
       drawRoadNetwork(lowDetail);
-      fireStation();
-      evacuaStation();
-      accreditationStation();
-      hydrantsStation();
-      drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn);
+      for (const station of worldStations) {
+        drawStation(station.structure, station.x, station.z, station.color, lowDetail);
+        const waterHasReachedFlames = rescue?.stationId === station.id &&
+          elapsed - rescue.startedAt >= WATER_REACHES_FIRE_SECONDS;
+        drawStationFire(station, elapsed, lowDetail, reducedMotion,
+          extinguishedStations.has(station.id) || waterHasReachedFlames);
+      }
+      drawLadderTruck(position, heading, elapsed, reducedMotion, lightsOn, lowDetail);
+      if (rescue) {
+        const station = worldStations.find((item) => item.id === rescue.stationId);
+        if (station && !reducedMotion) {
+          drawWaterJet(position, heading, station, elapsed, rescue, lowDetail);
+        }
+      }
     },
     project(position, elevation = 5.2) {
       // Convert a 3D station roof into a clickable screen-space annotation.

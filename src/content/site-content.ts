@@ -1,3 +1,4 @@
+import { getProjects, projectDefinitions, type ProjectView } from "@/content/projects";
 import type { Locale } from "@/lib/i18n";
 
 export type ProjectVisualVariant = "firetrack" | "evacuaplan";
@@ -16,18 +17,7 @@ type NavigationItem = {
   href: string;
 };
 
-type Project = {
-  slug: "firetrack" | "evacuaplan-studio" | "acreditaciones-app" | "hidrantes-app";
-  caseStudyLabel: string;
-  title: string;
-  status: string;
-  description: string;
-  highlights: string[];
-  technologies: string[];
-  gallery: ProjectGalleryItem[];
-  externalUrl?: string;
-  externalLabel?: string;
-};
+type Project = ProjectView;
 
 type Service = {
   number: string;
@@ -155,7 +145,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "4", label: "productos desarrollados" },
+        { value: String(projectDefinitions.length), label: "productos desarrollados" },
         { value: "De idea a producto", label: "definición, pruebas y evolución" },
         { value: "C1", label: "nivel de inglés" },
       ],
@@ -165,151 +155,7 @@ export const siteContent = {
       title: "De problemas operativos a productos digitales",
       description:
         "Proyectos que nacieron de problemas reales. Defino su funcionamiento, coordino la implementación asistida por IA y valido que resuelvan la necesidad original.",
-      projects: [
-        {
-          slug: "firetrack",
-          caseStudyLabel: "Ver caso de estudio",
-          title: "FireTrack",
-          status: "En producción",
-          description:
-            "Solución SaaS creada al identificar oportunidades para mejorar la gestión tradicional de inventario, inspecciones, mantenimiento y trazabilidad de extintores.",
-          highlights: [
-            "Análisis del flujo operativo y traducción de necesidades reales en reglas, permisos y procesos digitales.",
-            "Arquitectura multiempresa con autenticación, roles, aislamiento de datos y trazabilidad.",
-            "QR, reportes PDF, alertas, auditoría e importación Excel integrados al flujo diario.",
-          ],
-          technologies: [
-            "Next.js",
-            "React",
-            "TypeScript",
-            "Supabase",
-            "PostgreSQL",
-            "Vercel",
-          ],
-          gallery: [
-            {
-              id: "dashboard",
-              label: "Panel",
-              title: "Panel operativo multiempresa",
-              description:
-                "Métricas, inventario, estados, inspecciones y alertas reunidos en una vista de seguimiento diario.",
-              src: "/projects/firetrack/dashboard.webp",
-              alt: "Panel operativo de FireTrack con métricas e inventario de extintores",
-            },
-            {
-              id: "asset",
-              label: "Ficha y QR",
-              title: "Ficha técnica y acceso mediante QR",
-              description:
-                "Consulta del estado operativo, controles programados, historial y acceso rápido desde el equipo físico.",
-              src: "/projects/firetrack/asset-qr.webp",
-              alt: "Ficha de un extintor en FireTrack con etiqueta QR de demostración",
-            },
-            {
-              id: "floor-plan",
-              label: "Croquis",
-              title: "Ubicación interactiva sobre croquis",
-              description:
-                "Posicionamiento de equipos en planos multipágina y navegación entre el croquis y cada registro.",
-              src: "/projects/firetrack/croquis.webp",
-              alt: "Módulo de croquis de FireTrack con extintores ubicados sobre un plano",
-            },
-          ],
-          externalUrl: "https://firetrackcr.com",
-          externalLabel: "Visitar FireTrack",
-        },
-        {
-          slug: "evacuaplan-studio",
-          caseStudyLabel: "Ver caso de estudio",
-          title: "EvacuaPlan Studio",
-          status: "En desarrollo activo",
-          description:
-            "Herramienta web que traduce requisitos de planificación de emergencias en un flujo especializado para crear croquis profesionales.",
-          highlights: [
-            "Conversión de requisitos técnicos y operativos en herramientas específicas de edición.",
-            "Selección, rotación, agrupación, bloqueo, copia y edición avanzada de objetos.",
-            "Interacción con mouse, pantallas táctiles, iPad y Apple Pencil.",
-          ],
-          technologies: [
-            "Next.js",
-            "React",
-            "TypeScript",
-            "Konva",
-            "Tailwind CSS",
-          ],
-          gallery: [
-            {
-              id: "symbols",
-              label: "Símbolos",
-              title: "Biblioteca y transformación de símbolos",
-              description:
-                "Elementos de emergencia que pueden moverse, redimensionarse, rotarse, bloquearse y copiarse.",
-              src: "/projects/evacuaplan/symbols.webp",
-              alt: "Editor EvacuaPlan con símbolos de emergencia seleccionables",
-            },
-            {
-              id: "multi-select",
-              label: "Selección múltiple",
-              title: "Edición coordinada de varios objetos",
-              description:
-                "Selección, desplazamiento y administración conjunta de objetos sin afectar elementos protegidos.",
-              src: "/projects/evacuaplan/multi-select.webp",
-              alt: "EvacuaPlan Studio con varios objetos seleccionados simultáneamente",
-            },
-            {
-              id: "structure",
-              label: "Estructura",
-              title: "Paredes, puertas y ventanas",
-              description:
-                "Herramientas propias para construir y editar la estructura base de cada nivel del croquis.",
-              src: "/projects/evacuaplan/structure.webp",
-              alt: "EvacuaPlan Studio mostrando una pared con puerta y ventana",
-            },
-          ],
-        },
-        {
-          slug: "acreditaciones-app",
-          caseStudyLabel: "Ver caso de estudio",
-          title: "Acreditaciones",
-          status: "Sistema privado en evolución",
-          description: "Sistema de control de acreditaciones de operadores con ciclos de vigencia, historial de pruebas, reportes y análisis para planificar evaluaciones.",
-          highlights: [
-            "Normalización de históricos, validación de identidad y reglas de vigencia por modalidad y bloques.",
-            "Motor analítico independiente en Python con FastAPI, DuckDB y Google OR-Tools para análisis y planificación.",
-            "Asistencia con IA, consultas a datos y trazabilidad de aprobaciones sin exponer información real en esta demostración.",
-          ],
-          technologies: ["Next.js", "TypeScript", "PostgreSQL", "Python", "FastAPI", "DuckDB", "OR-Tools", "IA"],
-          gallery: [{
-            id: "overview",
-            label: "Vista conceptual",
-            title: "Control de acreditaciones y planificación",
-            description: "Visualización ilustrativa creada para el portafolio, sin datos de participantes reales.",
-            src: "/projects/acreditaciones/overview.svg",
-            alt: "Ilustración conceptual del sistema de acreditaciones sin datos reales",
-          }],
-        },
-        {
-          slug: "hidrantes-app",
-          caseStudyLabel: "Ver caso de estudio",
-          title: "Hidrantes",
-          status: "Aplicación operativa · despliegue por verificar",
-          description: "Mapa público para localizar hidrantes, consultar su caudal y abrir rutas de navegación; incorpora un editor privado.",
-          highlights: [
-            "Acceso por QR sin iniciar sesión para la consulta pública.",
-            "Ubicación del dispositivo solo con permiso, datos de GPM y enlaces a mapas.",
-            "Mantenimiento de ubicaciones restringido a un editor autorizado.",
-          ],
-          technologies: ["Next.js", "React", "TypeScript", "Leaflet", "Supabase", "Geolocalización"],
-          gallery: [{
-            id: "overview",
-            label: "Mapa conceptual",
-            title: "Consulta operativa sobre mapa",
-            description: "Ilustración con ubicaciones ficticias; no representa hidrantes reales.",
-            src: "/projects/hidrantes/overview.svg",
-            alt: "Mapa conceptual con hidrantes primarios y secundarios y puntos inventados",
-          }],
-        },
-      ],
+      projects: getProjects("es"),
     },
     servicesSection: {
       "eyebrow": "Qué aporto",
@@ -468,7 +314,7 @@ export const siteContent = {
         "Python",
       ],
       metrics: [
-        { value: "4", label: "developed projects" },
+        { value: String(projectDefinitions.length), label: "developed projects" },
         { value: "Idea to product", label: "definition, testing and evolution" },
         { value: "C1", label: "English proficiency" },
       ],
@@ -478,151 +324,7 @@ export const siteContent = {
       title: "From operational problems to digital products",
       description:
         "Projects born from real operational problems. I define their behavior, coordinate AI-assisted implementation and validate that each result addresses the original need.",
-      projects: [
-        {
-          slug: "firetrack",
-          caseStudyLabel: "View case study",
-          title: "FireTrack",
-          status: "In production",
-          description:
-            "A SaaS solution created after identifying opportunities to improve traditional fire-extinguisher inventory, inspection, maintenance and traceability processes.",
-          highlights: [
-            "Analysis of the operational workflow and translation of real needs into rules, permissions and digital processes.",
-            "Multi-company architecture with authentication, roles, data isolation and traceability.",
-            "QR, PDF reporting, alerts, audit records and Excel imports integrated into the daily workflow.",
-          ],
-          technologies: [
-            "Next.js",
-            "React",
-            "TypeScript",
-            "Supabase",
-            "PostgreSQL",
-            "Vercel",
-          ],
-          gallery: [
-            {
-              id: "dashboard",
-              label: "Dashboard",
-              title: "Multi-company operational dashboard",
-              description:
-                "Metrics, inventory, statuses, inspections and alerts brought together for daily operational monitoring.",
-              src: "/projects/firetrack/dashboard.webp",
-              alt: "FireTrack operational dashboard with extinguisher inventory metrics",
-            },
-            {
-              id: "asset",
-              label: "Asset and QR",
-              title: "Technical record and QR access",
-              description:
-                "Operational status, scheduled controls, history and fast access from the physical equipment.",
-              src: "/projects/firetrack/asset-qr.webp",
-              alt: "FireTrack extinguisher record with a safe demonstration QR label",
-            },
-            {
-              id: "floor-plan",
-              label: "Floor plan",
-              title: "Interactive equipment positioning",
-              description:
-                "Equipment placement on multi-page plans with navigation between the floor plan and each asset record.",
-              src: "/projects/firetrack/croquis.webp",
-              alt: "FireTrack floor-plan module with extinguishers positioned on a building plan",
-            },
-          ],
-          externalUrl: "https://firetrackcr.com",
-          externalLabel: "Visit FireTrack",
-        },
-        {
-          slug: "evacuaplan-studio",
-          caseStudyLabel: "View case study",
-          title: "EvacuaPlan Studio",
-          status: "Active development",
-          description:
-            "A web tool that translates emergency-planning requirements into a specialized workflow for creating professional evacuation plans.",
-          highlights: [
-            "Translation of technical and operational requirements into specialized editing tools.",
-            "Selection, rotation, grouping, locking, copying and advanced object editing.",
-            "Mouse, touchscreen, iPad and Apple Pencil interaction.",
-          ],
-          technologies: [
-            "Next.js",
-            "React",
-            "TypeScript",
-            "Konva",
-            "Tailwind CSS",
-          ],
-          gallery: [
-            {
-              id: "symbols",
-              label: "Symbols",
-              title: "Emergency symbol library and transformation",
-              description:
-                "Emergency objects that can be moved, resized, rotated, locked and copied.",
-              src: "/projects/evacuaplan/symbols.webp",
-              alt: "EvacuaPlan editor with selectable emergency symbols",
-            },
-            {
-              id: "multi-select",
-              label: "Multi-select",
-              title: "Coordinated editing of multiple objects",
-              description:
-                "Selection, movement and management of several objects without affecting protected elements.",
-              src: "/projects/evacuaplan/multi-select.webp",
-              alt: "EvacuaPlan Studio with several objects selected at the same time",
-            },
-            {
-              id: "structure",
-              label: "Structure",
-              title: "Walls, doors and windows",
-              description:
-                "Custom tools for building and editing the structural foundation of each plan level.",
-              src: "/projects/evacuaplan/structure.webp",
-              alt: "EvacuaPlan Studio showing a wall with a door and window",
-            },
-          ],
-        },
-        {
-          slug: "acreditaciones-app",
-          caseStudyLabel: "View case study",
-          title: "Accreditations",
-          status: "Private system in active development",
-          description: "Operator accreditation management with validity cycles, test history, reporting and analytics for evaluation planning.",
-          highlights: [
-            "Historical record normalization, identity reconciliation and modality-specific validity rules.",
-            "Independent Python analytics service with FastAPI, DuckDB and Google OR-Tools for analysis and scheduling.",
-            "AI-assisted data questions and approval traceability, with no real participant information exposed in this demo.",
-          ],
-          technologies: ["Next.js", "TypeScript", "PostgreSQL", "Python", "FastAPI", "DuckDB", "OR-Tools", "AI"],
-          gallery: [{
-            id: "overview",
-            label: "Concept preview",
-            title: "Accreditation control and planning",
-            description: "Illustrative portfolio preview created without real participant data.",
-            src: "/projects/acreditaciones/overview.svg",
-            alt: "Conceptual view of the accreditation system using synthetic data",
-          }],
-        },
-        {
-          slug: "hidrantes-app",
-          caseStudyLabel: "View case study",
-          title: "Hydrants",
-          status: "Operational app · deployment unverified",
-          description: "Public QR-accessible map to locate hydrants, inspect flow-rate records and open navigation; includes a private editing area.",
-          highlights: [
-            "QR-based public access without requiring a sign-in.",
-            "Permission-based device location, flow readings and map navigation links.",
-            "Location management restricted to an authorized editor.",
-          ],
-          technologies: ["Next.js", "React", "TypeScript", "Leaflet", "Supabase", "Geolocation"],
-          gallery: [{
-            id: "overview",
-            label: "Concept map",
-            title: "Operational hydrant lookup",
-            description: "Illustration with fictional locations; does not represent actual hydrants.",
-            src: "/projects/hidrantes/overview.svg",
-            alt: "Conceptual hydrant map with invented primary and secondary points",
-          }],
-        },
-      ],
+      projects: getProjects("en"),
     },
     servicesSection: {
       "eyebrow": "What I offer",

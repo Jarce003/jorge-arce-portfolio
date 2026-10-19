@@ -28,6 +28,16 @@ jobs:
         run: npm ci
       - name: Encoding validation
         run: npm run check:encoding
+      - name: Project catalog and artwork validation
+        run: npm run check:projects
+      - name: Validate SVG XML previews
+        run: python3 scripts/check-svg-xml.py
+      - name: AI demo query regression tests
+        run: npm run test:demo
+      - name: Rescue water and fire regression tests
+        run: npm run test:world
+      - name: Vehicle motion and performance regression tests
+        run: npm run test:motion
       - name: TypeScript validation
         run: npx tsc --noEmit
       - name: Production build
