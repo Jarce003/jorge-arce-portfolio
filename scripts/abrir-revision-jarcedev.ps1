@@ -93,31 +93,46 @@ try {
     # Vite serves the exact React Three Fiber candidate directly. Avoid
     # Turbopack; only start the Vite server on a currently free port.
     $scene = Join-Path $lab "experiments\r3f"
+    $sharedDeps = Join-Path $env:LOCALAPPDATA "JarceDev\r3f-deps"
+    $sharedModules = Join-Path $sharedDeps "node_modules"
     $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
     $tailwindPlugin = Join-Path $scene "node_modules\@tailwindcss\vite\package.json"
-    if (-not (Test-Path -LiteralPath $viteBin) -or -not (Test-Path -LiteralPath $tailwindPlugin)) {
-        # Reuse already-installed Vite dependencies from the previous review;
-        # a Windows directory junction avoids another unnecessary npm download.
-        $oldModules = Join-Path $oldLab "experiments\r3f\node_modules"
-        $newModules = Join-Path $scene "node_modules"
-        if ((Test-Path -LiteralPath (Join-Path $oldModules "vite\bin\vite.js")) -and
-            (Test-Path -LiteralPath (Join-Path $oldModules "@tailwindcss\vite\package.json")) -and
-            -not (Test-Path -LiteralPath $newModules)) {
-            try {
-                New-Item -ItemType Junction -Path $newModules -Target $oldModules -ErrorAction Stop | Out-Null
-                Write-Host "Dependencias 3D reutilizadas; sin reinstalar." -ForegroundColor Green
-            } catch {
-                Write-Host "No se pudo reutilizar node_modules; se instalaran normalmente." -ForegroundColor Gray
-            }
-        }
+
+    # Reuse dependencies across ALL review revisions. Installing in the
+    # deeply nested worktree caused Windows tar/file-write failures.
+    $packageSrc = Join-Path $scene "package.json"
+    $packageCache = Join-Path $sharedDeps "package.json"
+    $needsDeps = -not (Test-Path -LiteralPath (Join-Path $sharedModules "vite\bin\vite.js")) -or
+                 -not (Test-Path -LiteralPath (Join-Path $sharedModules "@tailwindcss\vite\package.json"))
+    if (-not $needsDeps -and (Test-Path -LiteralPath $packageCache)) {
+        $needsDeps = (Get-Content -LiteralPath $packageSrc -Raw) -ne
+                     (Get-Content -LiteralPath $packageCache -Raw)
+    }
+    if ($needsDeps) {
+        New-Item -ItemType Directory -Path $sharedDeps -Force | Out-Null
+        Copy-Item -LiteralPath $packageSrc -Destination $packageCache -Force
+        Write-Host "Preparando dependencias compartidas en una ruta corta de Windows..." -ForegroundColor Cyan
+        Push-Location $sharedDeps
+        try {
+            & npm.cmd install --no-package-lock --no-audit --no-fund --prefer-offline
+            if ($LASTEXITCODE -ne 0) { throw "Fallo npm en carpeta compartida: $sharedDeps" }
+        } finally { Pop-Location }
+    } else {
+        Write-Host "Dependencias 3D compartidas ya listas; sin reinstalacion." -ForegroundColor Green
+    }
+
+    $newModules = Join-Path $scene "node_modules"
+    if (-not (Test-Path -LiteralPath $newModules)) {
+        New-Item -ItemType Junction -Path $newModules -Target $sharedModules -ErrorAction Stop | Out-Null
+    } elseif (-not (Test-Path -LiteralPath $viteBin) -or -not (Test-Path -LiteralPath $tailwindPlugin)) {
+        # Preserve any partial installation rather than deleting user files.
+        $savedModules = Join-Path $scene ("node_modules-parcial-" + (Get-Date -Format "yyyyMMddHHmmss"))
+        Rename-Item -LiteralPath $newModules -NewName (Split-Path $savedModules -Leaf) -ErrorAction Stop
+        New-Item -ItemType Junction -Path $newModules -Target $sharedModules -ErrorAction Stop | Out-Null
+        Write-Host "Instalacion parcial anterior preservada; dependencias reutilizadas." -ForegroundColor Green
     }
     if (-not (Test-Path -LiteralPath $viteBin) -or -not (Test-Path -LiteralPath $tailwindPlugin)) {
-        Write-Host "Instalando dependencias 3D necesarias (incluyendo tarjetas IA)..." -ForegroundColor Cyan
-        Push-Location $scene
-        try {
-            & npm.cmd install --no-package-lock --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "Vite dependency installation failed." }
-        } finally { Pop-Location }
+        throw "No se pudieron vincular las dependencias 3D compartidas."
     }
 
     $nodeExe = (Get-Command node.exe).Source
