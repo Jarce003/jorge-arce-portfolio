@@ -24,6 +24,17 @@ async function waitForServer(){
   }
   throw Error("Vite did not start");
 }
+async function capture(page,filename){
+  // In headless SwiftShader a GPU readback occasionally never completes.
+  // A screenshot is diagnostic, not a reason to fail functional navigation.
+  try{
+    await page.screenshot({path:resolve(screenshots,filename),
+      animations:"disabled",timeout:9000});
+  }catch(error){
+    console.warn("Visual snapshot unavailable on software renderer:",filename,
+      error instanceof Error?error.message:String(error));
+  }
+}
 async function loadPage(page){
   await page.goto(url,{waitUntil:"networkidle",timeout:45000});
   await page.getByText("JARCEDEV",{exact:true}).waitFor();
@@ -54,14 +65,14 @@ async function rescueStation(page,name,label){
   },{timeout:10000});
   await discover.click();
   await page.waitForTimeout(710);
-  await page.screenshot({path:resolve(screenshots,label+"-water.png")});
+  await capture(page,label+"-water.png");
   await page.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
   if(label==="hidrantes"){
     // Fourth distinct rescue unlocks a reward once, without opening a tab.
     const reward=page.locator('[data-testid="rescue-reward"]');
     await reward.waitFor({timeout:12000});
     await reward.getByText("¡Todos los incendios extinguidos!").waitFor();
-    await page.screenshot({path:resolve(screenshots,"mission-complete-reward.png"),timeout:60000});
+    await capture(page,"mission-complete-reward.png");
     await reward.getByRole("button",{name:"Ver último proyecto"}).click();
     assert.equal(await reward.count(),0);
   }else{
@@ -77,7 +88,7 @@ async function rescueStation(page,name,label){
     await page.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
     console.log("Approved Acreditaciones AI demo consulted successfully in 3D case card.");
   }
-  await page.screenshot({path:resolve(screenshots,label+"-recovered.png"),timeout:60000});
+  await capture(page,label+"-recovered.png");
   await page.getByRole("button",{name:"Cerrar proyecto"}).click();
   console.log(name+": rescue and project panel OK");
 }
@@ -91,15 +102,15 @@ try{
   const desktop=await browser.newPage({viewport:{width:1366,height:768}});
   desktop.on("pageerror",error=>errors.push("Desktop: "+error.message));
   await loadPage(desktop);
-  await desktop.screenshot({path:resolve(screenshots,"all-four-day.png")});
+  await capture(desktop,"all-four-day.png");
   assert.equal(await desktop.getByText(/FPS aproximados|draw calls|Laboratorio 3D/).count(),0);
   assert.equal(await desktop.locator(".stations-dock button").count(),4);
   await desktop.getByRole("button",{name:/Vista aérea/}).click();
   await desktop.waitForTimeout(400);
-  await desktop.screenshot({path:resolve(screenshots,"all-four-blender-overview.png")});
+  await capture(desktop,"all-four-blender-overview.png");
   await desktop.getByRole("button",{name:/Día|Noche/}).click();
   await desktop.waitForTimeout(330);
-  await desktop.screenshot({path:resolve(screenshots,"all-four-night.png")});
+  await capture(desktop,"all-four-night.png");
   console.log("Four Blender buildings, web-style truck, camera and day/night switch OK");
 
   for(const [name,label] of [
@@ -124,7 +135,7 @@ try{
   });
   mobile.on("pageerror",error=>errors.push("Mobile: "+error.message));
   await loadPage(mobile);
-  await mobile.screenshot({path:resolve(screenshots,"mobile-portrait.png")});
+  await capture(mobile,"mobile-portrait.png");
   assert.equal(await mobile.getByRole("button",{name:"Acelerar"}).count(),1);
   assert.equal(await mobile.getByRole("button",{name:"Izquierda"}).count(),1);
   assert.equal(await mobile.locator(".stations-dock button").count(),4);
