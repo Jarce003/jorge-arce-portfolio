@@ -105,6 +105,27 @@ try{
   await capture(desktop,"all-four-day.png");
   assert.equal(await desktop.getByText(/FPS aproximados|draw calls|Laboratorio 3D/).count(),0);
   assert.equal(await desktop.locator(".stations-dock button").count(),4);
+  // Navigate to the restored compact project gallery without losing the
+  // localhost origin or opening the old production website.
+  const previewOrigin=new URL(desktop.url()).origin;
+  await desktop.getByRole("button",{name:/Mi perfil y proyectos/}).click();
+  const gallery=desktop.locator('[data-testid="inline-portfolio"]');
+  await gallery.waitFor();
+  assert.equal(await gallery.locator(".browser-card").count(),4);
+  const galleryImages=gallery.locator(".browser-card-art img");
+  assert.equal(await galleryImages.count(),4);
+  await galleryImages.first().evaluate(async node=>{
+    if(!(node instanceof HTMLImageElement))throw Error("Portfolio art is missing");
+    await node.decode();
+    if(node.naturalWidth===0)throw Error("Project art failed to load");
+  });
+  await gallery.getByRole("button",{name:/Consultar/}).click();
+  await gallery.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
+  await gallery.getByRole("button",{name:/Volver al mundo 3D/}).click();
+  assert.equal(await gallery.count(),0);
+  assert.equal(new URL(desktop.url()).origin,previewOrigin);
+  await desktop.locator(".viewport canvas").waitFor();
+  console.log("Four real project images, original AI demo and in-app return to 3D OK.");
   await desktop.getByRole("button",{name:/Vista aérea/}).click();
   await desktop.waitForTimeout(400);
   await capture(desktop,"all-four-blender-overview.png");
