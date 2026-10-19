@@ -42,7 +42,7 @@ export const projectDefinitions = [
     station: { id: "acreditaciones", x: -14, z: 12, structure: "academy" },
     icon: "✳",
     accent: "#a78bfa",
-    preview: "/projects/acreditaciones/overview.svg",
+    preview: "/projects/previews/acreditaciones.svg",
     technologies: ["Next.js", "Python", "DuckDB", "OR-Tools", "IA"],
     demo: "acreditaciones-ai",
     locale: {
@@ -69,7 +69,7 @@ export const projectDefinitions = [
     station: { id: "firetrack", x: -14, z: -12, structure: "operations" },
     icon: "🧯",
     accent: "#fb7185",
-    preview: "/projects/firetrack/dashboard-v2.webp",
+    preview: "/projects/previews/firetrack.svg",
     technologies: ["Next.js", "TypeScript", "Supabase", "QR"],
     locale: {
       es: {
@@ -95,7 +95,7 @@ export const projectDefinitions = [
     station: { id: "evacuaplan", x: 14, z: -12, structure: "design-studio" },
     icon: "▦",
     accent: "#67e8f9",
-    preview: "/projects/evacuaplan/structure.webp",
+    preview: "/projects/previews/evacuaplan.svg",
     technologies: ["Next.js", "React", "TypeScript", "Konva"],
     locale: {
       es: {
@@ -121,7 +121,7 @@ export const projectDefinitions = [
     station: { id: "hidrantes", x: 14, z: 12, structure: "mapping-hub" },
     icon: "📍",
     accent: "#6ee7b7",
-    preview: "/projects/hidrantes/overview.svg",
+    preview: "/projects/previews/hidrantes.svg",
     technologies: ["Next.js", "Leaflet", "Supabase", "QR"],
     locale: {
       es: {
