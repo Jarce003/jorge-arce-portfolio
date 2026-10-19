@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:experience && next build",
     "start": "next start",
     "lint": "eslint",
     "check:encoding": "node scripts/check-encoding.mjs",
     "check:projects": "node scripts/check-projects.mjs",
     "test:demo": "node --test scripts/test-sample-demo.mjs",
     "test:world": "node --test scripts/test-world-rescue.mjs",
-    "test:motion": "node --test scripts/test-world-motion.mjs"
+    "test:motion": "node --test scripts/test-world-motion.mjs",
+    "build:experience": "npm --prefix experiments/r3f install --no-package-lock --no-audit --no-fund && npm --prefix experiments/r3f run build && node scripts/build-experience.mjs"
   },
   "dependencies": {
     "next": "16.2.12",
