@@ -12,9 +12,12 @@ const projects=getProjects("es");
 const assets=Object.values(MODEL_FILES);
 type Direction="forward"|"reverse"|"left"|"right";
 function projectUrl(slug:string){
-  // Keep links on the same Next.js origin, regardless of the free local port.
-  // The independent Vite scene remains a development-only fallback.
-  if(typeof window!=="undefined" && window.location.port==="4174"){
+  // When reviewed directly from Vite (/, ports 3002+ or 4174), the
+  // real project case studies remain on the existing WebGL2 site at 3000.
+  // Inside Next.js (/experience/index.html), stay on the same origin.
+  if(typeof window!=="undefined" &&
+      window.location.pathname==="/" &&
+      ["localhost","127.0.0.1"].includes(window.location.hostname)){
     return "http://127.0.0.1:3000/es/projects/"+slug;
   }
   return "/es/projects/"+slug;
