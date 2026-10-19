@@ -45,33 +45,22 @@ function buildParts(){
       put(side*1.24,1.25,compartment,.035,.04,.23,"#36465b");
     }
     put(side*1.13,.65,-2.14,.26,.11,1.13,"#b8c9d6");
-    // Large Costa Rican flag on both cab doors. Body-mounted rather than
-    // floating; the top blue stripe stays below the cab's side window.
-    // Proportions 1:1:2:1:1 with a broad red band and crisp opaque colors.
-    const flagX=side*1.24;
-    const flagZ=-1.79;
-    const flagBands:[number,number,string][]=[
-      [1.045,.087,"#002B7F"],
-      [1.132,.087,"#FFFFFF"],
-      [1.263,.174,"#CE1126"],
-      [1.394,.087,"#FFFFFF"],
-      [1.481,.087,"#002B7F"],
-    ];
-    for(const [height,thickness,finish] of flagBands){
-      put(flagX,height,flagZ,.055,thickness,1.10,finish);
-    }
     // Rear-side alert lens belongs to the animated beacon system only.
   }
-  // A matching large flag on the rear-facing body is readable from the
-  // driving camera, which follows the truck from behind.
-  for(const [height,thickness,finish] of [
-    [1.24,.09,"#002B7F"],
-    [1.33,.09,"#FFFFFF"],
-    [1.465,.18,"#CE1126"],
-    [1.60,.09,"#FFFFFF"],
-    [1.69,.09,"#002B7F"],
-  ] as [number,number,string][]){
-    put(0,height,2.785,1.45,thickness,.052,finish);
+  // One elevated Costa Rican flag at the rear, matching the approved
+  // WebGL2 version. Static cloth is intentional: no cloth simulation cost.
+  // The broad central red band follows the correct 1:1:2:1:1 stripes.
+  const flagX=-.71, flagZ=3.15;
+  put(flagX-.52,2.80,flagZ,.065,1.76,.085,"#e5eef7"); // flagpole
+  put(flagX-.52,3.72,flagZ,.12,.11,.11,"#f4c670"); // finial
+  for(const [y,height,color] of [
+    [3.38,.15,"#002B7F"],
+    [3.23,.15,"#FFFFFF"],
+    [3.005,.30,"#CE1126"],
+    [2.78,.15,"#FFFFFF"],
+    [2.63,.15,"#002B7F"],
+  ] as const){
+    put(flagX,y,flagZ,1.02,height,.070,color);
   }
   // A single open aerial ladder, with a clearly separated turntable pivot.
   // Earlier versions accidentally rendered a large deck AND two overlapping
