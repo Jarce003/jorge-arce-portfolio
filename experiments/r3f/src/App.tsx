@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getProjects } from "@/content/projects";
+import { getProjects, type ProjectId } from "@/content/projects";
 import { AcreditacionesDemo } from "./acreditaciones-demo";
 import { PortfolioBrowser } from "./portfolio-browser";
 import {
@@ -25,6 +25,7 @@ export function App(){
   const rescue=useRef<Rescue|null>(null);
   const [day,setDay]=useState(true);
   const [portfolioOpen,setPortfolioOpen]=useState(false);
+  const [focusedProject,setFocusedProject]=useState<ProjectId>("acreditaciones-app");
   const [overview,setOverview]=useState(false);
   const [lights,setLights]=useState(true);
   const [assetStatus,setAssetStatus]=useState<"loading"|"ready"|"partial">("loading");
@@ -156,7 +157,10 @@ export function App(){
           </span>
         </button>
         <div className="header-actions">
-          <button type="button" className="go-back" onClick={()=>setPortfolioOpen(true)}>
+          <button type="button" className="go-back" onClick={()=>{
+            setFocusedProject("acreditaciones-app");
+            setPortfolioOpen(true);
+          }}>
             Mi perfil y proyectos ↗
           </button>
           <button type="button" className="reset-button" onClick={restart}>↻ Reiniciar</button>
@@ -232,6 +236,11 @@ export function App(){
               {selected.technologies.map(item=><span key={item}>{item}</span>)}
             </div>
             <div className="actions">
+              <button type="button" onClick={()=>{
+                setFocusedProject(selected.slug);setPortfolioOpen(true);
+              }}>
+                Ver caso y capturas
+              </button>
               {selected.demo==="acreditaciones-ai" && (
                 <button type="button" onClick={()=>setAiOpen(value=>!value)}
                   aria-expanded={aiOpen}>
@@ -300,7 +309,8 @@ export function App(){
           </div>
         </section>
       )}
-      {portfolioOpen && <PortfolioBrowser onBack={()=>setPortfolioOpen(false)}/>}
+      {portfolioOpen && <PortfolioBrowser key={focusedProject}
+        initialProject={focusedProject} onBack={()=>setPortfolioOpen(false)}/>}
       <section className="drive-controls" aria-label="Conducción táctil">
         <div className="steering">
           {driveButton("left","Izquierda","↶")}
