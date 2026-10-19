@@ -12,9 +12,12 @@ const projects=getProjects("es");
 const assets=Object.values(MODEL_FILES);
 type Direction="forward"|"reverse"|"left"|"right";
 function projectUrl(slug:string){
-  const local=typeof window!=="undefined" &&
-    ["localhost","127.0.0.1"].includes(window.location.hostname);
-  return (local?"http://localhost:3000":"")+"/es/projects/"+slug;
+  // Keep links on the same Next.js origin, regardless of the free local port.
+  // The independent Vite scene remains a development-only fallback.
+  if(typeof window!=="undefined" && window.location.port==="4174"){
+    return "http://127.0.0.1:3000/es/projects/"+slug;
+  }
+  return "/es/projects/"+slug;
 }
 async function assetExists(path:string){
   try{
