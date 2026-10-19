@@ -56,7 +56,17 @@ async function rescueStation(page,name,label){
   await page.waitForTimeout(710);
   await page.screenshot({path:resolve(screenshots,label+"-water.png")});
   await page.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
-  await page.screenshot({path:resolve(screenshots,label+"-recovered.png")});
+  // The case study is the approved compact inline card. No external tab,
+  // lengthy landing page or duplicate case-study content is permitted.
+  assert.equal(await page.getByRole("link",{name:/Ver caso completo/}).count(),0);
+  if(label==="acreditaciones"){
+    await page.getByRole("button",{name:/Probar asistente IA/}).click();
+    await page.locator('[data-testid="acreditaciones-demo"]').waitFor();
+    await page.locator('[data-testid="demo-submit"]').click();
+    await page.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
+    console.log("Approved Acreditaciones AI demo consulted successfully in 3D case card.");
+  }
+  await page.screenshot({path:resolve(screenshots,label+"-recovered.png"),timeout:60000});
   await page.getByRole("button",{name:"Cerrar proyecto"}).click();
   console.log(name+": rescue and project panel OK");
 }
