@@ -587,8 +587,13 @@ def hidrantes(mats):
     for index in range(4):
         b(f"NetworkFlowIndicator_{index}", (-3.0+index*1.65, 1.31, .06),
           (.91, .14, .085), mats["cyan"])
-    b("HydrantsNameBacking", (-2.22, -.04, 1.37), (3.94, .17, .72), navy)
-    facade_label("HidrantesFacadeName", "HIDRANTES", (-2.22, .08, 1.37), .40,
+    # Elevated, roof-mounted nameplate. The previous low-left sign was
+    # concealed by the oversized hydrant viewed from the public road.
+    for x in (-2.45, 2.45):
+        b(f"HydrantNameSupport_{x}", (x, -.04, 2.19),
+          (.17, .22, .53), chrome)
+    b("HydrantsNameBacking", (0, .13, 2.52), (5.90, .22, .79), navy)
+    facade_label("HidrantesFacadeName", "HIDRANTES", (0, .28, 2.52), .48,
                  white, target, root)
     print("Built Hidrantes map station:", len(target.objects), "objects")
     return target, root
