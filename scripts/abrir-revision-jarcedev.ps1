@@ -90,17 +90,18 @@ try {
     }
     if ($null -eq $candidatePort) { throw "No hay puerto libre entre 3000 y 3020." }
 
-    # Vite serves the exact React Three Fiber candidate directly. Next dev
-    # activates Turbopack and is unnecessary for this local visual review.
-    # Keep WebGL2 on 3000 and avoid starting, stopping or reconfiguring it.
+    # Vite serves the exact React Three Fiber candidate directly. Avoid
+    # Turbopack; only start the Vite server on a currently free port.
     $scene = Join-Path $lab "experiments\r3f"
     $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
-    if (-not (Test-Path -LiteralPath $viteBin)) {
+    $tailwindPlugin = Join-Path $scene "node_modules\@tailwindcss\vite\package.json"
+    if (-not (Test-Path -LiteralPath $viteBin) -or -not (Test-Path -LiteralPath $tailwindPlugin)) {
         # Reuse already-installed Vite dependencies from the previous review;
         # a Windows directory junction avoids another unnecessary npm download.
         $oldModules = Join-Path $oldLab "experiments\r3f\node_modules"
         $newModules = Join-Path $scene "node_modules"
         if ((Test-Path -LiteralPath (Join-Path $oldModules "vite\bin\vite.js")) -and
+            (Test-Path -LiteralPath (Join-Path $oldModules "@tailwindcss\vite\package.json")) -and
             -not (Test-Path -LiteralPath $newModules)) {
             try {
                 New-Item -ItemType Junction -Path $newModules -Target $oldModules -ErrorAction Stop | Out-Null
@@ -110,8 +111,8 @@ try {
             }
         }
     }
-    if (-not (Test-Path -LiteralPath $viteBin)) {
-        Write-Host "Instalando dependencias 3D (solo si faltan)..." -ForegroundColor Cyan
+    if (-not (Test-Path -LiteralPath $viteBin) -or -not (Test-Path -LiteralPath $tailwindPlugin)) {
+        Write-Host "Instalando dependencias 3D necesarias (incluyendo tarjetas IA)..." -ForegroundColor Cyan
         Push-Location $scene
         try {
             & npm.cmd install --no-package-lock --no-audit --no-fund
