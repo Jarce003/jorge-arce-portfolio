@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getProjects } from "@/content/projects";
-import { AcreditacionesDemo } from "@/components/project-demo/acreditaciones-demo";
+import { AcreditacionesDemo } from "./acreditaciones-demo";
 import {
   initialPose, closestStation, isAtStation, travelToStation,
   stations, type Controls, type Rescue, type StationId, type TruckPose,
