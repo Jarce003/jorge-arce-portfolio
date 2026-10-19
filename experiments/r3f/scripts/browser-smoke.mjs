@@ -202,7 +202,7 @@ try{
   assert.equal(await mobile.getByRole("button",{name:"Izquierda"}).count(),1);
   // Phone: same clean HUD, no sidebar and no blocking welcome card.
   const mobileDock=await mobile.locator(".stations-dock").boundingBox();
-  assert(mobileDock && mobileDock.width<=2 && mobileDock.height<=2,
+  assert(mobileDock===null || (mobileDock.width<=2 && mobileDock.height<=2),
     "Mobile project dock must not cover the 3D world");
   assert.equal(await mobile.locator(".overview").isVisible(),false);
   assert.equal(await mobile.locator(".steering-wheel-art").isVisible(),true);
