@@ -2,6 +2,7 @@
 @import "tailwindcss/theme.css";
 @import "tailwindcss/utilities.css";
 @source "./acreditaciones-demo.tsx";
+@source "./approved/*.tsx";
 
 :root{
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -9,7 +10,7 @@
 }
 *{box-sizing:border-box}
 html,body,#root{margin:0;width:100%;height:100%;overflow:hidden}
-button,a{font:inherit}
+button,a{font-family:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.56}
 button:focus-visible,a:focus-visible{outline:3px solid #b9a7ff;outline-offset:3px}
@@ -261,8 +262,9 @@ button:focus-visible,a:focus-visible{outline:3px solid #b9a7ff;outline-offset:3p
   .rescue-reward,.reward-stars span{animation:none!important}
 }
 
-/* Original compact portfolio flow is now inside the Vite world, not a link
- * to the older production website. Keep imagery and IA on the same origin. */
+
+/* Keep the original approved project's Tailwind layout unmodified.
+ * The 3D canvas is merely hidden while the canonical case cards are open. */
 button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:left}
 .portfolio-world[data-view="portfolio"] .viewport{visibility:hidden}
 .portfolio-world[data-view="portfolio"] .topbar,
@@ -273,92 +275,7 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
 .portfolio-world[data-view="portfolio"] .drive-controls,
 .portfolio-world[data-view="portfolio"] .rescue-reward{display:none}
 .portfolio-browser{
-  position:absolute;inset:0;z-index:20;overflow-y:auto;
-  color:#f5f7ff;background:#091426;overscroll-behavior:contain;
-  scrollbar-color:#5d7190 #101c32;
+  position:absolute;inset:0;z-index:20;overflow-x:hidden;overflow-y:auto;
+  scrollbar-color:#5d7190 #101c32;overscroll-behavior:contain;
 }
-.portfolio-browser-inner{
-  width:min(1130px,calc(100% - 36px));margin:0 auto;
-  padding:20px 0 42px;
-}
-.browser-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:30px}
-.browser-back{
-  border:1px solid #ffffff33;background:#19263f;color:#d8cbff;
-  padding:11px 16px;border-radius:999px;font-size:12px;font-weight:700;
-}
-.browser-back:hover{background:#343558;border-color:#bdaaff}
-.browser-top>span{font-size:10px;font-weight:900;letter-spacing:.18em;color:#c0acf5}
-.browser-intro{margin-bottom:28px}
-.browser-intro h1{font-size:clamp(30px,4.8vw,48px);margin:6px 0 7px;letter-spacing:-.05em;line-height:1.1}
-.browser-intro p{font-size:13px;line-height:1.65;color:#c3cfe2;margin:0}
-.browser-section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
-.browser-section-title h2{margin:0;color:#c5b1fa;font-weight:900;font-size:11px;letter-spacing:.18em}
-.browser-section-title span{font-size:11px;color:#9bacbf}
-.browser-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.browser-card{
-  display:flex;flex-direction:column;text-align:left;min-width:0;
-  padding:0;color:#f3f7ff;background:#18263e;border:1px solid #8d9eba24;
-  border-radius:12px;overflow:hidden;transition:border-color .16s,background .16s;
-}
-.browser-card:hover,.browser-card.selected{border-color:#b8a6fc;background:#29304c}
-.browser-card.selected{box-shadow:0 0 0 1px #b8a6fc55}
-.browser-card-art{height:124px;display:block;overflow:hidden;background:#101a30}
-.browser-card-art img{
-  display:block;width:100%;height:100%;object-fit:contain;
-  padding:7px 10px;
-}
-.browser-card-title{display:flex;align-items:center;gap:7px;min-width:0;padding:11px 10px}
-.browser-card-title>span:first-child{font-size:17px;flex-shrink:0}
-.browser-card-title>span:last-child{min-width:0}
-.browser-card-title strong{display:block;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.browser-card-title small{display:block;margin-top:3px;font-size:10px;color:#9eafc7}
-.browser-case{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr);gap:12px;margin-top:13px}
-.browser-summary{
-  background:#1a273e;border:1px solid #ffffff16;border-radius:18px;
-  padding:24px 21px;min-height:345px;display:flex;flex-direction:column;
-}
-.browser-summary h2{margin:7px 0 26px;font-size:24px;letter-spacing:-.025em}
-.browser-problem,.browser-solution{margin-bottom:21px}
-.browser-problem strong,.browser-solution strong{display:block;font-size:10px;letter-spacing:.14em}
-.browser-problem strong{color:#ff98a4}
-.browser-solution strong{color:#83edc6}
-.browser-problem p,.browser-solution p{color:#e0e6f1;margin:7px 0 0;font-size:13px;line-height:1.55}
-.browser-techs{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto}
-.browser-techs span{border-radius:7px;background:#ffffff0b;border:1px solid #ffffff1b;padding:5px 7px;font-size:10px;color:#d7e1ee}
-.browser-status{margin:13px 0 0;color:#97a8bd;font-size:11px}
-.browser-demo{min-width:0}
-.browser-demo>[data-testid="acreditaciones-demo"]{height:100%}
-.browser-case-art{
-  position:relative;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;background:#101d31;border:1px solid #ffffff20;
-  border-radius:18px;height:100%;min-height:345px;overflow:hidden;
-}
-.browser-case-art img{width:95%;max-height:315px;object-fit:contain}
-.browser-case-art p{margin:0 0 12px;font-size:10px;color:#9fb0c8}
-.browser-method{
-  display:flex;align-items:start;justify-content:space-between;gap:30px;
-  margin-top:25px;padding:21px;background:#131f33;border:1px solid #ffffff1c;border-radius:14px;
-}
-.browser-method>div:first-child{max-width:310px}
-.browser-method>div:first-child p{color:#c1cfdf;font-size:12px;line-height:1.65}
-.browser-method-tabs{display:flex;flex-wrap:wrap;gap:7px;max-width:590px}
-.browser-method-tabs button{background:#253650;color:#dce8f7;border:1px solid #ffffff23;border-radius:9px;padding:9px;font-size:11px}
-.browser-method-tabs button[aria-pressed="true"]{background:#bba8f0;color:#15223a;font-weight:800}
-.browser-method-tabs p{flex-basis:100%;min-height:1.5em;margin:7px 0 0;color:#c3d0df;font-size:12px}
-@media(max-width:800px){
-  .portfolio-browser-inner{width:calc(100% - 25px)}
-  .browser-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .browser-case{grid-template-columns:1fr}
-  .browser-summary{min-height:auto}
-  .browser-method{flex-direction:column;gap:10px}
-}
-@media(max-width:480px){
-  .browser-top{margin-bottom:20px}
-  .browser-top>span{display:none}
-  .browser-card-art{height:100px}
-  .browser-card-title{padding:8px}
-  .browser-card-title strong{font-size:10px}
-  .browser-card-title small{font-size:9px}
-  .browser-summary{padding:17px}
-  .browser-section-title span{font-size:10px}
-}
+.portfolio-browser button,.portfolio-browser a{cursor:pointer}
