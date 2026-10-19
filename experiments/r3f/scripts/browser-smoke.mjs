@@ -67,6 +67,17 @@ async function rescueStation(page,name,label){
   await page.waitForTimeout(710);
   await capture(page,label+"-water.png");
   await page.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
+  if(label==="firetrack"){
+    const beforeOrigin=new URL(page.url()).origin;
+    await page.getByRole("button",{name:"Ver caso y capturas"}).click();
+    const localCase=page.locator('[data-testid="inline-portfolio"]');
+    await localCase.waitFor({timeout:10000});
+    await localCase.getByRole("heading",{name:"FireTrack"}).waitFor();
+    assert.equal(new URL(page.url()).origin,beforeOrigin);
+    await localCase.getByRole("button",{name:/Volver al mundo 3D/}).click();
+    assert.equal(await localCase.count(),0);
+    console.log("FireTrack case study and return open inline without redirects or new tabs.");
+  }
   if(label==="hidrantes"){
     // Fourth distinct rescue unlocks a reward once, without opening a tab.
     const reward=page.locator('[data-testid="rescue-reward"]');
@@ -114,10 +125,12 @@ try{
   assert.equal(await gallery.locator(".browser-card").count(),4);
   const galleryImages=gallery.locator(".browser-card-art img");
   assert.equal(await galleryImages.count(),4);
-  await galleryImages.first().evaluate(async node=>{
-    if(!(node instanceof HTMLImageElement))throw Error("Portfolio art is missing");
-    await node.decode();
-    if(node.naturalWidth===0)throw Error("Project art failed to load");
+  await galleryImages.evaluateAll(async images=>{
+    await Promise.all(images.map(async node=>{
+      if(!(node instanceof HTMLImageElement))throw Error("Portfolio art is missing");
+      await node.decode();
+      if(node.naturalWidth===0)throw Error("Project art failed to load");
+    }));
   });
   await gallery.getByRole("button",{name:/Consultar/}).click();
   await gallery.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
