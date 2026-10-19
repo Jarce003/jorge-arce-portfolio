@@ -34,9 +34,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
+      type: "article",
+      url: "/" + lang + "/projects/" + project.slug,
+      title: project.title + " | JarceDev",
+      description: project.problem + " " + project.solution,
+      // Social apps such as WhatsApp do not reliably unfurl SVG artwork.
+      images: [{
+        url: "/" + lang + "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "JarceDev — Portafolio de soluciones digitales",
+      }],
+    },
+    twitter: {
+      card: "summary_large_image",
       title: project.title + " | JarceDev",
       description: project.solution,
-      images: [{ url: project.preview, alt: project.previewAlt }],
+      images: ["/" + lang + "/opengraph-image"],
     },
   };
 }
