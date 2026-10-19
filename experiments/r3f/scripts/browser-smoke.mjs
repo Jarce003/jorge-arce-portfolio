@@ -56,6 +56,17 @@ async function rescueStation(page,name,label){
   await page.waitForTimeout(710);
   await page.screenshot({path:resolve(screenshots,label+"-water.png")});
   await page.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
+  if(label==="hidrantes"){
+    // Fourth distinct rescue unlocks a reward once, without opening a tab.
+    const reward=page.locator('[data-testid="rescue-reward"]');
+    await reward.waitFor({timeout:12000});
+    await reward.getByText("¡Todos los incendios extinguidos!").waitFor();
+    await page.screenshot({path:resolve(screenshots,"mission-complete-reward.png"),timeout:60000});
+    await reward.getByRole("button",{name:"Ver último proyecto"}).click();
+    assert.equal(await reward.count(),0);
+  }else{
+    assert.equal(await page.locator('[data-testid="rescue-reward"]').count(),0);
+  }
   // The case study is the approved compact inline card. No external tab,
   // lengthy landing page or duplicate case-study content is permitted.
   assert.equal(await page.getByRole("link",{name:/Ver caso completo/}).count(),0);
@@ -98,7 +109,11 @@ try{
     await rescueStation(desktop,name,label);
   }
   await desktop.getByText("4/4").waitFor({timeout:5000});
-  console.log("Four stations discovered and counted correctly.");
+  console.log("Four stations discovered and reward unlocked correctly.");
+  await desktop.getByRole("button",{name:/Reiniciar/}).click();
+  await desktop.getByText("0/4").waitFor({timeout:5000});
+  assert.equal(await desktop.locator('[data-testid="rescue-reward"]').count(),0);
+  console.log("Reset clears completion reward, ready for another rescue run.");
   // Release the desktop WebGL context before creating a second software
   // renderer: shared SwiftShader/GPU budgets can stall mobile initialization.
   await desktop.close();
