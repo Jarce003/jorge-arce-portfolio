@@ -128,29 +128,83 @@ export function WaterSpray({
   );
 }
 
-/** Two clear red flashers work identically on procedural and imported trucks. */
-export function RedEmergencyLights({ active }: {active:boolean}) {
-  const refs=useRef<(THREE.Mesh|null)[]>([]);
+/** Flashing red warning lights around the cab, equipment body and aerial.
+ * Night-time pools on the asphalt restore the road reflections of WebGL2.
+ * Animation is disabled for people who prefer reduced motion.
+ */
+const BEACONS = [
+  // Two cab roof groups and front grille warning lights.
+  {at:[-.78,2.95,-2.34], size:[.40,.20,.28], phase:0, light:true},
+  {at:[ .78,2.95,-2.34], size:[.40,.20,.28], phase:1, light:true},
+  {at:[-.69,1.13,-3.02], size:[.36,.23,.10], phase:0, light:false},
+  {at:[ .69,1.13,-3.02], size:[.36,.23,.10], phase:1, light:false},
+  // Both sides: cab, middle service body and rear equipment bays.
+  {at:[-1.24,1.79,-1.86], size:[.10,.28,.43], phase:0, light:true},
+  {at:[ 1.24,1.79,-1.86], size:[.10,.28,.43], phase:1, light:true},
+  {at:[-1.24,1.72,.62], size:[.10,.27,.41], phase:1, light:false},
+  {at:[ 1.24,1.72,.62], size:[.10,.27,.41], phase:0, light:false},
+  {at:[-1.24,1.74,2.14], size:[.10,.28,.44], phase:0, light:true},
+  {at:[ 1.24,1.74,2.14], size:[.10,.28,.44], phase:1, light:true},
+  // Tail lamps and elevated rear ladder warning markers.
+  {at:[-.82,1.20,3.01], size:[.33,.23,.10], phase:1, light:false},
+  {at:[ .82,1.20,3.01], size:[.33,.23,.10], phase:0, light:false},
+  {at:[-.61,2.48,2.47], size:[.19,.19,.25], phase:1, light:true},
+  {at:[ .61,2.48,2.47], size:[.19,.19,.25], phase:0, light:true},
+] as const;
+
+export function RedEmergencyLights({
+  active,day,reducedMotion=false,
+}:{
+  active:boolean;day:boolean;reducedMotion?:boolean;
+}) {
+  const lenses=useRef<(THREE.Mesh|null)[]>([]);
+  const lamps=useRef<(THREE.PointLight|null)[]>([]);
+  const reflected=useRef<(THREE.Mesh|null)[]>([]);
   useFrame(({clock})=>{
-    const tick=Math.floor(clock.elapsedTime*5);
-    refs.current.forEach((mesh,index)=>{
-      if(!mesh)return;
-      const material=mesh.material as THREE.MeshStandardMaterial;
-      material.emissiveIntensity=active && (tick+index)%2===0 ? 3.0 : .08;
+    const flash=Math.floor(clock.elapsedTime*4.6)%2;
+    BEACONS.forEach((b,index)=>{
+      const on=active&&(reducedMotion||b.phase===flash);
+      const lens=lenses.current[index];
+      if(lens){
+        const material=lens.material as THREE.MeshStandardMaterial;
+        material.emissiveIntensity=on?(day?4.2:6.8):.06;
+      }
+      const point=lamps.current[index];
+      if(point)point.intensity=on?(day?3.4:7.6):0;
+      const ground=reflected.current[index];
+      if(ground){
+        const material=ground.material as THREE.MeshBasicMaterial;
+        material.opacity=on?(day?.12:.28):0;
+      }
     });
   });
   return (
-    <>
-      {[-.76,.76].map((x,index)=>(
-        <group key={index}>
-          <mesh ref={mesh=>{refs.current[index]=mesh;}}
-            position={[x,2.94,-2.34]}>
-            <boxGeometry args={[.46,.21,.27]}/>
-            <meshStandardMaterial color="#e52c43" emissive="#ff1f38"
-              emissiveIntensity={0.08} metalness={.22} roughness={.33}/>
-          </mesh>
-        </group>
-      ))}
-    </>
+    <group name="emergency-lightbar-and-body-flashers">
+      {BEACONS.map((b,index)=>{
+        const [x,y,z]=b.at;
+        return (
+          <group key={index}>
+            <mesh ref={node=>{lenses.current[index]=node;}}
+              position={[x,y,z]}>
+              <boxGeometry args={[...b.size]}/>
+              <meshStandardMaterial color="#c93442" emissive="#ff3047"
+                emissiveIntensity={.06} metalness={.16} roughness={.24}/>
+            </mesh>
+            {b.light && (
+              <pointLight ref={node=>{lamps.current[index]=node;}}
+                position={[x,y+.06,z]} color="#ff4156" intensity={0}
+                distance={day?5.2:9.5} decay={2}/>
+            )}
+            <mesh ref={node=>{reflected.current[index]=node;}}
+              rotation={[-Math.PI/2,0,0]}
+              position={[x*1.1,-.047,z]} renderOrder={4}>
+              <circleGeometry args={[index<4?1.55:1.2,22]}/>
+              <meshBasicMaterial color="#ff344c" transparent opacity={0}
+                blending={THREE.AdditiveBlending} depthWrite={false}/>
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
   );
 }
