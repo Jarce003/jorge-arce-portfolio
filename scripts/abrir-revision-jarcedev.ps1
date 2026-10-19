@@ -53,30 +53,63 @@ try {
     $version = [version]((& node --version).Trim().TrimStart("v"))
     if ($version -lt [version]"22.12.0") { throw "Node 22.12+ required." }
 
-    Write-Host "Actualizando solo el candidato. La version WebGL2 sigue en puerto 3000." -ForegroundColor Cyan
+    Write-Host "Preparando el candidato 3D sin modificar las carpetas anteriores." -ForegroundColor Cyan
     Git-Checked @("-C", $repo, "fetch", "origin", $labBranch) "fetch"
-    Ensure-Review $lab $labBranch
+
+    # Never force-clean or overwrite the previous review folder. Reuse a
+    # separate, commit-specific worktree so generated files cannot block the
+    # approved candidate and previously edited files are preserved.
+    $oldLab = $lab
+    $revision = (& git -C $repo rev-parse "origin/$labBranch").Trim()
+    if ($LASTEXITCODE -ne 0 -or $revision.Length -lt 10) {
+        throw "No se pudo resolver la revision experimental."
+    }
+    $lab = Join-Path $parent ("jarcedev-candidato-" + $revision.Substring(0, 10))
+    if (-not (Test-Path -LiteralPath $lab)) {
+        Git-Checked @("-C", $repo, "worktree", "add", "--detach", $lab, $revision) "create independent candidate"
+    } else {
+        $existingRevision = (& git -C $lab rev-parse HEAD).Trim()
+        if ($LASTEXITCODE -ne 0 -or $existingRevision -ne $revision) {
+            throw "El directorio de candidato ya existe con otra revision. No se modifico."
+        }
+        Write-Host "Reutilizando el candidato aislado de esta revision." -ForegroundColor Cyan
+    }
 
     $modelDirectory = Join-Path $lab "public\models\jarcedev\v1"
     foreach ($name in @("ladder-truck.glb", "firetrack-station.glb", "evacuaplan-station.glb", "acreditaciones-station.glb", "hidrantes-station.glb")) {
         if (-not (Test-Path (Join-Path $modelDirectory $name))) { throw "Missing Blender model: $name" }
     }
-    # Port 3000 belongs to the already-running WebGL2 portfolio.
-    # Never stop, reuse, or start another process on that port.
+    # Use 3000 when available, as requested. Do not stop an existing server;
+    # fall back to another free port if 3000 becomes occupied.
     $candidatePort = $null
-    foreach ($port in 3002..3020) {
+    foreach ($port in (@(3000) + @(3002..3020))) {
         if (-not (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)) {
             $candidatePort = $port
             break
         }
     }
-    if ($null -eq $candidatePort) { throw "No free preview port in 3002..3020." }
+    if ($null -eq $candidatePort) { throw "No hay puerto libre entre 3000 y 3020." }
 
     # Vite serves the exact React Three Fiber candidate directly. Next dev
     # activates Turbopack and is unnecessary for this local visual review.
     # Keep WebGL2 on 3000 and avoid starting, stopping or reconfiguring it.
     $scene = Join-Path $lab "experiments\r3f"
     $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
+    if (-not (Test-Path -LiteralPath $viteBin)) {
+        # Reuse already-installed Vite dependencies from the previous review;
+        # a Windows directory junction avoids another unnecessary npm download.
+        $oldModules = Join-Path $oldLab "experiments\r3f\node_modules"
+        $newModules = Join-Path $scene "node_modules"
+        if ((Test-Path -LiteralPath (Join-Path $oldModules "vite\bin\vite.js")) -and
+            -not (Test-Path -LiteralPath $newModules)) {
+            try {
+                New-Item -ItemType Junction -Path $newModules -Target $oldModules -ErrorAction Stop | Out-Null
+                Write-Host "Dependencias 3D reutilizadas; sin reinstalar." -ForegroundColor Green
+            } catch {
+                Write-Host "No se pudo reutilizar node_modules; se instalaran normalmente." -ForegroundColor Gray
+            }
+        }
+    }
     if (-not (Test-Path -LiteralPath $viteBin)) {
         Write-Host "Instalando dependencias 3D (solo si faltan)..." -ForegroundColor Cyan
         Push-Location $scene
@@ -98,9 +131,9 @@ try {
     Write-Host ""
     Write-Host "LISTO. Abre en Chrome:" -ForegroundColor Green
     Write-Host "CANDIDATO 3D:  $previewBase/" -ForegroundColor Yellow
-    Write-Host "WEBGL2 ACTUAL: http://127.0.0.1:3000/es (sin cambios)" -ForegroundColor Gray
+    Write-Host "Referencia web: https://www.jarcedev.com/es" -ForegroundColor Gray
     Write-Host "Para cerrar solo el candidato: Stop-Process -Id $($labProcess.Id)" -ForegroundColor DarkGray
-    Write-Host "No se abrio Next.js ni se altero el servidor del puerto 3000." -ForegroundColor DarkGray
+    Write-Host "No se inicio Turbopack ni se cerraron otros servidores." -ForegroundColor DarkGray
     Write-Host "Sin cambios en main ni Vercel." -ForegroundColor DarkGray
 } catch {
     Write-Host ("ERROR: " + $_.Exception.Message) -ForegroundColor Red
