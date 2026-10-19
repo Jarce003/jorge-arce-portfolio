@@ -41,6 +41,25 @@ async function capture(page,filename){
 async function checkResponsiveWorld(page,width,height,label){
   await page.setViewportSize({width,height});
   await page.waitForTimeout(350);
+  // React Three Fiber measures its parent with ResizeObserver. On headless
+  // SwiftShader it can take several frames to process an orientation change;
+  // verify the FINAL measured viewport rather than a stale intermediate frame.
+  const immediate=await page.evaluate(()=>({
+    innerHeight:window.innerHeight,
+    shellHeight:document.querySelector(".portfolio-world")?.getBoundingClientRect().height,
+    canvasHeight:document.querySelector(".viewport canvas")?.getBoundingClientRect().height,
+    containerHeight:document.querySelector(".viewport")?.getBoundingClientRect().height,
+  }));
+  console.log(label+": immediate resize measurements",JSON.stringify(immediate));
+  try{
+    await page.waitForFunction(expected=>{
+      const canvas=document.querySelector(".viewport canvas");
+      return canvas && Math.abs(canvas.getBoundingClientRect().height-expected)<2;
+    },height,{timeout:12000,polling:200});
+  }catch(error){
+    console.warn(label+": 3D canvas did not settle after orientation change",
+      error instanceof Error?error.message:String(error));
+  }
   const frame=await page.evaluate(()=>{
     const shell=document.querySelector(".portfolio-world");
     const canvas=document.querySelector(".viewport canvas");
@@ -65,7 +84,8 @@ async function checkResponsiveWorld(page,width,height,label){
   assert(frame.world && Math.abs(frame.world.height-height)<2,
     label+": world must fill the display without forcing a minimum height");
   assert(frame.canvas && Math.abs(frame.canvas.height-height)<2,
-    label+": canvas must fill available height");
+    label+": canvas must fill available height; got "+
+      JSON.stringify({canvas:frame.canvas,world:frame.world,screen:frame.innerHeight}));
   assert(frame.scrollHeight<=height+2,
     label+": document must not create a white/blank strip below the world");
   for(const [selector,box] of Object.entries(frame.controls)){
