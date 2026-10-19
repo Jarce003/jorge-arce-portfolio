@@ -215,8 +215,8 @@ export function App(){
       </nav>
       <section className="overview" aria-label="Introducción y recorrido">
         <span className="eyebrow">JARCEDEV · MUNDO 3D</span>
-        <h1>Recorre mis proyectos.</h1>
-        <p>Conduce hasta una estación y descubre lo que hay detrás de cada aplicación.</p>
+        <h1>Mis proyectos, en un mapa.</h1>
+        <p>Conduce y acércate a cada estación.</p>
         <div className="journey-status" role="status">
           <span>Proyectos descubiertos</span>
           <strong>{rescued.size}/4</strong>
@@ -278,15 +278,17 @@ export function App(){
             <span aria-hidden="true">{busy?"💧":nearby?"🔥":"🚒"}</span>
             <div className="rescue-text">
               <strong>{busy?"Extinguiendo el incendio…":nearbyProject?
-                nearbyProject.title:"Acércate a una estación"}</strong>
+                nearbyProject.title:"Recorre el mapa"}</strong>
               <small>{busy?"Al terminar conocerás el proyecto.":
                 nearby?(rescued.has(nearby)?"Este proyecto ya fue descubierto. Abre su ficha.":
-                "Apaga el fuego para conocer el proyecto."):"Conduce hasta un edificio para conocerlo."}</small>
+                "Apaga el fuego para conocer el proyecto."):"Acércate a una estación."}</small>
             </div>
-            <button type="button" className="discover"
-              onClick={discover} disabled={!nearby||busy}>
-              {nearby&&rescued.has(nearby)?"Ver proyecto":"Descubrir"}
-            </button>
+            {(nearby||busy) && (
+              <button type="button" className="discover"
+                onClick={discover} disabled={!nearby||busy}>
+                {nearby&&rescued.has(nearby)?"Ver proyecto":"Descubrir"}
+              </button>
+            )
           </div>
         )}
       </section>
