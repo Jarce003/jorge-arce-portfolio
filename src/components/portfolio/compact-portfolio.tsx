@@ -17,15 +17,15 @@ const copy = {
     returnWorld: "Explorar mundo 3D",
     projects: "MIS PROYECTOS",
     select: "Selecciona un proyecto",
-    process: "MI PROCESO",
+    process: "CÓMO TRABAJO",
     method: [
-      { name: "Observar", detail: "Comprender cómo funciona la operación." },
-      { name: "Detectar", detail: "Encontrar lo que se puede mejorar." },
-      { name: "Definir", detail: "Diseñar la solución y desarrollarla con IA." },
-      { name: "Validar", detail: "Probarla, corregirla y seguir mejorando." },
+      { name: "Observar", detail: "Conozco el trabajo diario, escucho a quienes lo realizan y entiendo qué necesitan." },
+      { name: "Detectar", detail: "Identifico los puntos que dificultan el trabajo y priorizo mejoras con sentido." },
+      { name: "Definir", detail: "Diseño el producto, sus reglas y sus flujos; uso la IA como herramienta de apoyo." },
+      { name: "Validar", detail: "Pongo a prueba cada función, corrijo lo necesario y compruebo su utilidad." },
     ],
-    profile: "Ingeniero en Sistemas · Experiencia operativa desde 2014 · Desarrollo asistido por IA.",
-    note: "El código se implementa con asistencia de IA; mi aporte está en el problema, las decisiones y la validación.",
+    profile: "Ingeniero en Sistemas · Bombero desde 2014 · Diseño de soluciones digitales.",
+    note: "Combino experiencia operativa y tecnología para convertir necesidades reales en herramientas útiles. Defino el funcionamiento, tomo las decisiones del producto y verifico cada resultado; utilizo IA como apoyo durante el desarrollo.",
     contact: "Conversemos",
   },
   en: {
@@ -35,15 +35,15 @@ const copy = {
     returnWorld: "Explore the 3D world",
     projects: "SELECTED PROJECTS",
     select: "Select a project",
-    process: "MY APPROACH",
+    process: "HOW I WORK",
     method: [
-      { name: "Observe", detail: "Understand how the operation works." },
-      { name: "Identify", detail: "Spot what could work better." },
-      { name: "Define", detail: "Design the solution and build it with AI." },
-      { name: "Validate", detail: "Test, adjust and keep improving." },
+      { name: "Observe", detail: "Learn how work gets done, listen to the people involved and understand their needs." },
+      { name: "Identify", detail: "Find friction in everyday work and focus on improvements that matter." },
+      { name: "Define", detail: "Design the product, its rules and workflows, using AI as a supporting tool." },
+      { name: "Validate", detail: "Test each feature, refine what needs work and verify its usefulness." },
     ],
-    profile: "Systems Engineer · Operational experience since 2014 · AI-assisted development.",
-    note: "AI tools implement the source code; I lead the problems, product decisions and validation.",
+    profile: "Systems Engineer · Firefighter since 2014 · Digital product design.",
+    note: "I combine field experience and technology to turn real needs into useful tools. I define product behavior, make key decisions and verify results, using AI as a development tool.",
     contact: "Let's talk",
   },
 } as const;
@@ -80,14 +80,14 @@ export function CompactPortfolio({ lang }: { lang: Locale }) {
               return (
                 <button key={project.slug} type="button" aria-pressed={active}
                   onClick={() => setSelectedSlug(project.slug)}
-                  className={"group overflow-hidden rounded-xl border text-left transition-all duration-200 " +
+                  className={"group overflow-hidden rounded-xl border text-left text-white transition-all duration-200 " +
                     (active ? "border-violet-300 bg-violet-300/15 shadow-lg shadow-violet-950/20" : "border-white/10 bg-white/[.04] hover:border-violet-300/50")}>
                   <div className="relative h-24 overflow-hidden bg-[#071323] sm:h-28">
                     <ProjectArtwork key={project.slug} project={project} decorative sizes="(max-width: 640px) 50vw, 25vw" className="transition-transform duration-200 group-hover:scale-[1.04]" />
                   </div>
                   <div className="flex min-h-14 items-center gap-2 px-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[.77rem] font-bold sm:text-sm">{project.title}</p>
+                      <p className="truncate text-[.77rem] font-bold text-white sm:text-sm">{project.title}</p>
                       <p className="mt-0.5 truncate text-[.64rem] text-slate-400">{project.category}</p>
                     </div>
                     {active && <span aria-hidden="true" className="text-violet-300">●</span>}
@@ -104,7 +104,7 @@ export function CompactPortfolio({ lang }: { lang: Locale }) {
 
       <section id={lang === "es" ? "proceso" : "process"} className="scroll-mt-24 bg-[#f4f6fa] px-4 py-9 text-slate-950 sm:px-8 sm:py-12">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-[.7rem] font-bold tracking-[.18em] text-violet-700">{t.process}</h2>
+          <h2 className="text-base font-extrabold tracking-[.065em] text-violet-800 sm:text-lg">{t.process}</h2>
           <div id={lang === "es" ? "servicios" : "services"} className="mt-3 grid scroll-mt-24 grid-cols-4 gap-1.5 sm:gap-3" role="group" aria-label={t.process}>
             {t.method.map((item, index) => (
               <button key={item.name} type="button" onClick={() => setStep(index)} aria-pressed={step === index}
@@ -114,7 +114,7 @@ export function CompactPortfolio({ lang }: { lang: Locale }) {
               </button>
             ))}
           </div>
-          <p className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600" aria-live="polite">
+          <p className="mt-3 min-h-16 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-600" aria-live="polite">
             {t.method[step].detail}
           </p>
         </div>
