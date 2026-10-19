@@ -29,7 +29,7 @@ async function capture(page,filename){
   // A screenshot is diagnostic, not a reason to fail functional navigation.
   try{
     await page.screenshot({path:resolve(screenshots,filename),
-      animations:"disabled",timeout:9000});
+      animations:"disabled",timeout:2000});
   }catch(error){
     console.warn("Visual snapshot unavailable on software renderer:",filename,
       error instanceof Error?error.message:String(error));
@@ -170,6 +170,9 @@ try{
   }
   await desktop.getByRole("button",{name:/Rescates completados: 4 de 4/}).waitFor();
   const desktopAward=desktop.locator('[data-testid="rescue-reward"]');
+  // The fourth-station helper already verified the reward and closed it
+  // with "Ver último proyecto". Reopen from 4/4 before asserting visibility.
+  await desktop.getByRole("button",{name:/Ver recompensa/}).click();
   await desktopAward.waitFor({state:"visible",timeout:10000});
   assert.equal(await desktop.locator('[data-testid="reward-backdrop"]').isVisible(),true);
   await desktopAward.getByText("¡Todos los incendios extinguidos!").waitFor();
