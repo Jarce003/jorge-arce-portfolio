@@ -353,7 +353,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       }
     }
   }
-  function fireStation(x: number, z: number, accent: string) {
+  function fireStation(x: number, z: number, accent: string, lowDetail: boolean) {
     plot(x,z,accent);
     box(x, 1.6, z - 1.15, 5.8, 3.2, 4.2, "#dce0e8");
     box(x, 3.45, z - 1.15, 6.35, .45, 4.7, palette.fire);
@@ -398,6 +398,48 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       box(x+offset, 1.18, z+4.5, .22, .10, .22, "#253a4e");
     }
     draw("cube",x+3.68,4.36,z-1.95,.62,.18,.62,accent,0,0,daylightTarget > .5 ? .12 : 1);
+
+    // FireTrack: a playful inspection workshop, with oversized equipment
+    // that immediately reads as fire-extinguisher management at road speed.
+    const equipmentX = x - 4.12;
+    const equipmentZ = z + 2.45;
+    box(equipmentX, .46, equipmentZ, 1.65, .14, 2.6, "#294456");
+    for (const zShift of [-.70, .15, .93]) {
+      cylinder(equipmentX, 1.18, equipmentZ+zShift, .63, 1.25, .63, "#c52d3d");
+      cylinder(equipmentX, 1.83, equipmentZ+zShift, .51, .16, .51, "#cbd8e0");
+      box(equipmentX, 1.55, equipmentZ+zShift+.33, .36, .24, .06, "#eaf4f7");
+      box(equipmentX, 1.96, equipmentZ+zShift, .48, .08, .12, "#364e63");
+    }
+    // Front-of-building inventory terminal / QR motif.
+    box(x+3.62, 1.9, z+1.38, 1.36, 2.35, .18, "#162c3e");
+    box(x+3.62, 2.02, z+1.50, 1.15, 1.75, .07, "#59bac5");
+    for (const [dx, dy] of [[-.35,.47],[.35,.47],[-.35,-.3],[.02,.02],[.36,-.42]]) {
+      box(x+3.62+dx,2.02+dy,z+1.57,.21,.21,.04,"#153445");
+    }
+    // Larger but still light-weight architectural elements (desktop only).
+    if (!lowDetail) {
+      // Roof-mounted inspection icon, hose storage and color-coded bays.
+      cylinder(x-1.65, 4.07, z-1.15, 1.45, .20, 1.45, "#eff4f5");
+      cylinder(x-1.65, 4.30, z-1.15, 1.00, .24, 1.00, "#d23646");
+      cylinder(x-1.65, 4.46, z-1.15, .50, .20, .50, "#f7c67b");
+      for (const side of [-1, 1]) {
+        box(x+side*3.03, 1.95, z-1.25, .28, 2.20, 2.95, "#e3eff1");
+        for (const band of [.92, 1.35, 1.78, 2.21]) {
+          box(x+side*3.20, band, z-1.30, .10, .10, 2.5, "#7b9eae");
+        }
+      }
+      for (const offset of [-1.75, 0, 1.75]) {
+        // White maintenance lamps above each service bay.
+        box(x+offset, 2.24, z+1.31, .90, .11, .16, "#f5f8fa");
+        box(x+offset, 2.27, z+1.41, .58, .06, .05, accent);
+      }
+      // Equipment racks and hose coils on the far side of the plot.
+      for (const offset of [-.66, .66]) {
+        cylinder(x+4.04, 1.15, z-.72+offset, .78, .15, .78, "#d1dce2");
+        cylinder(x+4.04, 1.16, z-.72+offset, .42, .20, .42, "#354b5c");
+      }
+      box(x, 4.18, z-3.03, 5.45, .12, .14, "#f8e5a9");
+    }
   }
   function evacuaStation(x: number, z: number, accent: string) {
     plot(x,z,accent);
@@ -544,9 +586,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
   }
 
-  function drawStation(structure: StructureType, x: number, z: number, accent: string) {
+  function drawStation(structure: StructureType, x: number, z: number, accent: string, lowDetail: boolean) {
     switch (structure) {
-      case "operations": fireStation(x, z, accent); break;
+      case "operations": fireStation(x, z, accent, lowDetail); break;
       case "design-studio": evacuaStation(x, z, accent); break;
       case "academy": accreditationStation(x, z, accent); break;
       case "mapping-hub": hydrantsStation(x, z, accent); break;
@@ -1016,7 +1058,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       lastShape = null;
       drawRoadNetwork(lowDetail);
       for (const station of worldStations) {
-        drawStation(station.structure, station.x, station.z, station.color);
+        drawStation(station.structure, station.x, station.z, station.color, lowDetail);
         const waterHasReachedFlames = rescue?.stationId === station.id &&
           elapsed - rescue.startedAt >= WATER_REACHES_FIRE_SECONDS;
         drawStationFire(station, elapsed, lowDetail, reducedMotion,
