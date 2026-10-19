@@ -14,6 +14,7 @@ on:
       - "tools/blender/**"
       - "scripts/pilot-3d-local.ps1"
       - "scripts/review-jarcedev-final.ps1"
+      - "scripts/abrir-revision-jarcedev.ps1"
       - "tsconfig.json"
       - ".github/workflows/r3f-laboratory-checks.yml"
   workflow_dispatch:
@@ -147,6 +148,7 @@ jobs:
           $paths = @(
             'scripts/pilot-3d-local.ps1',
             'scripts/review-jarcedev-final.ps1',
+            'scripts/abrir-revision-jarcedev.ps1',
             'scripts/validate-local.ps1'
           )
           foreach ($path in $paths) {
