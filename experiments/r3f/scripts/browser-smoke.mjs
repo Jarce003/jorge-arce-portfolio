@@ -247,6 +247,33 @@ try{
   await phoneAward.getByRole("button",{name:"Seguir explorando"}).click();
   console.log("Mobile: four rescues, visible 4/4 award, dismiss and reopen OK.");
 
+  // The English route must use the SAME interactive 3D world, localized
+  // project details, gallery, and working touch/keyboard controls.
+  await mobile.close();
+  const english=await browser.newPage({viewport:{width:1200,height:790}});
+  english.on("pageerror",error=>errors.push("English: "+error.message));
+  await english.goto(url+"?lang=en",{waitUntil:"networkidle",timeout:45000});
+  await english.locator("canvas").waitFor();
+  assert.equal(await english.locator("html").getAttribute("lang"),"en");
+  await english.getByRole("button",{name:"View profile and projects"}).waitFor();
+  await english.getByRole("button",{name:/Rescues completed: 0 of 4/}).waitFor();
+  await english.getByRole("button",{name:"Switch to aerial view"}).waitFor();
+  // The project preview must not silently fall back to Spanish.
+  await english.keyboard.press("1");
+  await english.getByRole("button",{name:"Discover"}).click();
+  await english.getByText("STATION RECOVERED").waitFor({timeout:12000});
+  await english.getByText("Accreditations",{exact:true}).first().waitFor();
+  await english.getByRole("button",{name:"View project and screenshots"}).click();
+  const enGallery=english.locator('[data-testid="inline-portfolio"]');
+  await enGallery.waitFor();
+  await enGallery.getByText("HOW I WORK").waitFor();
+  await enGallery.getByRole("link",{name:/Explore the 3D world/}).click();
+  assert.equal(await enGallery.count(),0);
+  await english.getByRole("button",{name:"Español"}).click();
+  await english.getByRole("button",{name:"Ver perfil y proyectos"}).waitFor();
+  assert.match(english.url(),/lang=es/);
+  console.log("Bilingual 3D: English station, localized portfolio and ES/EN switch OK.");
+
   if(errors.length)throw Error("JavaScript errors:\n"+errors.join("\n"));
   console.log("All four-project R3F browser checks passed; screenshots: "+screenshots);
 }catch(error){

@@ -4,6 +4,9 @@ import { getProjects, type ProjectId } from "@/content/projects";
 import { AcreditacionesDemo } from "./acreditaciones-demo";
 import { PortfolioBrowser } from "./portfolio-browser";
 import { WorldIcon } from "./world-icons";
+import { WorldLanguageSwitch } from "./world-language-switch";
+import { worldCopy } from "./world-copy";
+import type { Locale } from "@/lib/i18n";
 import {
   initialPose, closestStation, isAtStation, travelToStation,
   stations, type Controls, type Rescue, type StationId, type TruckPose,
@@ -11,7 +14,8 @@ import {
 import { MODEL_FILES } from "./stations";
 import { WorldScene } from "./scene";
 
-const projects=getProjects("es");
+const lang:Locale=new URLSearchParams(window.location.search).get("lang")==="en"?"en":"es";
+const projects=getProjects(lang);
 const assets=Object.values(MODEL_FILES);
 type Direction="forward"|"reverse"|"left"|"right";
 async function assetExists(path:string){
@@ -21,6 +25,7 @@ async function assetExists(path:string){
   }catch{return false;}
 }
 export function App(){
+  const t=worldCopy[lang];
   const controls=useRef<Controls>({forward:false,reverse:false,left:false,right:false});
   const truck=useRef<TruckPose>(initialPose());
   const rescue=useRef<Rescue|null>(null);
@@ -40,6 +45,8 @@ export function App(){
   const [mobileGraphics,setMobileGraphics]=useState(false);
   const [hintVisible,setHintVisible]=useState(true);
   useEffect(()=>{
+    document.documentElement.lang=lang;
+    document.title=lang==="es"?"JarceDev | Portafolio 3D":"JarceDev | 3D Portfolio";
     let mounted=true;
     Promise.all(assets.map(assetExists)).then(exists=>{
       if(mounted)setAssetStatus(exists.every(Boolean)?"ready":"partial");
@@ -163,11 +170,12 @@ export function App(){
   const nearbyProject=nearby?projects.find(project=>project.station.id===nearby):null;
   const modelMode=assetStatus==="ready";
   const allRescued=rescued.size===stations.length;
+  const progressReadable=t.progressLabel+": "+rescued.size+(lang==="es"?" de ":" of ")+stations.length;
   const showReward=allRescued&&!rewardDismissed;
   return (
     <main className="pilot portfolio-world" data-assets={assetStatus}
       data-view={portfolioOpen?"portfolio":"world"}>
-      <div className="viewport" aria-label="Mundo interactivo de proyectos JarceDev">
+      <div className="viewport" aria-label={t.worldLabel}>
         <Canvas frameloop={portfolioOpen?"never":"always"}
           dpr={mobileGraphics?[.7,1]:[.85,1.15]} shadows={!mobileGraphics}
           camera={{position:[0,8,13],fov:51,near:.1,far:130}}
@@ -180,78 +188,79 @@ export function App(){
       </div>
       <header className="topbar">
         <button type="button" className="identity" onClick={()=>setPortfolioOpen(false)}
-          aria-label="JarceDev, volver al mundo 3D">
+          aria-label={t.homeLabel}>
           <span className="identity-lines">
             <strong>JARCEDEV</strong>
-            <small>Ingeniería de software · Costa Rica</small>
+            <small>{t.tagline}</small>
           </span>
         </button>
         <div className="header-actions">
+          <WorldLanguageSwitch lang={lang}/>
           <button type="button" className="go-back" onClick={()=>{
             setFocusedProject("acreditaciones-app");
             setPortfolioOpen(true);
-          }} aria-label="Ver perfil y proyectos">
+          }} aria-label={t.projectsLabel}>
             <WorldIcon name="grid" size={17}/>
-            <span>Proyectos</span>
+            <span>{t.projects}</span>
           </button>
           <button type="button" className="reset-button" onClick={restart}
-            title="Reiniciar recorrido" aria-label="Reiniciar recorrido">
+            title={t.restartLabel} aria-label={t.restartLabel}>
             <WorldIcon name="reset" size={17}/>
-            <span>Reiniciar</span>
+            <span>{t.restart}</span>
           </button>
         </div>
       </header>
-      <section className="tools" aria-label="Controles del mundo">
+      <section className="tools" aria-label={t.worldControls}>
         <button type="button" onClick={()=>setDay(value=>!value)}
-          aria-label={day?"Activar modo noche":"Activar modo día"}
-          title={day?"Modo noche":"Modo día"}>
+          aria-label={day?t.activateNight:t.activateDay}
+          title={day?t.nightTitle:t.dayTitle}>
           <WorldIcon name={day?"moon":"sun"} size={20}/>
         </button>
         <button type="button" onClick={()=>setOverview(value=>!value)}
           aria-pressed={overview}
-          aria-label={overview?"Volver a cámara del camión":"Activar vista aérea"}
-          title={overview?"Cámara del camión":"Vista aérea"}>
+          aria-label={overview?t.chase:t.aerial}
+          title={overview?t.chaseTitle:t.aerialTitle}>
           <WorldIcon name="camera" size={20}/>
         </button>
         <button type="button" onClick={()=>setLights(value=>!value)}
           aria-pressed={lights}
-          title={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}
-          aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
+          title={lights?t.sirenOff:t.sirenOn}
+          aria-label={lights?t.sirenOff:t.sirenOn}>
           <WorldIcon name="siren" size={20}/>
         </button>
       </section>
       <button type="button" className={"rescue-progress "+(allRescued?"is-complete":"")}
         onClick={()=>{if(allRescued)setRewardDismissed(false);}}
         disabled={!allRescued} aria-label={allRescued
-          ?"Rescates completados: "+rescued.size+" de "+stations.length+". Ver recompensa"
-          :"Rescates completados: "+rescued.size+" de "+stations.length}
-        title={allRescued?"Ver recompensa":"Rescates completados"}>
+          ?progressReadable+". "+t.rewardAction
+          :progressReadable}
+        title={allRescued?t.rewardAction:t.progressLabel}>
         {allRescued && <WorldIcon name="reset" size={15}/>}
-        <span>{allRescued?"Recompensa":"Rescates"}</span>
+        <span>{allRescued?t.reward:t.progress}</span>
         <strong>{rescued.size}/{stations.length}</strong>
       </button>
       {/* Kept in the accessibility tree but offscreen: projects are chosen
           by approaching/clicking a building or shortcuts 1–4, not a sidebar. */}
-      <nav className="stations-dock" aria-label="Acceso directo a estaciones">
+      <nav className="stations-dock" aria-label={t.stationAccess}>
         {projects.map(project=>(
           <button key={project.station.id} type="button" disabled={busy}
             onClick={()=>travel(project.station.id as StationId)}
-            aria-label={"Ir a "+project.title}>{project.title}</button>
+            aria-label={t.goTo+" "+project.title}>{project.title}</button>
         ))}
       </nav>
       {hintVisible && !panel && !busy && !nearby && !showReward && (
         <div className="drive-hint" role="status">
-          <span>Acércate a una estación</span>
+          <span>{t.approach}</span>
           <button type="button" onClick={()=>setHintVisible(false)}
-            aria-label="Ocultar ayuda">×</button>
+            aria-label={t.dismissHelp}>×</button>
         </div>
       )}
       <section className="interaction" aria-live="polite">
         {selected?(
-          <article className="project-info" aria-label={"Proyecto "+selected.title}>
+          <article className="project-info" aria-label={t.project+" "+selected.title}>
             <div className="project-info-head">
-              <span className="eyebrow">ESTACIÓN RECUPERADA</span>
-              <button type="button" aria-label="Cerrar proyecto" onClick={()=>setPanel(null)}>×</button>
+              <span className="eyebrow">{t.stationRecovered}</span>
+              <button type="button" aria-label={t.closeProject} onClick={()=>setPanel(null)}>×</button>
             </div>
             <div className="project-heading">
               <img src={selected.preview} alt={selected.previewAlt} loading="lazy"/>
@@ -262,8 +271,8 @@ export function App(){
               </div>
             </div>
             <div className="project-story">
-              <p><strong>El desafío</strong>{selected.problem}</p>
-              <p><strong>La solución</strong>{selected.solution}</p>
+              <p><strong>{t.challenge}</strong>{selected.problem}</p>
+              <p><strong>{t.solution}</strong>{selected.solution}</p>
             </div>
             <div className="technology-tags">
               {selected.technologies.map(item=><span key={item}>{item}</span>)}
@@ -272,21 +281,21 @@ export function App(){
               <button type="button" onClick={()=>{
                 setFocusedProject(selected.slug);setPortfolioOpen(true);
               }}>
-                Ver caso y capturas
+                {t.viewCase}
               </button>
               {selected.demo==="acreditaciones-ai" && (
                 <button type="button" onClick={()=>setAiOpen(value=>!value)}
                   aria-expanded={aiOpen}>
-                  ✳ {aiOpen?"Cerrar demostración":"Probar asistente IA"}
+                  ✳ {aiOpen?t.hideDemo:t.tryDemo}
                 </button>
               )}
               <button type="button" onClick={()=>{setPanel(null);setAiOpen(false);}}>
-                Seguir explorando
+                {t.continue}
               </button>
             </div>
             {selected.demo==="acreditaciones-ai" && aiOpen && (
               <div className="ai-demo-panel">
-                <AcreditacionesDemo lang="es" compact/>
+                <AcreditacionesDemo lang={lang} compact/>
               </div>
             )}
           </article>
@@ -294,16 +303,16 @@ export function App(){
           <div className="rescue-card">
             <span aria-hidden="true">🔥</span>
             <div className="rescue-text">
-              <strong>{busy?"Extinguiendo el incendio…":nearbyProject?
-                nearbyProject.title:"Estación cercana"}</strong>
-              <small>{busy?"Al terminar conocerás el proyecto.":
-                nearby?(rescued.has(nearby)?"Este proyecto ya fue descubierto. Abre su ficha.":
-                "Apaga el fuego para conocer el proyecto."):"Acércate a una estación."}</small>
+              <strong>{busy?t.extinguishing:nearbyProject?
+                nearbyProject.title:t.nearbyStation}</strong>
+              <small>{busy?t.finishing:
+                nearby?(rescued.has(nearby)?t.alreadyFound:
+                t.putOutFire):t.approach}</small>
             </div>
             {(nearby||busy) && (
               <button type="button" className="discover"
                 onClick={discover} disabled={!nearby||busy}>
-                {nearby&&rescued.has(nearby)?"Ver proyecto":"Descubrir"}
+                {nearby&&rescued.has(nearby)?t.viewProject:t.discover}
               </button>
             )}
           </div>
@@ -318,15 +327,15 @@ export function App(){
             <span>✦</span><span>✧</span><span>✦</span><span>✧</span><span>✦</span>
           </div>
           <div className="reward-medal" aria-hidden="true">🏅</div>
-          <p className="eyebrow">MISIÓN COMPLETADA</p>
-          <h2 id="rescue-reward-title">¡Todos los incendios extinguidos!</h2>
+          <p className="eyebrow">{t.mission}</p>
+          <h2 id="rescue-reward-title">{t.missionTitle}</h2>
           <p id="rescue-reward-detail">
-            Has recuperado las cuatro estaciones y descubierto los cuatro proyectos de JarceDev.
+            {t.missionDescription}
           </p>
-          <div className="reward-total" aria-label="Cuatro de cuatro estaciones recuperadas">
-            <strong>4/4</strong><span>Estaciones recuperadas</span>
+          <div className="reward-total" aria-label={"4/4 "+t.recoveredStations}>
+            <strong>4/4</strong><span>{t.recoveredStations}</span>
           </div>
-          <div className="reward-projects" aria-label="Proyectos descubiertos">
+          <div className="reward-projects" aria-label={t.projectsFound}>
             {projects.map(project=>(
               <span key={project.slug}>
                 <span aria-hidden="true">✓</span> {project.title}
@@ -335,20 +344,20 @@ export function App(){
           </div>
           <div className="reward-actions">
             <button type="button" onClick={()=>setRewardDismissed(true)}>
-              Ver último proyecto
+              {t.viewLast}
             </button>
             <button type="button" onClick={()=>{
               setRewardDismissed(true);setPanel(null);setAiOpen(false);
             }}>
-              Seguir explorando
+              {t.continue}
             </button>
           </div>
         </section>
         </div>
       )}
-      {portfolioOpen && <PortfolioBrowser key={focusedProject}
-        initialProject={focusedProject} onBack={()=>setPortfolioOpen(false)}/>}
-      <section className="drive-controls" aria-label="Conducción táctil">
+      {portfolioOpen && <PortfolioBrowser key={focusedProject+"-"+lang}
+        lang={lang} initialProject={focusedProject} onBack={()=>setPortfolioOpen(false)}/>}
+      <section className="drive-controls" aria-label={t.driving}>
         <div className="steering">
           <div className="steering-wheel-art" aria-hidden="true">
             <svg viewBox="0 0 100 100" fill="none">
@@ -357,12 +366,12 @@ export function App(){
               <path d="M10 45h29l11 13 11-13h29M50 58v31" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
             </svg>
           </div>
-          {driveButton("left","Izquierda","←")}
-          {driveButton("right","Derecha","→")}
+          {driveButton("left",t.left,"←")}
+          {driveButton("right",t.right,"→")}
         </div>
         <div className="pedals">
-          {driveButton("reverse","Retroceder","↓")}
-          {driveButton("forward","Acelerar","↑")}
+          {driveButton("reverse",t.reverse,"↓")}
+          {driveButton("forward",t.forward,"↑")}
         </div>
       </section>
     </main>

@@ -1,8 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { SiteHeader } from "@/components/site-header";
-import { WorldExperience } from "@/components/world/world-experience";
-import { siteContent } from "@/content/site-content";
 import { isLocale } from "@/lib/i18n";
 
 type HomePageProps = {
@@ -17,36 +14,28 @@ export default async function HomePage({ params }: HomePageProps) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
 
-  // The finished Spanish experience is hosted by Next.js itself, sharing the
-  // four authoritative project pages and existing static GLB assets.
-  // Keep the established English world untouched until its translation ships.
-  if (lang === "es") {
-    return (
-      <main className="relative h-[100svh] w-full overflow-hidden bg-[#081326]">
-        <h1 className="sr-only">JarceDev — Portafolio interactivo de ingeniería de software</h1>
-        <iframe
-          title="Explora el portafolio 3D de JarceDev"
-          src="/experience/index.html"
-          className="block h-full w-full border-0"
-          loading="eager"
-          allowFullScreen
-        />
-        <noscript>
-          <p>
-            El mundo 3D requiere JavaScript. Consulta los cuatro proyectos
-            en <a href="/es/portfolio">el portafolio accesible</a>.
-          </p>
-        </noscript>
-      </main>
-    );
-  }
-
+  // Both locales run the SAME R3F build, with language selected via URL.
+  // This keeps physics, graphics and rescue rewards identical in ES and EN.
   return (
-    <>
-      <SiteHeader lang={lang} content={siteContent[lang]} variant="world" />
-      <main>
-        <WorldExperience lang={lang} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""} />
-      </main>
-    </>
+    <main className="relative h-[100svh] w-full overflow-hidden bg-[#081326]">
+      <h1 className="sr-only">
+        {lang === "es" ? "JarceDev — Portafolio 3D de Jorge Arce" : "JarceDev — Jorge Arce's 3D Portfolio"}
+      </h1>
+      <iframe
+        title={lang === "es" ? "Portafolio 3D de JarceDev" : "JarceDev 3D Portfolio"}
+        src={`/experience/index.html?lang=${lang}`}
+        className="block h-full w-full border-0"
+        loading="eager"
+        allowFullScreen
+      />
+      <noscript>
+        <p>
+          {lang === "es" ? "Consulta mis proyectos en " : "View my projects at "}
+          <a href={`/${lang}/portfolio`}>
+            {lang === "es" ? "el portafolio" : "my portfolio"}
+          </a>.
+        </p>
+      </noscript>
+    </main>
   );
 }
