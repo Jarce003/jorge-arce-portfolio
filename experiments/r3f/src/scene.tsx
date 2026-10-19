@@ -248,6 +248,48 @@ export function WorldScene({
       <Suspense fallback={<ThemedStations modelMode={false}/>}>
         <ThemedStations modelMode={modelMode}/>
       </Suspense>
+      {/* Street furniture and landscaped lots add depth at driving-camera distance. */}
+      {stations.map((station) => (
+        <group key={station.id + "-streetscape"} position={[station.x, 0, station.z]}>
+          {[-1, 1].map((side) => (
+            <group key={side}>
+              <mesh position={[side * 5.7, .17, 0]} castShadow receiveShadow>
+                <boxGeometry args={[.34, .34, 10.8]}/>
+                <meshStandardMaterial color="#dce8e4" roughness={.88}/>
+              </mesh>
+              {[-3.35, 3.35].map((depth) => (
+                <group key={depth} position={[side * 6.55, 0, depth]}>
+                  <mesh position={[0, .28, 0]} castShadow>
+                    <cylinderGeometry args={[.62, .76, .56, 10]}/>
+                    <meshStandardMaterial color="#b6c8c3" roughness={.93}/>
+                  </mesh>
+                  <mesh position={[0, .88, 0]} castShadow>
+                    <icosahedronGeometry args={[.67, 1]}/>
+                    <meshStandardMaterial color={day ? "#417e67" : "#28584f"} roughness={1}/>
+                  </mesh>
+                </group>
+              ))}
+            </group>
+          ))}
+          <mesh position={[0, .04, 5.53]} receiveShadow>
+            <boxGeometry args={[11.5, .12, .34]}/>
+            <meshStandardMaterial color="#f4e7b5" roughness={.86}/>
+          </mesh>
+          {[-4.8, 4.8].map((side) => (
+            <group key={side} position={[side, 0, 5.18]}>
+              <mesh position={[0, 2.02, 0]} castShadow>
+                <cylinderGeometry args={[.055, .09, 4.04, 10]}/>
+                <meshStandardMaterial color="#334e5b" metalness={.35} roughness={.46}/>
+              </mesh>
+              <mesh position={[0, 4.14, 0]}>
+                <boxGeometry args={[.58, .22, .43]}/>
+                <meshStandardMaterial color="#e5eff1" emissive="#fff2bd" emissiveIntensity={day ? .10 : .8}/>
+              </mesh>
+              {!day && <pointLight position={[0, 4.05, 0]} color="#fff0c4" intensity={2.2} distance={9}/>}
+            </group>
+          ))}
+        </group>
+      ))}
       <StationFires rescued={rescued} rescue={rescue}/>
       <group ref={truckGroup} position={[0,0,initialPose().z]}>
         <Suspense fallback={<LowPolyTruck lights={lights}/>}>
