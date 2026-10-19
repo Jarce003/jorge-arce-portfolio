@@ -95,6 +95,9 @@ try{
   }
   await desktop.getByText("4/4").waitFor({timeout:5000});
   console.log("Four stations discovered and counted correctly.");
+  // Release the desktop WebGL context before creating a second software
+  // renderer: shared SwiftShader/GPU budgets can stall mobile initialization.
+  await desktop.close();
 
   const mobile=await browser.newPage({
     viewport:{width:390,height:844},isMobile:true,
