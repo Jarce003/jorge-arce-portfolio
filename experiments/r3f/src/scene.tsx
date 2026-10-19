@@ -183,12 +183,18 @@ export function WorldScene({
       onRescueComplete(action.stationId);
     }
     const mobile=gl.domElement.clientWidth<560;
-    if(overview)cameraDesired.set(pose.x+13,23,pose.z+13);
-    else cameraDesired.set(
-      pose.x+Math.sin(pose.heading)*(mobile?13.2:9.8),
-      mobile?9.3:7.9,
-      pose.z+Math.cos(pose.heading)*(mobile?13.2:9.8),
-    );
+    if(overview)cameraDesired.set(pose.x+12.7,20.8,pose.z+12.7);
+    else {
+      // Three-quarter chase view: shows the recognizable cab and
+      // compartments instead of hiding all truck detail behind its tail.
+      const back = mobile ? 12.1 : 9.4;
+      const side = mobile ? 2.65 : 4.6;
+      cameraDesired.set(
+        pose.x + Math.sin(pose.heading)*back + Math.cos(pose.heading)*side,
+        mobile ? 7.5 : 6.25,
+        pose.z + Math.cos(pose.heading)*back - Math.sin(pose.heading)*side,
+      );
+    }
     camera.position.lerp(cameraDesired,damping(dt,7));
     cameraTarget.set(pose.x,1.55,pose.z);
     camera.lookAt(cameraTarget);
