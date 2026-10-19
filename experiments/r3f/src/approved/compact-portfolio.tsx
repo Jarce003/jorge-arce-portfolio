@@ -103,7 +103,7 @@ export function CompactPortfolio({lang,initialSlug="acreditaciones-app"}:{lang:L
 
       <section id={lang === "es" ? "proceso" : "process"} className="scroll-mt-24 bg-[#f4f6fa] px-4 py-9 text-slate-950 sm:px-8 sm:py-12">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-base font-extrabold tracking-[.065em] text-violet-800 sm:text-lg">{t.process}</h2>
+          <h2 className="text-xl font-normal tracking-normal text-violet-800 sm:text-2xl">{t.process}</h2>
           <div id={lang === "es" ? "servicios" : "services"} className="mt-3 grid scroll-mt-24 grid-cols-4 gap-1.5 sm:gap-3" role="group" aria-label={t.process}>
             {t.method.map((item, index) => (
               <button key={item.name} type="button" onClick={() => setStep(index)} aria-pressed={step === index}
