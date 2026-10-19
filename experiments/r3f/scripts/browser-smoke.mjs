@@ -26,17 +26,16 @@ async function waitForServer(){
 }
 async function loadPage(page){
   await page.goto(url,{waitUntil:"networkidle",timeout:45000});
-  await page.getByText("JARCEDEV / LABORATORIO 3D").waitFor();
+  await page.getByText("JARCEDEV",{exact:true}).waitFor();
   await page.locator("canvas").waitFor();
   await page.waitForFunction(()=>{
     const el=document.querySelector("canvas");
     return Boolean(el && el.width>0 && el.height>0);
   });
-  // The status badge is intentionally hidden in portrait CSS.
-  // Read its DOM text instead of requiring it to be visibly rendered.
+  // Production UI no longer exposes asset counts or debug badges.
   await page.waitForFunction(
-    () => document.querySelector(".mini-state")?.textContent?.includes("5 GLB listos"),
-    null, {timeout:18000},
+    () => document.querySelector("main.portfolio-world")?.getAttribute("data-assets")==="ready",
+    null, {timeout:20000},
   );
   await page.waitForTimeout(700);
 }
@@ -72,20 +71,15 @@ try{
   desktop.on("pageerror",error=>errors.push("Desktop: "+error.message));
   await loadPage(desktop);
   await desktop.screenshot({path:resolve(screenshots,"all-four-day.png")});
-  const toggle=desktop.getByRole("button",{name:/Modelos GLB|Geometría básica/});
-  assert.equal(await toggle.isDisabled(),false);
-  assert.equal(await toggle.getAttribute("aria-pressed"),"true");
-  await toggle.click();
-  assert.equal(await toggle.getAttribute("aria-pressed"),"false");
-  await toggle.click();
-  assert.equal(await toggle.getAttribute("aria-pressed"),"true");
+  assert.equal(await desktop.getByText(/FPS aproximados|draw calls|Laboratorio 3D/).count(),0);
+  assert.equal(await desktop.locator(".stations-dock button").count(),4);
   await desktop.getByRole("button",{name:/Vista aérea/}).click();
   await desktop.waitForTimeout(400);
   await desktop.screenshot({path:resolve(screenshots,"all-four-blender-overview.png")});
   await desktop.getByRole("button",{name:/Día|Noche/}).click();
   await desktop.waitForTimeout(330);
   await desktop.screenshot({path:resolve(screenshots,"all-four-night.png")});
-  console.log("5 real GLB assets, camera and day/night switch OK");
+  console.log("Four Blender buildings, web-style truck, camera and day/night switch OK");
 
   for(const [name,label] of [
     ["FireTrack","firetrack"],["EvacuaPlan Studio","evacuaplan"],
