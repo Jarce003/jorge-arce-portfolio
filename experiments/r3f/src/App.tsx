@@ -51,10 +51,13 @@ export function App(){
     Promise.all(assets.map(assetExists)).then(exists=>{
       if(mounted)setAssetStatus(exists.every(Boolean)?"ready":"partial");
     });
-    const narrow=window.matchMedia("(max-width: 600px)");
-    setMobileGraphics(narrow.matches);
+    // Account for rotated phones and tablets instead of checking width only.
+    const reducedGpu=window.matchMedia(
+      "(max-width: 600px), (pointer: coarse) and (max-width: 1399px)"
+    );
+    setMobileGraphics(reducedGpu.matches);
     const syncNarrow=(e:MediaQueryListEvent)=>setMobileGraphics(e.matches);
-    narrow.addEventListener("change",syncNarrow);
+    reducedGpu.addEventListener("change",syncNarrow);
     const media=window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(media.matches);
     const sync=(e:MediaQueryListEvent)=>setReducedMotion(e.matches);
@@ -62,7 +65,7 @@ export function App(){
     return ()=>{
       mounted=false;
       media.removeEventListener("change",sync);
-      narrow.removeEventListener("change",syncNarrow);
+      reducedGpu.removeEventListener("change",syncNarrow);
     };
   },[]);
   useEffect(()=>{
