@@ -25,7 +25,6 @@ const copy = {
       { name: "Validar", detail: "Probarla, corregirla y seguir mejorando." },
     ],
     profile: "Ingeniero en Sistemas · Experiencia operativa desde 2014 · Desarrollo asistido por IA.",
-    resume: "Ver CV",
     note: "El código se implementa con asistencia de IA; mi aporte está en el problema, las decisiones y la validación.",
     contact: "Conversemos",
   },
@@ -44,7 +43,6 @@ const copy = {
       { name: "Validate", detail: "Test, adjust and keep improving." },
     ],
     profile: "Systems Engineer · Operational experience since 2014 · AI-assisted development.",
-    resume: "View CV",
     note: "AI tools implement the source code; I lead the problems, product decisions and validation.",
     contact: "Let's talk",
   },
@@ -132,8 +130,15 @@ export function CompactPortfolio({ lang }: { lang: Locale }) {
             <p className="mt-1 text-[.71rem] leading-5 text-slate-500">{t.note}</p>
           </div>
           <div className="flex gap-2">
-            <a href={lang === "es" ? "/cv/Jorge-Arce-Solano-CV-ES.pdf" : "/cv/Jorge-Arce-Solano-CV-EN.pdf"} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center rounded-full border border-slate-300 bg-white px-4 text-xs font-semibold">{t.resume} ↗</a>
-            <a href="https://www.linkedin.com/in/jorge-arce-solano" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center rounded-full border border-slate-300 bg-white px-4 text-xs font-semibold">LinkedIn ↗</a>
+            <a href="https://www.linkedin.com/in/jorge-arce-solano"
+              target="_blank" rel="noopener noreferrer"
+              aria-label={lang === "es" ? "Ver perfil de LinkedIn" : "View LinkedIn profile"}
+              title="LinkedIn"
+              className="inline-flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-[#0A66C2] transition-colors hover:border-[#0A66C2] hover:bg-[#e9f3ff]">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-5">
+                <path d="M20.447 20.452h-3.554v-5.57c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.667H9.352V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124Zm1.782 13.019H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.73v20.54c0 .956.792 1.73 1.771 1.73h20.451c.978 0 1.778-.774 1.778-1.73V1.73C24 .774 23.2 0 22.222 0h.003Z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </section>
