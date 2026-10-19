@@ -36,16 +36,25 @@ export function App(){
   const [busy,setBusy]=useState(false);
   const [rewardDismissed,setRewardDismissed]=useState(false);
   const [reducedMotion,setReducedMotion]=useState(false);
+  const [mobileGraphics,setMobileGraphics]=useState(false);
   useEffect(()=>{
     let mounted=true;
     Promise.all(assets.map(assetExists)).then(exists=>{
       if(mounted)setAssetStatus(exists.every(Boolean)?"ready":"partial");
     });
+    const narrow=window.matchMedia("(max-width: 600px)");
+    setMobileGraphics(narrow.matches);
+    const syncNarrow=(e:MediaQueryListEvent)=>setMobileGraphics(e.matches);
+    narrow.addEventListener("change",syncNarrow);
     const media=window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(media.matches);
     const sync=(e:MediaQueryListEvent)=>setReducedMotion(e.matches);
     media.addEventListener("change",sync);
-    return ()=>{mounted=false;media.removeEventListener("change",sync);};
+    return ()=>{
+      mounted=false;
+      media.removeEventListener("change",sync);
+      narrow.removeEventListener("change",syncNarrow);
+    };
   },[]);
   const complete=useCallback((id:StationId)=>{
     setBusy(false);
@@ -138,7 +147,8 @@ export function App(){
     <main className="pilot portfolio-world" data-assets={assetStatus}
       data-view={portfolioOpen?"portfolio":"world"}>
       <div className="viewport" aria-label="Mundo interactivo de proyectos JarceDev">
-        <Canvas frameloop={portfolioOpen?"never":"always"} dpr={[.85,1.15]} shadows
+        <Canvas frameloop={portfolioOpen?"never":"always"}
+          dpr={mobileGraphics?[.7,1]:[.85,1.15]} shadows={!mobileGraphics}
           camera={{position:[0,8,13],fov:51,near:.1,far:130}}
           gl={{antialias:true,powerPreference:"high-performance"}}>
           <WorldScene day={day} overview={overview} modelMode={modelMode}
