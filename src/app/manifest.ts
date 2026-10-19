@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Jorge Arce Solano | Full Stack Software Engineer",
-    short_name: "Jorge Arce",
+    name: "JarceDev | Portafolio interactivo 3D de Jorge Arce",
+    short_name: "JarceDev",
     description:
-      "Professional portfolio focused on web applications, SaaS products and operational software.",
+      "Explora cuatro aplicaciones creadas para resolver problemas reales en un mundo 3D interactivo.",
     start_url: "/es",
     display: "standalone",
     background_color: "#f8fafc",
