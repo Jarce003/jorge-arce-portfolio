@@ -32,7 +32,12 @@ async function loadPage(page){
     const el=document.querySelector("canvas");
     return Boolean(el && el.width>0 && el.height>0);
   });
-  await page.getByText("5 GLB listos").waitFor({timeout:18000});
+  // The status badge is intentionally hidden in portrait CSS.
+  // Read its DOM text instead of requiring it to be visibly rendered.
+  await page.waitForFunction(
+    () => document.querySelector(".mini-state")?.textContent?.includes("5 GLB listos"),
+    null, {timeout:18000},
+  );
   await page.waitForTimeout(700);
 }
 async function rescueStation(page,name,label){
