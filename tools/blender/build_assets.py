@@ -369,8 +369,8 @@ def firetrack(mats):
     cylinder("TelemetryDisc", (3.5, -2.0, 7.45),
              .43, .12, mats["cyan"], target, root, vertices=12)
 
-    facade_label("FireTrackFacadeName", "FIRETRACK", (0, 2.37, 5.13), .41,
-                 dark, target, root)
+    facade_label("FireTrackFacadeName", "FIRETRACK", (0, 2.41, 5.13), .39,
+                 white, target, root)
 
     # Practical forecourt painted markings around equipment access.
     for index in range(5):
@@ -401,21 +401,21 @@ def evacuaplan(mats):
         b("VividFaçade_" + str(x), (x, .71, 1.65), (.075, 4.85, .16), cyan)
 
     # Oversized cutaway floor plan that looks like a floating design canvas.
-    b("BlueprintTable", (0, -1.3, 4.20), (7.70, 5.2, .31), white)
-    b("BlueprintSurface", (0, -1.3, 4.37), (7.16, 4.7, .055), mats["glass"])
+    b("BlueprintTable", (0, -1.3, 3.37), (7.70, 5.2, .31), white)
+    b("BlueprintSurface", (0, -1.3, 3.54), (7.16, 4.7, .055), mats["glass"])
     for x in (-2.5, -.75, 1.12, 2.46):
-        b(f"PlanWallVertical_{x}", (x, -1.28, 4.51), (.09, 4.33, .19), sky)
+        b(f"PlanWallVertical_{x}", (x, -1.28, 3.68), (.09, 4.33, .19), sky)
     for y in (-2.5, -.52):
-        b(f"PlanWallHorizontal_{y}", (0, y, 4.51), (6.80, .09, .19), sky)
+        b(f"PlanWallHorizontal_{y}", (0, y, 3.68), (6.80, .09, .19), sky)
 
     # Clear lime-green escape route from orange location marker to exit.
-    b("EvacuationRoute_A", (-2.1, -2.84, 4.57), (2.16, .22, .08), mint)
-    b("EvacuationRoute_B", (-1.02, -1.81, 4.57), (.22, 2.27, .08), mint)
-    b("EvacuationRoute_C", (.91, -.77, 4.57), (3.92, .22, .08), mint)
-    cylinder("YouAreHereMarker", (-3.17, -2.84, 4.60), .28, .21,
+    b("EvacuationRoute_A", (-2.1, -2.84, 3.74), (2.16, .22, .08), mint)
+    b("EvacuationRoute_B", (-1.02, -1.81, 3.74), (.22, 2.27, .08), mint)
+    b("EvacuationRoute_C", (.91, -.77, 3.74), (3.92, .22, .08), mint)
+    cylinder("YouAreHereMarker", (-3.17, -2.84, 3.77), .28, .21,
              mats["amber"], target, root, vertices=16)
-    b("ExitDoorFrame", (2.90, -.77, 4.77), (.11, 1.04, .41), mint)
-    b("ExitDoorPanel", (3.04, -.77, 4.69), (.11, .81, .25), sky)
+    b("ExitDoorFrame", (2.90, -.77, 3.94), (.11, 1.04, .41), mint)
+    b("ExitDoorPanel", (3.04, -.77, 3.86), (.11, .81, .25), sky)
 
     # Giant freestanding floor-plan drafting station and physical door
     # frame makes the project readable while driving at road speed.
@@ -432,13 +432,14 @@ def evacuaplan(mats):
     b("WayfindingArrowShaft", (-4.60, 2.59, 2.62), (.75, .055, .09), white)
     b("ExitSymbolDoor", (3.25, 3.19, 1.85), (.71, .09, 1.01), mint)
     for index in range(5):
-        b(f"PlanGrid_{index}", (-3.2+index*1.57, -1.30, 4.41),
+        b(f"PlanGrid_{index}", (-3.2+index*1.57, -1.30, 3.58),
           (.025, 4.50, .016), cyan)
     for index in range(4):
         b(f"ForecourtEscapeArrow_{index}", (-2.1 + index * 1.3, 3.84, .02),
           (.73, .29, .05), mint)
-    facade_label("EvacuaPlanFacadeName", "EVACUAPLAN", (0, 1.38, 3.52), .53,
-                 navy, target, root)
+    b("StudioNameBacking", (0, 1.39, 2.52), (6.5, .15, .73), navy)
+    facade_label("EvacuaPlanFacadeName", "EVACUAPLAN", (0, 1.50, 2.52), .46,
+                 white, target, root)
     print("Built EvacuaPlan design station:", len(target.objects), "objects")
     return target, root
 
@@ -504,8 +505,9 @@ def acreditaciones(mats):
     for x in (-1.5, 1.5):
         b(f"AcademyEntrancePost_{x}", (x, 3.08, 1.59),
           (.19, .18, 3.12), light)
-    facade_label("AcademyFacadeName", "ACREDITACIONES", (0, 2.49, 3.48), .39,
-                 navy, target, root)
+    b("AcademyNameBacking", (0, 1.62, 4.05), (6.37, .17, .66), navy)
+    facade_label("AcademyFacadeName", "ACREDITACIONES", (0, 1.75, 4.05), .34,
+                 light, target, root)
     print("Built Acreditaciones AI station:", len(target.objects), "objects")
     return target, root
 
@@ -585,7 +587,8 @@ def hidrantes(mats):
     for index in range(4):
         b(f"NetworkFlowIndicator_{index}", (-3.0+index*1.65, 1.31, .06),
           (.91, .14, .085), mats["cyan"])
-    facade_label("HidrantesFacadeName", "HIDRANTES", (0, 2.07, 2.11), .51,
+    b("HydrantsNameBacking", (-2.22, -.04, 1.37), (3.94, .17, .72), navy)
+    facade_label("HidrantesFacadeName", "HIDRANTES", (-2.22, .08, 1.37), .40,
                  white, target, root)
     print("Built Hidrantes map station:", len(target.objects), "objects")
     return target, root
