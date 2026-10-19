@@ -27,10 +27,9 @@ function buildParts(){
   for(let i=-2;i<=2;i++)put(0,.74+i*.065,-3.03,1.34,.023,.04,"#e7edf6");
   put(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
   put(0,1.39,-2.97,.18,.24,.07,"#202a38");
-  // Dark roof mount for the ONLY working pair of emergency flashers.
-  put(0,2.5,-2.16,1.30,.12,.30,"#3b5268");
-  // Low-profile turntable service deck; the old wide white roof slab hid the ladder.
-  put(0,2.48,.49,1.51,.09,3.80,"#8496a8");
+  // Emergency bar sits on the cab roof; it does not intersect the aerial.
+  put(0,2.50,-2.50,2.06,.10,.30,"#3b5268");
+  // No solid full-length ladder roof deck: the aerial must read as open truss.
   for(const side of [-1,1]){
     put(side*.78,1.11,-2.97,.36,.24,.09,"#fff1b3");
     put(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
@@ -46,22 +45,43 @@ function buildParts(){
       put(side*1.24,1.25,compartment,.035,.04,.23,"#36465b");
     }
     put(side*1.13,.65,-2.14,.26,.11,1.13,"#b8c9d6");
+    // Costa Rica civil flag on each cab door: blue / white / double red /
+    // white / blue. Readable from both drive-side and passenger-side views.
+    // The emblem is not a fake national coat of arms.
+    const flagX=side*1.213;
+    const flagZ=-1.66;
+    const flagBands:[number,number,string][]=[
+      [1.112,.042,"#002B7F"],[1.155,.042,"#FFFFFF"],
+      [1.224,.094,"#CE1126"],[1.293,.042,"#FFFFFF"],
+      [1.336,.042,"#002B7F"],
+    ];
+    for(const [height,thickness,finish] of flagBands){
+      put(flagX,height,flagZ,.035,thickness,.51,finish);
+    }
     // Rear-side alert lens belongs to the animated beacon system only.
   }
-  // Apparatus turntable and nested ladder.
-  put(0,1.85,1.48,1.52,.23,1.65,"#cbd8e0");
-  put(0,2.03,1.48,1.62,.21,1.61,"#8ea1b1");
-  for(const side of [-.58,.58]){
-    put(side,2.38,.04,.12,.16,5.48,"#f0f5f8");
-    put(side,2.20,.04,.13,.14,5.48,"#98a9bd");
-    for(let index=0;index<11;index++)put(side,2.30,-2.47+index*.49,.10,.23,.10,"#dfe9f4");
+  // A single open aerial ladder, with a clearly separated turntable pivot.
+  // Earlier versions accidentally rendered a large deck AND two overlapping
+  // rung layers, producing a white floating slab/duplicate ladder silhouette.
+  put(0,1.90,1.42,1.35,.20,1.25,"#9aaebd");
+  put(0,2.15,1.42,1.28,.29,1.12,"#455e72");
+  put(0,2.37,1.42,1.21,.12,1.05,"#bed0de");
+  for(const side of [-.60,.60]){
+    // Structural upper and lower longitudinal rails.
+    put(side,2.85,-.06,.115,.12,5.48,"#dce6f0");
+    put(side,2.58,-.06,.115,.12,5.48,"#879fb1");
+    // One row of open side truss uprights, not a second ladder.
+    for(let index=0;index<11;index++){
+      put(side,2.72,-2.54+index*.50,.095,.30,.095,"#bdcddc");
+    }
   }
-  for(let index=0;index<13;index++)put(0,2.32,-2.50+index*.42,1.20,.075,.105,"#cbdde8");
-  for(const side of [-.39,.39])put(side,2.58,-.41,.08,.10,3.86,"#aabccf");
-  for(let index=0;index<9;index++)put(0,2.60,-2.12+index*.39,.82,.052,.10,"#ebf1f5");
-  put(0,2.44,-2.68,1.53,.13,.21,"#d7e3e9");
-  // Duplicate static amber aerial markers removed; flashing lights are in effects.tsx.
-  put(0,2.15,2.34,1.36,.13,.65,"#cbd7e1");
+  // Exactly one continuous line of rungs between the lower rails.
+  for(let index=0;index<14;index++){
+    put(0,2.66,-2.62+index*.40,1.28,.082,.11,"#e5eef5");
+  }
+  // Side support and the compact ladder tip/nozzle.
+  put(0,2.48,1.75,.53,.10,1.19,"#758fa4");
+  put(0,2.70,-2.77,.37,.20,.20,"#b4c5d4");
   return parts;
 }
 const matrices=buildParts().reduce<Record<string,THREE.Matrix4[]>>((groups,p)=>{
