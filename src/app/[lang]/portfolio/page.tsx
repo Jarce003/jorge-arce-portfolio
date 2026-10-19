@@ -16,6 +16,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: lang === "es" ? "Proyectos, método y contacto | JarceDev" : "Projects, approach and contact | JarceDev",
     description: siteContent[lang].projectsSection.description,
+    openGraph: {
+      type: "website",
+      url: "/" + lang + "/portfolio",
+      title: lang === "es" ? "Proyectos y método de trabajo | JarceDev" : "Projects and process | JarceDev",
+      description: siteContent[lang].projectsSection.description,
+      images: [{ url: "/" + lang + "/opengraph-image", width: 1200, height: 630,
+        alt: lang === "es" ? "Cuatro proyectos de JarceDev" : "Four JarceDev projects" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["/" + lang + "/opengraph-image"],
+    },
     alternates: {
       canonical: "/" + lang + "/portfolio",
       languages: { es: "/es/portfolio", en: "/en/portfolio" },
