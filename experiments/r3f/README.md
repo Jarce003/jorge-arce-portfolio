@@ -4,7 +4,7 @@
 
 ## Qué muestra
 
-Una **estación FireTrack** y un camión escalera americano original con conducción, cámara trasera/aérea, día/noche, luces rojas, llamas, agua en gotas instanciadas, salpicaduras y el panel del proyecto. Incluye FPS aproximados y draw calls. Es arte de juego, **no una simulación real de extinción**.
+Las **cuatro estaciones del catálogo principal** (FireTrack, EvacuaPlan, Acreditaciones e Hidrantes), además de un camión escalera americano original, con conducción, cámara trasera/aérea, día/noche, balizas rojas, incendios por estación, agua instanciada y fichas compactas. Acreditaciones conserva acceso a su demostración IA en la versión WebGL principal. Se muestran FPS aproximados y draw calls. Es arte de juego, **no una simulación real de extinción**.
 
 Se puede alternar entre:
 - **Geometría básica:** funciona inmediatamente cuando se instala R3F.
@@ -87,8 +87,12 @@ Se deben completar las cuatro estaciones usando el catálogo compartido y conser
 
 ### Limitaciones de esta etapa
 
-- Solo se reproduce FireTrack; no es una migración.
+- Las cuatro estaciones están disponibles, pero esta sigue siendo una rama experimental aislada, no una migración.
 - Los GLB todavía deben generarse y revisarse localmente mediante Blender.
 - No hay simulación física de agua o incendios; se utilizan formas/partículas instanciadas.
 - FPS y draw calls son indicadores aproximados, no comparación homogénea con WebGL2.
 - El experimento tiene dependencias y compilación separadas para no afectar a Next.js ni al código de producción.
+
+## Versión candidata con cuatro estructuras (2026-10-18)
+
+La versión **WebGL2** en la rama `feature/jarcedev-world-first-v3` es el producto principal: conserva exactamente la conducción, agua y luces aprobadas, y ya contiene las cuatro estructuras temáticas con recorte de detalle móvil. Este laboratorio tiene los cinco modelos Blender exportados (camión + cuatro estructuras), una escena R3F con esas cuatro estaciones, navegación táctil, descubrir/extinguir y un panel compartido por proyecto mediante `src/content/projects.ts`. Solo se considerará integrar R3F si la **única comparación local** demuestra una mejora visual y de rendimiento frente a WebGL2. No se despliega a Vercel durante las pruebas.
