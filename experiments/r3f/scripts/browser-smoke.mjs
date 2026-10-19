@@ -127,7 +127,7 @@ try{
   const galleryImages=gallery.locator('img[data-testid^="preview-"]');
   assert.equal(await galleryImages.count(),5);
   const approvedPaths=await galleryImages.evaluateAll(images=>images.map(node=>
-    new URL((node as HTMLImageElement).src).pathname
+    new URL(node.src).pathname
   ));
   assert.equal(approvedPaths.every(path=>path.startsWith("/projects/previews/")&&path.endsWith(".svg")),true);
   await galleryImages.evaluateAll(async images=>{
