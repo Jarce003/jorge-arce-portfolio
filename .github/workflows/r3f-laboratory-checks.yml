@@ -1,4 +1,4 @@
-name: JarceDev R3F Laboratory Checks
+name: JarceDev 3D Portfolio Quality Checks
 
 on:
   push:
@@ -7,11 +7,17 @@ on:
     paths:
       - "experiments/r3f/**"
       - "tools/blender/**"
+      - "src/app/[lang]/page.tsx"
+      - "scripts/build-experience.mjs"
+      - "package.json"
       - ".github/workflows/r3f-laboratory-checks.yml"
   pull_request:
     paths:
       - "experiments/r3f/**"
       - "tools/blender/**"
+      - "src/app/[lang]/page.tsx"
+      - "scripts/build-experience.mjs"
+      - "package.json"
       - "scripts/pilot-3d-local.ps1"
       - "scripts/review-jarcedev-final.ps1"
       - "scripts/abrir-revision-jarcedev.ps1"
@@ -24,7 +30,7 @@ permissions:
 
 jobs:
   experimental-scene:
-    name: Experimental R3F scene (does not deploy)
+    name: React Three Fiber interactive experience build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,11 +49,40 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Type-check and build isolated R3F scene
         run: npm run build
-      - name: Verify existing Next.js package is unchanged
+      - name: Verify existing WebGL2 renderer is preserved
         working-directory: .
         run: |
           git diff --exit-code -- package.json package-lock.json
           test -f src/components/world/world-renderer.ts
+
+  production-portfolio:
+    name: Integrated Next.js production build with 3D experience
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install portfolio dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify project data and WebGL2 physics
+        run: |
+          npm run check:encoding
+          npm run check:projects
+          npm run test:world
+      - name: Build integrated Next.js and Three Fiber portfolio
+        run: npm run build
+      - name: Confirm static 3D application and current website
+        run: |
+          test -f public/experience/index.html
+          grep -q '/experience/assets/' public/experience/index.html
+          test -f src/components/world/world-renderer.ts
+          test -f src/app/\[lang\]/portfolio/page.tsx
 
   blender-model-export:
     name: Generate and validate actual Blender GLB assets (no deployment)
