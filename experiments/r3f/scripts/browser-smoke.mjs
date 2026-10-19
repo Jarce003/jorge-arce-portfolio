@@ -74,7 +74,7 @@ async function rescueStation(page,name,label){
     await localCase.waitFor({timeout:10000});
     await localCase.getByRole("heading",{name:"FireTrack"}).waitFor();
     assert.equal(new URL(page.url()).origin,beforeOrigin);
-    await localCase.getByRole("button",{name:/Volver al mundo 3D/}).click();
+    await localCase.getByRole("link",{name:/Explorar mundo 3D/}).click();
     assert.equal(await localCase.count(),0);
     console.log("FireTrack case study and return open inline without redirects or new tabs.");
   }
@@ -122,9 +122,14 @@ try{
   await desktop.getByRole("button",{name:/Mi perfil y proyectos/}).click();
   const gallery=desktop.locator('[data-testid="inline-portfolio"]');
   await gallery.waitFor();
-  assert.equal(await gallery.locator(".browser-card").count(),4);
-  const galleryImages=gallery.locator(".browser-card-art img");
-  assert.equal(await galleryImages.count(),4);
+  const approvedCards=gallery.getByRole("group",{name:"MIS PROYECTOS"}).getByRole("button");
+  assert.equal(await approvedCards.count(),4);
+  const galleryImages=gallery.locator('img[data-testid^="preview-"]');
+  assert.equal(await galleryImages.count(),5);
+  const approvedPaths=await galleryImages.evaluateAll(images=>images.map(node=>
+    new URL((node as HTMLImageElement).src).pathname
+  ));
+  assert.equal(approvedPaths.every(path=>path.startsWith("/projects/previews/")&&path.endsWith(".svg")),true);
   await galleryImages.evaluateAll(async images=>{
     await Promise.all(images.map(async node=>{
       if(!(node instanceof HTMLImageElement))throw Error("Portfolio art is missing");
@@ -134,11 +139,11 @@ try{
   });
   await gallery.getByRole("button",{name:/Consultar/}).click();
   await gallery.locator('[data-testid="demo-metric"]').waitFor({timeout:15000});
-  await gallery.getByRole("button",{name:/Volver al mundo 3D/}).click();
+  await gallery.getByRole("link",{name:/Explorar mundo 3D/}).click();
   assert.equal(await gallery.count(),0);
   assert.equal(new URL(desktop.url()).origin,previewOrigin);
   await desktop.locator(".viewport canvas").waitFor();
-  console.log("Four real project images, original AI demo and in-app return to 3D OK.");
+  console.log("Four approved normalized artworks, original AI and in-app return to 3D OK.");
   await desktop.getByRole("button",{name:/Vista aérea/}).click();
   await desktop.waitForTimeout(400);
   await capture(desktop,"all-four-blender-overview.png");
