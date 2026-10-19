@@ -28,7 +28,8 @@ function buildParts(){
   put(0,.52,-3.06,2.34,.24,.30,"#c7d3dd");
   put(0,1.39,-2.97,.18,.24,.07,"#202a38");
   put(0,2.5,-2.16,1.30,.12,.30,"#c5d0df");
-  put(0,2.52,.49,2.20,.16,3.92,"#f0f4f7");
+  // Low-profile turntable service deck; the old wide white roof slab hid the ladder.
+  put(0,2.48,.49,1.51,.09,3.80,"#8496a8");
   for(const side of [-1,1]){
     put(side*.78,1.11,-2.97,.36,.24,.09,"#fff1b3");
     put(side*1.14,1.72,-1.83,.10,.54,1.24,"#a2dcf0");
