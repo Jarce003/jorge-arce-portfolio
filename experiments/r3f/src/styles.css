@@ -512,3 +512,43 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
   .reward-medal{display:none}
   .reward-projects{display:none}
 }
+
+/* Compact bilingual switch; readable but not another HUD card. */
+.world-language-switch{
+  display:inline-flex;align-items:center;flex-shrink:0;
+  gap:2px;padding:3px;border:1px solid #94a8c06b;
+  border-radius:999px;background:#0b1b2dd9;
+  backdrop-filter:blur(8px);
+}
+.world-language-switch button{
+  border:0;border-radius:999px;padding:6px 9px;
+  background:transparent;color:#aebed0;font-size:10px;
+  line-height:1.15;font-weight:700;letter-spacing:.06em;
+  min-width:30px;min-height:28px;
+}
+.world-language-switch button[aria-current="page"]{
+  background:#b7a7f5;color:#151c32;
+}
+.world-language-switch button:hover:not([aria-current="page"]){
+  background:#263d59;color:white;
+}
+.portfolio-language-switch{
+  position:sticky;top:7px;float:right;z-index:22;
+  margin:9px 14px -48px 0;
+  box-shadow:0 5px 16px #03091477;
+}
+@media(max-width:600px){
+  .header-actions{gap:5px}
+  .world-language-switch{padding:2px;gap:0}
+  .world-language-switch button{padding:5px 7px;min-height:28px;min-width:27px;font-size:9px}
+  .go-back{gap:4px;padding:7px 8px}
+  .go-back svg{width:14px;height:14px}
+  .reset-button{width:33px;min-height:33px}
+  .portfolio-language-switch{top:5px;margin:7px 9px -45px 0}
+}
+@media(max-width:365px){
+  .identity strong{font-size:13px}
+  .topbar{padding-inline:8px}
+  .header-actions{gap:3px}
+  .go-back{font-size:10px;padding:7px 6px}
+}
