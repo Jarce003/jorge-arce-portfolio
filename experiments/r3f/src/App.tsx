@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getProjects } from "@/content/projects";
+import { AcreditacionesDemo } from "@/components/project-demo/acreditaciones-demo";
 import {
   initialPose, closestStation, isAtStation, travelToStation,
   stations, type Controls, type Rescue, type StationId, type TruckPose,
@@ -39,6 +40,7 @@ export function App(){
   const [nearby,setNearby]=useState<StationId|null>(null);
   const [rescued,setRescued]=useState<ReadonlySet<string>>(()=>new Set());
   const [panel,setPanel]=useState<StationId|null>(null);
+  const [aiOpen,setAiOpen]=useState(false);
   const [busy,setBusy]=useState(false);
   const [reducedMotion,setReducedMotion]=useState(false);
   useEffect(()=>{
@@ -56,12 +58,13 @@ export function App(){
     setBusy(false);
     setRescued(before=>new Set([...before,id]));
     setPanel(id);
+    setAiOpen(false);
   },[]);
   const restart=useCallback(()=>{
     controls.current={forward:false,reverse:false,left:false,right:false};
     Object.assign(truck.current,initialPose());
     rescue.current=null;setNearby(null);setRescued(new Set());
-    setPanel(null);setBusy(false);
+    setPanel(null);setAiOpen(false);setBusy(false);
   },[]);
   const discover=useCallback(()=>{
     if(rescue.current)return;
@@ -78,7 +81,7 @@ export function App(){
     if(rescue.current)return;
     Object.assign(truck.current,travelToStation(truck.current,id));
     controls.current={forward:false,reverse:false,left:false,right:false};
-    setPanel(null);setNearby(id);
+    setPanel(null);setAiOpen(false);setNearby(id);
   },[]);
   useEffect(()=>{
     const map:Record<string,Direction>={
@@ -229,11 +232,21 @@ export function App(){
               {selected.technologies.map(item=><span key={item}>{item}</span>)}
             </div>
             <div className="actions">
-              <a href={projectUrl(selected.slug)} target="_blank" rel="noreferrer">
-                Ver caso completo ↗
-              </a>
-              <button type="button" onClick={()=>setPanel(null)}>Seguir explorando</button>
+              {selected.demo==="acreditaciones-ai" && (
+                <button type="button" onClick={()=>setAiOpen(value=>!value)}
+                  aria-expanded={aiOpen}>
+                  ✳ {aiOpen?"Cerrar demostración":"Probar asistente IA"}
+                </button>
+              )}
+              <button type="button" onClick={()=>{setPanel(null);setAiOpen(false);}}>
+                Seguir explorando
+              </button>
             </div>
+            {selected.demo==="acreditaciones-ai" && aiOpen && (
+              <div className="ai-demo-panel">
+                <AcreditacionesDemo lang="es" compact/>
+              </div>
+            )}
           </article>
         ):(
           <div className="rescue-card">
