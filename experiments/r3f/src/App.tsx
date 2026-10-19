@@ -144,7 +144,7 @@ export function App(){
   return (
     <main className="pilot portfolio-world" data-assets={assetStatus}>
       <div className="viewport" aria-label="Mundo interactivo de proyectos JarceDev">
-        <Canvas dpr={[1,1.5]} shadows
+        <Canvas dpr={[.85,1.15]} shadows
           camera={{position:[0,8,13],fov:51,near:.1,far:130}}
           gl={{antialias:true,powerPreference:"high-performance"}}>
           <WorldScene day={day} overview={overview} modelMode={modelMode}
