@@ -136,11 +136,30 @@ export function ThemedStations({ modelMode }: {modelMode:boolean}) {
 // Flame bases belong to architectural surfaces, not a shared world height.
 // Coordinates match Blender model local X/Y/Z after glTF's Z-up to Y-up conversion.
 // The outer group mirrors the orientation of the imported building on southern lots.
+// Local coordinates are Three.js Y-up, with Blender's positive Y facing -Z.
+// Each building gets roof fires, illuminated facade fires and two accessible
+// front-court fires. They remain anchored to architectural or ground surfaces.
 export const FIRE_ANCHORS: Record<Station["id"], readonly [number,number,number][]> = {
-  firetrack: [[-2.7,5.98,.55],[.1,5.98,1.25],[2.8,5.98,.3]],
-  evacuaplan: [[-3.1,3.63,.20],[0,3.76,1.48],[3.1,3.63,.20]],
-  acreditaciones: [[-2.8,4.05,.45],[0,4.05,1.48],[2.8,4.05,.45]],
-  hidrantes: [[-3.4,2.05,2.45],[0,2.05,2.50],[2.0,2.05,2.45]],
+  firetrack: [
+    [-3.2,5.98,.45],[0,5.98,1.1],[3.1,5.98,.45],
+    [-2.75,3.3,-2.51],[0,3.55,-2.51],[2.75,3.3,-2.51],
+    [-3.7,.11,-3.43],[3.7,.11,-3.43],
+  ],
+  evacuaplan: [
+    [-3.0,3.66,.4],[0,3.70,1.1],[3.05,3.66,.4],
+    [-2.6,2.30,-1.24],[0,2.4,-1.24],[2.65,2.3,-1.24],
+    [-3.1,.10,-3.06],[3.1,.10,-3.06],
+  ],
+  acreditaciones: [
+    [-2.9,4.06,.32],[0,4.06,1.02],[2.95,4.06,.32],
+    [-2.9,2.3,-1.67],[0,2.6,-1.67],[2.9,2.3,-1.67],
+    [-3.6,.10,-3.35],[3.6,.10,-3.35],
+  ],
+  hidrantes: [
+    [-3.35,2.05,2.15],[-.8,2.05,2.15],[2.05,2.05,2.15],
+    [-3.60,1.25,.34],[0,1.4,.34],[3.45,1.25,.34],
+    [-3.90,.10,-3.20],[3.90,.10,-3.20],
+  ],
 };
 
 // Curved flame tongues replace the previous visible cone primitives.
@@ -151,6 +170,9 @@ FLAME_SHAPE.bezierCurveTo(-.12,1.10,-.03,1.24,0,1.72);
 FLAME_SHAPE.bezierCurveTo(.22,1.29,.13,.91,.36,.66);
 FLAME_SHAPE.bezierCurveTo(.68,.28,.49,.18,.46,0);
 FLAME_SHAPE.closePath();
+const SHARED_FLAME_GEOMETRY=new THREE.ShapeGeometry(FLAME_SHAPE,10);
+const SHARED_EMBER_GEOMETRY=new THREE.IcosahedronGeometry(.059,0);
+
 
 function FireAtStation({
   station,discovered,rescue,modelMode,
@@ -186,7 +208,7 @@ function FireAtStation({
         const fallbackHeight=station.id==="hidrantes"?2.37:
           station.id==="firetrack"?5.45:station.id==="acreditaciones"?4.50:3.72;
         const flameY=modelMode?height:fallbackHeight;
-        const heightScale=station.id==="hidrantes"?.75:.87;
+        const heightScale=index>=6?.82:station.id==="hidrantes"?.96:1.08;
         return (
           <group key={index} ref={node=>{flames.current[index]=node;}}
             position={[x,flameY,z]} scale={heightScale}>
@@ -200,25 +222,25 @@ function FireAtStation({
                 position={[(tongue-1)*.19,0,(tongue%2)*.15]}
                 scale={[tongue===1?.82:1,tongue===2?.76:1,1]}>
                 <mesh>
-                  <shapeGeometry args={[FLAME_SHAPE,10]}/>
+                  <primitive object={SHARED_FLAME_GEOMETRY} attach="geometry"/>
                   <meshBasicMaterial color={tongue===1?"#ff922c":"#ff5324"}
                     transparent opacity={.90} side={THREE.DoubleSide}
                     depthWrite={false}/>
                 </mesh>
                 <mesh position={[0,.03,.012]} scale={[.47,.62,1]}>
-                  <shapeGeometry args={[FLAME_SHAPE,10]}/>
+                  <primitive object={SHARED_FLAME_GEOMETRY} attach="geometry"/>
                   <meshBasicMaterial color="#ffeaa2" transparent opacity={.83}
                     side={THREE.DoubleSide} depthWrite={false}/>
                 </mesh>
               </group>
             ))}
-            {[0,1,2,3,4].map(ember=>(
+            {[0,1,2].map(ember=>(
               <mesh key={ember} position={[
                   Math.sin(index*1.9+ember*2.4)*.44,
                   .72+(ember%3)*.40,
                   Math.cos(ember*2.7+index)*.27,
                 ]}>
-                <icosahedronGeometry args={[.045+(ember%2)*.025,0]}/>
+                <primitive object={SHARED_EMBER_GEOMETRY} attach="geometry"/>
                 <meshBasicMaterial color="#ffd36b"/>
               </mesh>
             ))}
