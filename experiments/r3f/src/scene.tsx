@@ -17,6 +17,7 @@ export type SceneProps = {
   overview:boolean;
   modelMode:boolean;
   lights:boolean;
+  reducedMotion:boolean;
   rescued:ReadonlySet<string>;
   controls:MutableRefObject<Controls>;
   truck:MutableRefObject<TruckPose>;
@@ -27,7 +28,7 @@ export type SceneProps = {
 };
 
 export function WorldScene({
-  day,overview,modelMode,lights,rescued,controls,truck,rescue,
+  day,overview,modelMode,lights,reducedMotion,rescued,controls,truck,rescue,
   onNearby,onRescueComplete,onMetrics,
 }: SceneProps) {
   const truckGroup=useRef<THREE.Group>(null);
@@ -172,7 +173,7 @@ export function WorldScene({
       <StationFires rescued={rescued} rescue={rescue} modelMode={modelMode}/>
       <group ref={truckGroup} position={[0,0,initialPose().z]}>
         <WebStyleTruck truck={truck}/>
-        <RedEmergencyLights active={lights} day={day}/>
+        <RedEmergencyLights active={lights} day={day} reducedMotion={reducedMotion}/>
       </group>
       <WaterSpray truck={truck} rescue={rescue}/>
       {!day && stations.map(s=>(
