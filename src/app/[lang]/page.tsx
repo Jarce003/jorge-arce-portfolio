@@ -17,7 +17,7 @@ export default async function HomePage({ params }: HomePageProps) {
   // Both locales run the SAME R3F build, with language selected via URL.
   // This keeps physics, graphics and rescue rewards identical in ES and EN.
   return (
-    <main className="relative h-[100svh] w-full overflow-hidden bg-[#081326]">
+    <main className="fixed inset-0 h-[100dvh] min-h-0 w-full overflow-hidden bg-[#081326]">
       <h1 className="sr-only">
         {lang === "es" ? "JarceDev — Portafolio 3D de Jorge Arce" : "JarceDev — Jorge Arce's 3D Portfolio"}
       </h1>
