@@ -256,6 +256,7 @@ def firetrack(mats):
     red = mats["red"]
     dark = mats["dark"]
     silver = mats["silver"]
+    chrome = mats["chrome"]
     glass = mats["glass"]
 
     def b(name, xyz, dims, mat=wall):
