@@ -1,87 +1,113 @@
-# One-command JarceDev side-by-side review; Windows PowerShell 5.1.
-# Uses existing Git branches and checked-in GLBs; does not modify main or launch a browser.
+# JarceDev visual review: two isolated Git worktrees, one VS Code terminal.
+# Existing worktrees, user edits, main and Vercel remain untouched.
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
 $parent = Join-Path $env:USERPROFILE "nodeJsProyects\Ejercicios python"
-$repository = Join-Path $parent "jorge-arce-portfolio"
+$repo = Join-Path $parent "jorge-arce-portfolio"
+$web = Join-Path $parent "jarcedev-review-webgl2"
+$lab = Join-Path $parent "jarcedev-review-blender-r3f"
 $webBranch = "feature/jarcedev-world-first-v3"
 $labBranch = "experiment/jarcedev-blender-r3f-pilot"
-$lab = Join-Path $parent "jorge-arce-portfolio-r3f"
 
-function Git-Checked([string[]]$GitArguments, [string]$Label) {
+function Git-Checked([string[]]$GitArguments, [string]$Step) {
     & git @GitArguments
-    if ($LASTEXITCODE -ne 0) { throw "Git: $Label failed (exit $LASTEXITCODE)." }
+    if ($LASTEXITCODE -ne 0) { throw "Git error in $Step (exit $LASTEXITCODE)." }
 }
-function Check-Worktree([string]$Directory, [string]$Expected) {
-    if (-not (Test-Path -LiteralPath $Directory)) { throw "Missing directory: $Directory" }
-    $actual = (& git -C $Directory branch --show-current).Trim()
-    if ($LASTEXITCODE -ne 0 -or $actual -ne $Expected) {
-        throw "Unexpected branch in $Directory. Expected $Expected, got $actual. Nothing changed."
+function Ensure-Review([string]$Directory, [string]$Branch) {
+    if (-not (Test-Path -LiteralPath $Directory)) {
+        Git-Checked @("-C", $repo, "worktree", "add", "--detach", $Directory, "origin/$Branch") "create review directory"
+        return
+    }
+    $existing = (& git -C $Directory rev-parse --show-toplevel 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $existing) { throw "Review directory is not a Git worktree: $Directory" }
+    $normalized = [IO.Path]::GetFullPath(($existing | Select-Object -First 1).Trim()).TrimEnd('\')
+    $expected = [IO.Path]::GetFullPath($Directory).TrimEnd('\')
+    if (-not [string]::Equals($normalized, $expected, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Unexpected Git directory: $Directory"
     }
     $changes = @(& git -C $Directory status --porcelain)
-    if ($LASTEXITCODE -ne 0) { throw "Could not inspect Git status: $Directory" }
-    if ($changes.Count -gt 0) {
-        throw "Uncommitted files in $Directory. Nothing overwritten. Save them before running review."
+    if ($LASTEXITCODE -ne 0 -or $changes.Count -gt 0) {
+        throw "Uncommitted changes in the isolated review directory: $Directory. Nothing overwritten."
     }
+    Git-Checked @("-C", $Directory, "checkout", "--detach", "origin/$Branch") "refresh review directory"
 }
-function Ensure-Worktree([string]$Directory, [string]$Branch) {
-    if (-not (Test-Path -LiteralPath $Directory)) {
-        & git -C $repository show-ref --verify --quiet ("refs/heads/" + $Branch)
-        if ($LASTEXITCODE -eq 0) {
-            Git-Checked @("-C", $repository, "worktree", "add", $Directory, $Branch) "create worktree"
-        } else {
-            Git-Checked @("-C", $repository, "worktree", "add", "-b", $Branch, $Directory, ("origin/" + $Branch)) "create worktree"
+function Wait-Ready([string]$Url, [object]$Process, [string]$ErrorLog) {
+    for ($attempt = 0; $attempt -lt 75; $attempt++) {
+        if ($Process.HasExited) {
+            $details = if (Test-Path $ErrorLog) { (Get-Content $ErrorLog -Tail 16) -join [Environment]::NewLine } else { "" }
+            throw "Server exited for $Url. $details"
         }
+        try {
+            $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 3
+            if ($response.StatusCode -eq 200) { return }
+        } catch { }
+        Start-Sleep -Seconds 1
     }
-    Check-Worktree $Directory $Branch
-    Git-Checked @("-C", $Directory, "pull", "--ff-only", "origin", $Branch) "update worktree"
+    $details = if (Test-Path $ErrorLog) { (Get-Content $ErrorLog -Tail 16) -join [Environment]::NewLine } else { "" }
+    throw "Server not ready: $Url. $details"
 }
 try {
-    if (-not (Test-Path -LiteralPath $repository)) { throw "Base repository missing: $repository" }
+    if (-not (Test-Path $repo)) { throw "Base repository not found: $repo" }
     foreach ($app in @("git.exe", "node.exe", "npm.cmd")) {
-        if (-not (Get-Command $app -ErrorAction SilentlyContinue)) { throw "Missing prerequisite: $app" }
+        if (-not (Get-Command $app -ErrorAction SilentlyContinue)) { throw "Missing requirement: $app" }
     }
-    $nodeVersion = (& node --version).TrimStart("v")
-    if ([version]$nodeVersion -lt [version]"22.12.0") { throw "Node 22.12+ required." }
-    Write-Host "Updating review branches..." -ForegroundColor Cyan
-    Git-Checked @("-C", $repository, "fetch", "origin", $webBranch, $labBranch) "fetch"
-    $current = (& git -C $repository branch --show-current).Trim()
-    if ($LASTEXITCODE -ne 0) { throw "Unable to read current branch." }
-    $web = $repository
-    if ($current -ne $webBranch) { $web = Join-Path $parent "jorge-arce-portfolio-webgl2-review" }
-    Ensure-Worktree $web $webBranch
-    Ensure-Worktree $lab $labBranch
-    $modelDir = Join-Path $lab "public\models\jarcedev\v1"
-    foreach ($file in @("ladder-truck.glb", "firetrack-station.glb", "evacuaplan-station.glb", "acreditaciones-station.glb", "hidrantes-station.glb")) {
-        if (-not (Test-Path -LiteralPath (Join-Path $modelDir $file))) { throw "Missing GLB: $file" }
+    $version = [version]((& node --version).Trim().TrimStart("v"))
+    if ($version -lt [version]"22.12.0") { throw "Node 22.12+ required." }
+
+    Write-Host "Preparando revision aislada. Tus carpetas actuales no se modifican." -ForegroundColor Cyan
+    Git-Checked @("-C", $repo, "fetch", "origin", $webBranch, $labBranch) "fetch"
+    Ensure-Review $web $webBranch
+    Ensure-Review $lab $labBranch
+
+    $modelDirectory = Join-Path $lab "public\models\jarcedev\v1"
+    foreach ($name in @("ladder-truck.glb", "firetrack-station.glb", "evacuaplan-station.glb", "acreditaciones-station.glb", "hidrantes-station.glb")) {
+        if (-not (Test-Path (Join-Path $modelDirectory $name))) { throw "Missing Blender model: $name" }
     }
     foreach ($port in @(3000, 4174)) {
-        $busy = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
-        if ($busy) { throw "Port $port occupied. Close previous server terminal and retry." }
+        if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
+            throw "Port $port already in use. Stop the other server using this port."
+        }
     }
-    if (-not (Test-Path -LiteralPath (Join-Path $web "node_modules\next"))) {
+
+    $nextBin = Join-Path $web "node_modules\next\dist\bin\next"
+    if (-not (Test-Path $nextBin)) {
+        Write-Host "Instalando dependencias WebGL2..." -ForegroundColor Cyan
         Push-Location $web
         try {
             & npm.cmd ci --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "WebGL2 dependency installation failed." }
+            if ($LASTEXITCODE -ne 0) { throw "WebGL2 npm ci failed." }
         } finally { Pop-Location }
     }
-    $labScene = Join-Path $lab "experiments\r3f"
-    if (-not (Test-Path -LiteralPath (Join-Path $labScene "node_modules\vite"))) {
-        Push-Location $labScene
+    $scene = Join-Path $lab "experiments\r3f"
+    $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
+    if (-not (Test-Path $viteBin)) {
+        Write-Host "Instalando dependencias React Three Fiber..." -ForegroundColor Cyan
+        Push-Location $scene
         try {
-            & npm.cmd install --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "R3F dependency installation failed." }
+            & npm.cmd install --no-package-lock --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { throw "R3F npm install failed." }
         } finally { Pop-Location }
     }
-    Start-Process -FilePath "cmd.exe" -WorkingDirectory $web -ArgumentList @("/k", "npm.cmd run dev -- -p 3000")
-    Start-Process -FilePath "cmd.exe" -WorkingDirectory $labScene -ArgumentList @("/k", "npm.cmd run dev -- --host 127.0.0.1 --port 4174 --strictPort")
+
+    $nodeExe = (Get-Command node.exe).Source
+    $webOut = Join-Path $env:TEMP "jarcedev-review-webgl2.stdout.log"
+    $webErr = Join-Path $env:TEMP "jarcedev-review-webgl2.stderr.log"
+    $labOut = Join-Path $env:TEMP "jarcedev-review-r3f.stdout.log"
+    $labErr = Join-Path $env:TEMP "jarcedev-review-r3f.stderr.log"
+    Write-Host "Iniciando ambas versiones sin nuevas ventanas..." -ForegroundColor Cyan
+    $webProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $web -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3000' -f $nextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $webOut -RedirectStandardError $webErr
+    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $scene -ArgumentList ('"{0}" --host 127.0.0.1 --port 4174 --strictPort' -f $viteBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
+
+    Wait-Ready "http://127.0.0.1:3000/es" $webProcess $webErr
+    Wait-Ready "http://127.0.0.1:4174/" $labProcess $labErr
     Write-Host ""
-    Write-Host "WEBGL2:       http://localhost:3000/es" -ForegroundColor Yellow
-    Write-Host "BLENDER/R3F:  http://127.0.0.1:4174" -ForegroundColor Yellow
-    Write-Host "Open both links manually after server terminals show Ready." -ForegroundColor Gray
-    Write-Host "No changes to main or Vercel." -ForegroundColor Gray
+    Write-Host "LISTO. Abre en Chrome:" -ForegroundColor Green
+    Write-Host "WebGL2:    http://127.0.0.1:3000/es" -ForegroundColor Yellow
+    Write-Host "Blender:   http://127.0.0.1:4174/" -ForegroundColor Yellow
+    Write-Host "Para cerrar ambos servidores: Stop-Process -Id $($webProcess.Id),$($labProcess.Id)" -ForegroundColor DarkGray
+    Write-Host "Sin modificar main, tus cambios locales o Vercel." -ForegroundColor DarkGray
 } catch {
-    Write-Host ("REVIEW ERROR: " + $_.Exception.Message) -ForegroundColor Red
+    Write-Host ("ERROR: " + $_.Exception.Message) -ForegroundColor Red
     exit 1
 }
