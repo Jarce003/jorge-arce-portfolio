@@ -43,7 +43,10 @@ next-env.d.ts
 # public environment variable template
 !/.env.example
 
-# Standalone local-only R3F pilot
+# Built production 3D experience is generated during Next.js build
+/public/experience/
+
+# Standalone R3F source
 /experiments/r3f/node_modules/
 /experiments/r3f/dist/
 
