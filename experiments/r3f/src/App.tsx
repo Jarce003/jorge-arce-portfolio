@@ -143,7 +143,14 @@ export function App(){
       onPointerDown={e=>{
         e.preventDefault();
         setHintVisible(false);
-        e.currentTarget.setPointerCapture(e.pointerId);
+        // Programmatic touch events and some mobile browsers can report a
+        // pointer that has already ended. Driving must still work if capture
+        // is unavailable.
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // The matching pointer-up/cancel still releases the control.
+        }
         controls.current[action]=true;
       }}
       onPointerUp={()=>{controls.current[action]=false;}}
