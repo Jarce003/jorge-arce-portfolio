@@ -57,7 +57,7 @@ jobs:
           blender --background --factory-startup --python tools/blender/build_assets.py
       - name: Validate generated GLB signatures, parts and mobile budgets
         run: |
-          node tools/blender/verify_glb.mjs public/models/jarcedev/v1/ladder-truck.glb public/models/jarcedev/v1/firetrack-station.glb
+          node tools/blender/verify_glb.mjs public/models/jarcedev/v1/ladder-truck.glb public/models/jarcedev/v1/firetrack-station.glb public/models/jarcedev/v1/evacuaplan-station.glb public/models/jarcedev/v1/acreditaciones-station.glb public/models/jarcedev/v1/hidrantes-station.glb
       - name: Archive reviewable Blender and GLB assets
         uses: actions/upload-artifact@v4
         with:
