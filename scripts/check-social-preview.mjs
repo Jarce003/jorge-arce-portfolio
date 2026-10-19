@@ -38,6 +38,7 @@ try{
     assert(html.includes("/"+lang+"/opengraph-image"),"OG image not present: "+lang);
     assert.match(html,/name="twitter:card"[^>]+summary_large_image/);
     assert.match(html,/JarceDev/);
+    assert(html.includes("/experience/index.html?lang="+lang),"Wrong 3D experience for locale "+lang);
     assert(!html.includes("Jorge-Arce-Solano-CV-"),"CV download link was exposed");
     const preview=await read("/"+lang+"/opengraph-image");
     assert.equal(preview.status,200,"Social preview endpoint missing: "+lang);
