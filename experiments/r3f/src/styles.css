@@ -404,3 +404,111 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
   .steering .drive-button>span{font-size:29px;line-height:1}
   .steering .drive-button{width:64px;min-height:64px}
 }
+
+/* Compact destination HUD: keep the world, truck and buildings visible. */
+.portfolio-world .overview{display:none!important}
+.portfolio-world .stations-dock{
+  position:absolute!important;width:1px!important;height:1px!important;
+  overflow:hidden!important;clip-path:inset(50%);white-space:nowrap;
+  padding:0!important;margin:0!important;top:0;left:0;right:auto;
+}
+.portfolio-world .stations-dock:focus-within{
+  width:auto!important;height:auto!important;clip-path:none;
+  top:70px;left:12px;padding:8px!important;
+  background:#101f35;border-radius:12px
+}
+.go-back{
+  display:inline-flex;align-items:center;gap:8px;
+  border-color:#b5a3ed;background:#b7a7f5;color:#171932;font-weight:750;
+}
+.go-back:hover{background:#d0c3ff;color:#11172c}
+.reset-button{
+  display:inline-flex;align-items:center;gap:7px;background:transparent;
+  border:1px solid #b4c6dd35;color:#cedbe9;
+}
+.reset-button:hover{background:#31415d;color:#fff}
+.tools{top:75px;right:18px;gap:7px;max-width:none}
+.tools button{
+  display:grid;place-items:center;padding:0;
+  min-width:43px;min-height:43px;border-radius:12px;
+  background:#0d2139e0;border:1px solid #8298bd61;color:#eef4ff;
+}
+.tools button:hover{background:#23395a}
+.tools button[aria-pressed="true"]{border-color:#b9a9ff;background:#403c65}
+.rescue-progress{
+  position:absolute;z-index:6;right:18px;top:128px;
+  display:inline-flex;align-items:center;gap:9px;
+  background:#0b1d31e9;color:#cfdfef;
+  border:1px solid #8da1c466;border-radius:999px;
+  padding:7px 13px;font-size:11px;box-shadow:0 8px 20px #07102144;
+  backdrop-filter:blur(10px);
+}
+.rescue-progress:disabled{opacity:1;cursor:default}
+.rescue-progress strong{font-size:15px;color:#9cf1d5;font-variant-numeric:tabular-nums}
+.rescue-progress.is-complete{border-color:#ddc48f;color:#f7e8b1;cursor:pointer}
+.rescue-progress.is-complete:hover{background:#30465c}
+.drive-hint{
+  position:absolute;z-index:6;bottom:117px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:12px;padding:9px 11px 9px 16px;
+  border-radius:999px;background:#0b1c31df;border:1px solid #8298b351;
+  color:#e5eef8;box-shadow:0 7px 20px #050b1a50;font-size:11px;
+  backdrop-filter:blur(9px);white-space:nowrap;
+}
+.drive-hint button{
+  display:grid;place-items:center;border:0;background:transparent;color:#d1deec;
+  width:22px;height:22px;font-size:18px;line-height:1;padding:0;
+}
+.interaction:not(:has(.project-info,.rescue-card)){display:none}
+.interaction:has(.rescue-card){bottom:118px;width:max-content;max-width:calc(100vw - 25px)}
+.interaction .rescue-card{padding:8px 12px;gap:10px;border-radius:14px}
+.interaction .rescue-card>span{font-size:19px}
+.interaction .rescue-text strong{font-size:12px}
+.interaction .rescue-text small{font-size:10px;margin-top:1px}
+.interaction .discover{min-height:36px;padding:8px 11px;font-size:11px}
+.reward-backdrop{
+  position:fixed;inset:0;z-index:60;
+  display:grid;place-items:center;padding:calc(12px + env(safe-area-inset-top)) 12px
+    calc(12px + env(safe-area-inset-bottom));
+  background:#050d1ab5;backdrop-filter:blur(4px);
+}
+.reward-backdrop .rescue-reward{
+  position:relative;top:auto;left:auto;transform:none;
+  width:min(448px,100%);max-height:min(650px,calc(100svh - 28px));
+  overflow-y:auto;overscroll-behavior:contain;
+  animation:none;
+}
+.portfolio-world[data-view="portfolio"] .reward-backdrop{display:none}
+@media(max-width:900px){
+  .tools{top:63px;right:12px}
+  .rescue-progress{top:117px;right:12px}
+}
+@media(max-width:600px){
+  .topbar{min-height:56px}
+  .go-back{min-height:35px;padding:8px 11px;gap:5px}
+  .reset-button{min-height:35px;width:37px;padding:7px;justify-content:center}
+  .reset-button>span{display:none}
+  .tools{top:64px;right:12px;gap:7px}
+  .tools button{width:36px;min-width:36px;height:36px;min-height:36px;padding:0}
+  .rescue-progress{top:110px;right:12px;padding:6px 10px;gap:6px}
+  .drive-hint{bottom:105px;left:50%;max-width:calc(100vw - 24px);font-size:10px;padding:6px 9px 6px 11px}
+  .interaction:has(.rescue-card){bottom:102px;width:max-content;max-width:calc(100vw - 20px)}
+  .interaction .rescue-card{padding:7px 9px}
+  .reward-backdrop{z-index:100;align-items:center;overflow:hidden}
+  .reward-backdrop .rescue-reward{
+    max-height:calc(100svh - 24px);padding:18px 16px;
+    box-shadow:0 22px 70px #030a1ef0;
+  }
+  .reward-medal{width:58px;height:58px;font-size:28px;margin:3px auto 9px}
+  .rescue-reward h2{font-size:23px;margin:6px 0}
+  .rescue-reward>p:not(.eyebrow){font-size:12px}
+  .reward-total{margin:12px auto 8px}
+  .reward-total strong{font-size:29px}
+  .reward-projects>span{padding:7px 8px}
+  .reward-actions{margin-top:13px;gap:6px}
+  .reward-actions button{min-height:38px}
+}
+@media(max-height:600px){
+  .reward-backdrop .rescue-reward{max-height:calc(100svh - 12px);padding:12px}
+  .reward-medal{display:none}
+  .reward-projects{display:none}
+}
