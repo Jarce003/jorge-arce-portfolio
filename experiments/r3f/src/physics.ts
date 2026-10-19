@@ -39,9 +39,9 @@ export function advanceTruck(pose: TruckPose, controls: Controls, dt: number): T
   const step=Math.max(0,Math.min(dt,.075));
   const throttle=Number(controls.forward)-Number(controls.reverse);
   const speed=Math.max(-3.7,Math.min(7.2,
-    (pose.speed+throttle*13*step)*Math.exp(-2.8*step)));
+    (pose.speed+throttle*14*step)*Math.exp(-2.0*step)));
   const steer=Number(controls.left)-Number(controls.right);
-  const heading=pose.heading+(Math.abs(speed)>.04?steer*1.7*step*Math.sign(speed):0);
+  const heading=pose.heading+(Math.abs(speed)>.04?steer*1.9*step*Math.sign(speed):0);
   return {
     x:Math.max(-26,Math.min(26,pose.x-Math.sin(heading)*speed*step)),
     z:Math.max(-26,Math.min(26,pose.z-Math.cos(heading)*speed*step)),
