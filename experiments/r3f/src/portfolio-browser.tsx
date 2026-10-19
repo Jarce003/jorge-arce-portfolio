@@ -12,8 +12,10 @@ const method=[
 
 /** The approved small JarceDev project cards, hosted alongside the 3D world.
  * Navigation no longer escapes to the deployed legacy website. */
-export function PortfolioBrowser({onBack}:{onBack:()=>void}){
-  const [selectedSlug,setSelectedSlug]=useState<ProjectId>("acreditaciones-app");
+export function PortfolioBrowser({
+  onBack,initialProject="acreditaciones-app",
+}:{onBack:()=>void;initialProject?:ProjectId}){
+  const [selectedSlug,setSelectedSlug]=useState<ProjectId>(initialProject);
   const selected=projects.find(project=>project.slug===selectedSlug)??projects[0];
   const [methodStep,setMethodStep]=useState(0);
   return (
