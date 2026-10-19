@@ -587,13 +587,14 @@ def hidrantes(mats):
     for index in range(4):
         b(f"NetworkFlowIndicator_{index}", (-3.0+index*1.65, 1.31, .06),
           (.91, .14, .085), mats["cyan"])
-    # Elevated, roof-mounted nameplate. The previous low-left sign was
-    # concealed by the oversized hydrant viewed from the public road.
-    for x in (-2.45, 2.45):
-        b(f"HydrantNameSupport_{x}", (x, -.04, 2.19),
-          (.17, .22, .53), chrome)
-    b("HydrantsNameBacking", (0, .13, 2.52), (5.90, .22, .79), navy)
-    facade_label("HidrantesFacadeName", "HIDRANTES", (0, .28, 2.52), .48,
+    # High-contrast, front-facing masthead, ABOVE the map board and hydrant.
+    # Old 2.52m sign sat behind the map/valve objects, leaving only "TES"
+    # visible. This sign clears the highest foreground map board (4.73m).
+    for x in (-3.24, 3.24):
+        b(f"HydrantNameSupport_{x}", (x, .08, 3.73),
+          (.19, .23, 3.55), chrome)
+    b("HydrantsNameBacking", (0, .05, 5.52), (7.65, .30, 1.04), navy)
+    facade_label("HidrantesFacadeName", "HIDRANTES", (0, .28, 5.53), .76,
                  white, target, root)
     print("Built Hidrantes map station:", len(target.objects), "objects")
     return target, root
