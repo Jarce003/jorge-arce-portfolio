@@ -441,7 +441,7 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       box(x, 4.18, z-3.03, 5.45, .12, .14, "#f8e5a9");
     }
   }
-  function evacuaStation(x: number, z: number, accent: string) {
+  function evacuaStation(x: number, z: number, accent: string, lowDetail: boolean) {
     plot(x,z,accent);
     box(x, 1.25, z - 1.6, 6.0, 2.5, 3.5, "#cadde4");
     box(x - 2.7, 1.3, z + 1.4, .34, 2.6, 4, "#70b7cb");
@@ -493,8 +493,51 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       draw("cube", x-1.15+index*1.15, 3.82, z-1.55,
         .70, .12, .48, accent, 0, 0, daylightTarget > .5 ? .12 : .85);
     }
+
+    // Giant open cutaway blueprint on the rooftop. The cyan safe-exit
+    // corridor is legible from the chase camera; no text or tiny texture.
+    box(x-.10, 4.12, z-1.55, 5.55, .13, 3.42, "#eaf4f7");
+    box(x-.10, 4.21, z-1.55, 5.18, .045, 3.13, "#264e65");
+    for (const offset of [-1.38, .28, 1.66]) {
+      box(x+offset, 4.27, z-1.55, .095, .12, 2.70, "#c7e9eb");
+    }
+    for (const offset of [-.83, .45]) {
+      box(x-.10, 4.27, z-1.55+offset, 4.75, .12, .085, "#c7e9eb");
+    }
+    // "You are here" marker, bent bright green escape route and exit gate.
+    cylinder(x-1.80, 4.40, z-2.68, .35, .26, .35, "#ffcb79");
+    cylinder(x-1.80, 4.59, z-2.68, .16, .09, .16, "#ffffff");
+    box(x-.80, 4.34, z-2.60, 1.90, .035, .15, "#4ef6b2");
+    box(x+.13, 4.34, z-1.98, .15, .035, 1.33, "#4ef6b2");
+    box(x+.92, 4.34, z-1.33, 1.65, .035, .15, "#4ef6b2");
+    box(x+1.77, 4.44, z-1.35, .14, .42, .82, "#78ffd4");
+    // Oversized schematic door and freestanding wayfinding arch: obvious
+    // thematic objects even without reading the project's description.
+    box(x+3.65, 1.40, z+2.36, .30, 2.65, 2.14, "#d0ecf0");
+    box(x+3.69, 1.45, z+2.36, .11, 2.32, 1.77, "#29516a");
+    box(x+3.76, 1.45, z+2.36, .065, 1.89, 1.29, "#83e2e4");
+    cylinder(x+3.85, 1.31, z+1.76, .12, .13, .12, "#fef7c4");
+    if (!lowDetail) {
+      // Blueprint frame, drafting rulers, cutaway room dividers and a
+      // translucent-looking roof canopy, without extra texture downloads.
+      for (const side of [-1,1]) {
+        box(x+side*2.77, 4.35, z-1.55, .19, .38, 3.66, accent);
+        box(x+side*2.90, 1.38, z+1.12, .14, 2.2, 2.30, "#f0f6fa");
+      }
+      for (let index=0; index<5; index++) {
+        box(x-2.12+index*1.02,4.29,z-3.08,.065,.04,.24,"#9dd7e6");
+      }
+      for (const offset of [-1.7,-.58,.58,1.7]) {
+        box(x+offset,.22,z+4.21,.68,.07,.18,"#f5fcfc");
+      }
+      // Model architecture: two-scale façades on a working design board.
+      for (const [px,pz,height] of [[-1.13,2.22,.46],[.55,2.38,.65],[1.48,3.40,.48]] as const) {
+        box(x+px,.43+height*.5,z+pz,.53,height,.52,"#a8dae7");
+        box(x+px,.49+height,z+pz,.60,.08,.60,accent);
+      }
+    }
   }
-  function accreditationStation(x: number, z: number, accent: string) {
+  function accreditationStation(x: number, z: number, accent: string, lowDetail: boolean) {
     plot(x,z,accent);
     box(x, 1.4, z-1.4, 6.5, 2.8, 4.2, "#d2cde8");
     for(let i=-2; i<=2; i+=1) {
@@ -533,8 +576,52 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     }
     draw("cylinder", x, 5.85, z-1.45, .77, .16, .77, accent,
       0, 0, daylightTarget > .5 ? .12 : 1);
+
+    // Giant readable analytics screen, deliberately free of personal data:
+    // fake bars and luminous nodes visually communicate the AI assistant.
+    box(x,2.05,z+1.62,3.85,2.65,.20,"#253450");
+    box(x,2.12,z+1.78,3.48,2.31,.075,"#14273e");
+    box(x-1.36,2.93,z+1.84,.46,.17,.05,"#6ee7e5");
+    box(x-.49,2.93,z+1.84,.91,.17,.05,"#bda9fa");
+    for (const [offset,height,color] of [
+      [-1.19,.60,"#78dfdb"],[-.47,.99,"#8ce1ff"],
+      [.25,1.29,"#bba6f7"],[.97,.80,"#8ef0cf"],
+    ] as const) {
+      box(x+offset,1.40+height*.5,z+1.87,.38,height,.065,color);
+    }
+    // Distinct network/AI marker towering over the training blocks.
+    const aiX=x-3.09,aiZ=z+2.34;
+    cylinder(aiX,2.49,aiZ,.13,3.25,.13,"#e9eaff");
+    cylinder(aiX,4.20,aiZ,.93,.18,.93,"#d6cbfa");
+    cylinder(aiX,4.39,aiZ,.64,.24,.64,accent);
+    for (const offset of [-.57,.57]) {
+      cylinder(aiX+offset,4.88,aiZ,.22,.82,.22,"#e3dcfd");
+      cylinder(aiX+offset,5.33,aiZ,.29,.15,.29,"#91eff2");
+    }
+    box(aiX,5.25,aiZ,1.28,.12,.12,"#a5f4e7");
+    // Colored qualification blocks form a recognizable learning podium.
+    for (const [index,shade] of ["#9a8bdd","#bda9f4","#e0cafa"].entries()) {
+      const bx=x+2.55+index*.45;
+      box(bx,.84+index*.37,z+3.46,.38,.83+index*.70,.45,shade);
+    }
+    if (!lowDetail) {
+      // More visible circuit wiring from the academy display, not dense text.
+      for (const side of [-1,1]) {
+        box(x+side*2.05,1.92,z+1.70,.12,1.49,.09,"#d3e5fa");
+        box(x+side*2.08,2.82,z+1.72,.39,.12,.09,accent);
+      }
+      for (let i=0;i<4;i++) {
+        const panelX=x-2.1+i*1.40;
+        box(panelX,3.38,z+2.17,.81,.11,.38,"#faf5ff");
+        cylinder(panelX,3.60,z+2.17,.28,.14,.28, i%2?accent:"#65dfd3");
+      }
+      // Distinct fake nodes: do not expose actual accreditation records.
+      for (const [px,py] of [[-1.2,4.35],[.42,4.04],[1.4,4.56]] as const) {
+        cylinder(x+px,py,z-2.75,.18,.12,.18,accent);
+      }
+    }
   }
-  function hydrantsStation(x: number, z: number, accent: string) {
+  function hydrantsStation(x: number, z: number, accent: string, lowDetail: boolean) {
     plot(x,z,accent);
     box(x, .65, z-2.2, 7.1, 1.3, 2.0, "#69879b");
     for(let i=0;i<3;i+=1) {
@@ -573,6 +660,43 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     box(x+3.25, 4.23, z-2.1, 2.2, .17, 2.2, "#e1f6f1");
     draw("cylinder", x+3.25, 4.33, z-2.1, 2.6, .08, 2.6,
       accent, 0, 0, daylightTarget > .5 ? .08 : .9);
+
+    // Stylized city-waterworks: oversized pipes and a public hydrant plaza
+    // make the app's QR/map/flow concept instantly readable from the road.
+    box(x+.20,.31,z+2.90,5.30,.32,.38,"#57a4b5");
+    box(x+2.54,.55,z+2.90,.36,.52,.38,"#c5d9dc");
+    box(x+2.54,.75,z+1.82,.36,.32,2.24,"#55b8b1");
+    cylinder(x+2.54,.81,z+.84,.46,.26,.46,"#f5d69c");
+    // Sculpted map board shows blocks, streets and two map pins.
+    box(x-1.38,3.39,z-2.05,3.18,2.37,.26,"#1b3e51");
+    box(x-1.38,3.40,z-1.89,2.90,2.07,.065,"#376578");
+    for (const offset of [-.76,.11,.77]) {
+      box(x-1.38+offset,3.44,z-1.81,.065,1.79,.04,"#b5dedc");
+    }
+    for (const offset of [-.51,.49]) {
+      box(x-1.39,3.40+offset,z-1.80,2.71,.066,.04,"#b5dedc");
+    }
+    for (const [dx,dy,shade] of [[-.63,-.24,"#f0c76d"],[.62,.39,"#72e6c8"]] as const) {
+      cylinder(x-1.38+dx,3.40+dy,z-1.75,.22,.13,.22,shade);
+      draw("cone",x-1.38+dx,3.17+dy,z-1.73,.46,.33,.46,shade);
+    }
+    // Raised indicator/beacon, without displaying real flow numbers.
+    cylinder(x+3.20,4.74,z-2.02,.35,.43,.35,"#f3fbfb");
+    draw("cone",x+3.20,5.16,z-2.02,.76,.51,.76,accent);
+    if (!lowDetail) {
+      // Visible side pipes, valve wheels and pavement marking stones.
+      for (const side of [-1,1]) {
+        box(x+side*3.56,1.06,z+.78,.44,.40,2.72,"#a8d8d7");
+        cylinder(x+side*3.48,1.19,z+2.05,.62,.16,.62,"#e2eeed");
+        cylinder(x+side*3.48,1.29,z+2.05,.30,.18,.30,accent);
+      }
+      for (const offset of [-1.85,-.95,-.05,.85,1.75]) {
+        box(x+offset,.14,z+4.55,.20,.06,.75,"#b3cdd0");
+      }
+      for (const index of [-1,0,1]) {
+        cylinder(x+index*1.25,.20,z-3.9,.38,.14,.38,"#4cc5ad");
+      }
+    }
   }
   // Additional projects use a reusable structure template without new renderer code.
   function genericStation(x: number, z: number, accent: string) {
@@ -589,9 +713,9 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
   function drawStation(structure: StructureType, x: number, z: number, accent: string, lowDetail: boolean) {
     switch (structure) {
       case "operations": fireStation(x, z, accent, lowDetail); break;
-      case "design-studio": evacuaStation(x, z, accent); break;
-      case "academy": accreditationStation(x, z, accent); break;
-      case "mapping-hub": hydrantsStation(x, z, accent); break;
+      case "design-studio": evacuaStation(x, z, accent, lowDetail); break;
+      case "academy": accreditationStation(x, z, accent, lowDetail); break;
+      case "mapping-hub": hydrantsStation(x, z, accent, lowDetail); break;
       default: genericStation(x, z, accent);
     }
   }
