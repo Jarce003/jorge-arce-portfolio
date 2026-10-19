@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { siteContent } from "@/content/site-content";
 import { isLocale, locales } from "@/lib/i18n";
 import { getSiteUrl } from "@/lib/site-url";
+import { SOCIAL_PREVIEW_IMAGE, SOCIAL_PREVIEW_WIDTH, SOCIAL_PREVIEW_HEIGHT } from "@/lib/social-preview";
 
 import "../globals.css";
 
@@ -72,13 +73,13 @@ export async function generateMetadata({
       description: content.metadata.description,
       images: [
         {
-          url: `/${lang}/opengraph-image`,
-          width: 1200,
-          height: 630,
+          url: SOCIAL_PREVIEW_IMAGE,
+          width: SOCIAL_PREVIEW_WIDTH,
+          height: SOCIAL_PREVIEW_HEIGHT,
           type: "image/png",
           alt: lang === "es"
-            ? "JarceDev — Portafolio interactivo 3D de ingeniería de software"
-            : "JarceDev — Interactive 3D software portfolio",
+            ? "JarceDev — Portafolio interactivo, vista del mundo 3D"
+            : "JarceDev — Interactive portfolio, 3D world preview"
         },
       ],
     },
@@ -86,7 +87,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: content.metadata.title,
       description: content.metadata.description,
-      images: [`/${lang}/opengraph-image`],
+      images: [SOCIAL_PREVIEW_IMAGE],
     },
     icons: {
       icon: [

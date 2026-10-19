@@ -114,7 +114,7 @@ export const siteContent = {
     metadata: {
       title: "JarceDev | Jorge Arce",
       description:
-        "Un recorrido por mis proyectos: FireTrack, EvacuaPlan Studio, Acreditaciones e Hidrantes.",
+        "Portafolio interactivo",
     },
     navigation: [
       { label: "Mundo 3D", href: "#mundo" },
@@ -283,7 +283,7 @@ export const siteContent = {
     metadata: {
       title: "JarceDev | Jorge Arce",
       description:
-        "A look at my projects: FireTrack, EvacuaPlan Studio, Accreditations and Hydrants.",
+        "Interactive portfolio",
     },
     navigation: [
       { label: "3D World", href: "#mundo" },
