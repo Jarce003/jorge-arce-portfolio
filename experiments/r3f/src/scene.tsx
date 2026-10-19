@@ -4,6 +4,7 @@ import * as THREE from "three";
 
 import { RedEmergencyLights, WaterSpray } from "./effects";
 import { WebStyleTruck } from "./web-style-truck";
+import { StreetLights } from "./streetlights";
 import { ThemedStations, StationFires } from "./stations";
 import {
   RESCUE_DURATION, advanceTruck, closestStation, damping,
@@ -78,26 +79,26 @@ export function WorldScene({
   });
   return (
     <>
-      <color attach="background" args={[day?"#a9cadd":"#0b192c"]}/>
-      <fog attach="fog" args={[day?"#a9cadd":"#14283b",36,105]}/>
-      <ambientLight intensity={day?1.04:.45}/>
-      <hemisphereLight args={[day?"#e6f9ff":"#8ca6cf","#1b3542",day?1.12:.52]}/>
-      <directionalLight position={[17,26,9]} intensity={day?2.14:.90}
+      <color attach="background" args={[day?"#a9cadd":"#1d3046"]}/>
+      <fog attach="fog" args={[day?"#a9cadd":"#253b51",44,120]}/>
+      <ambientLight intensity={day?1.04:.75}/>
+      <hemisphereLight args={[day?"#e6f9ff":"#a4c3dd","#24424c",day?1.12:.84]}/>
+      <directionalLight position={[17,26,9]} intensity={day?2.14:1.20}
         castShadow shadow-mapSize={[1024,1024]}
         shadow-camera-left={-38} shadow-camera-right={38}
         shadow-camera-top={38} shadow-camera-bottom={-38}/>
       {/* A real traversable four-way road network, not a cosmetic start podium. */}
       <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.16,0]} receiveShadow>
         <planeGeometry args={[115,115]}/>
-        <meshStandardMaterial color={day?"#8bb29f":"#294644"} roughness={1}/>
+        <meshStandardMaterial color={day?"#8bb29f":"#37574f"} roughness={1}/>
       </mesh>
       <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.10,0]} receiveShadow>
         <planeGeometry args={[8,87]}/>
-        <meshStandardMaterial color={day?"#6d8390":"#253e50"} roughness={1}/>
+        <meshStandardMaterial color={day?"#6d8390":"#39516b"} roughness={1}/>
       </mesh>
       <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.09,0]} receiveShadow>
         <planeGeometry args={[87,8]}/>
-        <meshStandardMaterial color={day?"#6d8390":"#253e50"} roughness={1}/>
+        <meshStandardMaterial color={day?"#6d8390":"#39516b"} roughness={1}/>
       </mesh>
       {Array.from({length:16},(_,i)=>{
         const z=-37+i*5;
@@ -119,12 +120,13 @@ export function WorldScene({
         <mesh key={s.id+"-lot"} position={[s.x,-.08,s.z]} rotation={[-Math.PI/2,0,0]}
           receiveShadow>
           <planeGeometry args={[12,11]}/>
-          <meshStandardMaterial color={day?"#bbd0ce":"#28475b"} roughness={.93}/>
+          <meshStandardMaterial color={day?"#bbd0ce":"#446171"} roughness={.93}/>
         </mesh>
       ))}
       <Suspense fallback={<ThemedStations modelMode={false}/>}>
         <ThemedStations modelMode={modelMode}/>
       </Suspense>
+      <StreetLights day={day}/>
       {/* Street furniture and landscaped lots add depth at driving-camera distance. */}
       {stations.map((station) => (
         <group key={station.id + "-streetscape"} position={[station.x, 0, station.z]}>
@@ -170,7 +172,7 @@ export function WorldScene({
       <StationFires rescued={rescued} rescue={rescue} modelMode={modelMode}/>
       <group ref={truckGroup} position={[0,0,initialPose().z]}>
         <WebStyleTruck truck={truck}/>
-        <RedEmergencyLights active={lights}/>
+        <RedEmergencyLights active={lights} day={day}/>
       </group>
       <WaterSpray truck={truck} rescue={rescue}/>
       {!day && stations.map(s=>(
