@@ -1,4 +1,4 @@
-const fallbackSiteUrl = "http://localhost:3000";
+const fallbackSiteUrl = "https://jarcedev.com";
 
 export function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
