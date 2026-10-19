@@ -195,7 +195,7 @@ export function App(){
           return (
             <button key={id} type="button" disabled={busy}
               aria-current={nearby===id?"location":undefined}
-              onClick={()=>travel(id)}
+              onClick={()=>travel(id as StationId)}
               className={nearby===id?"current":""}>
               <span aria-hidden="true">{project.icon}</span>
               <span>{project.title}</span>
