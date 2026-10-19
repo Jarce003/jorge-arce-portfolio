@@ -45,20 +45,33 @@ function buildParts(){
       put(side*1.24,1.25,compartment,.035,.04,.23,"#36465b");
     }
     put(side*1.13,.65,-2.14,.26,.11,1.13,"#b8c9d6");
-    // Costa Rica civil flag on each cab door: blue / white / double red /
-    // white / blue. Readable from both drive-side and passenger-side views.
-    // The emblem is not a fake national coat of arms.
-    const flagX=side*1.213;
-    const flagZ=-1.66;
+    // Large Costa Rican flag on both cab doors. Body-mounted rather than
+    // floating; the top blue stripe stays below the cab's side window.
+    // Proportions 1:1:2:1:1 with a broad red band and crisp opaque colors.
+    const flagX=side*1.24;
+    const flagZ=-1.79;
     const flagBands:[number,number,string][]=[
-      [1.112,.042,"#002B7F"],[1.155,.042,"#FFFFFF"],
-      [1.224,.094,"#CE1126"],[1.293,.042,"#FFFFFF"],
-      [1.336,.042,"#002B7F"],
+      [1.045,.087,"#002B7F"],
+      [1.132,.087,"#FFFFFF"],
+      [1.263,.174,"#CE1126"],
+      [1.394,.087,"#FFFFFF"],
+      [1.481,.087,"#002B7F"],
     ];
     for(const [height,thickness,finish] of flagBands){
-      put(flagX,height,flagZ,.035,thickness,.51,finish);
+      put(flagX,height,flagZ,.055,thickness,1.10,finish);
     }
     // Rear-side alert lens belongs to the animated beacon system only.
+  }
+  // A matching large flag on the rear-facing body is readable from the
+  // driving camera, which follows the truck from behind.
+  for(const [height,thickness,finish] of [
+    [1.24,.09,"#002B7F"],
+    [1.33,.09,"#FFFFFF"],
+    [1.465,.18,"#CE1126"],
+    [1.60,.09,"#FFFFFF"],
+    [1.69,.09,"#002B7F"],
+  ] as [number,number,string][]){
+    put(0,height,2.785,1.45,thickness,.052,finish);
   }
   // A single open aerial ladder, with a clearly separated turntable pivot.
   // Earlier versions accidentally rendered a large deck AND two overlapping
