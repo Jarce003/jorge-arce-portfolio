@@ -143,6 +143,15 @@ export const FIRE_ANCHORS: Record<Station["id"], readonly [number,number,number]
   hidrantes: [[-3.4,2.05,2.45],[0,2.05,2.50],[2.0,2.05,2.45]],
 };
 
+// Curved flame tongues replace the previous visible cone primitives.
+const FLAME_SHAPE = new THREE.Shape();
+FLAME_SHAPE.moveTo(-.46,0);
+FLAME_SHAPE.bezierCurveTo(-.67,.31,-.34,.50,-.24,.78);
+FLAME_SHAPE.bezierCurveTo(-.12,1.10,-.03,1.24,0,1.72);
+FLAME_SHAPE.bezierCurveTo(.22,1.29,.13,.91,.36,.66);
+FLAME_SHAPE.bezierCurveTo(.68,.28,.49,.18,.46,0);
+FLAME_SHAPE.closePath();
+
 function FireAtStation({
   station,discovered,rescue,modelMode,
 }:{
@@ -150,6 +159,7 @@ function FireAtStation({
   rescue:MutableRefObject<Rescue|null>;
 }) {
   const flames=useRef<(THREE.Group|null)[]>([]);
+  const roofGlow=useRef<THREE.PointLight>(null);
   const anchors=FIRE_ANCHORS[station.id];
   useFrame(()=>{
     const r=rescue.current;
@@ -157,6 +167,7 @@ function FireAtStation({
       ? performance.now()/1000-r.startedAt : -1;
     const strength=discovered?0:seconds<.58?1:Math.max(0,1-(seconds-.58)/.9);
     const motion=performance.now()*.0041;
+    if(roofGlow.current)roofGlow.current.intensity=strength*4.8;
     flames.current.forEach((flame,index)=>{
       if(!flame)return;
       flame.visible=strength>.02;
@@ -167,6 +178,10 @@ function FireAtStation({
   return (
     <group position={[station.x,0,station.z]}
       rotation={[0,station.z<0?Math.PI:0,0]}>
+      <pointLight ref={roofGlow}
+        position={[0,station.id==="firetrack"?6.45:station.id==="acreditaciones"?4.7:
+          station.id==="evacuaplan"?4.3:2.8,0]}
+        color="#ff853e" distance={9} intensity={0} decay={2}/>
       {anchors.map(([x,height,z],index)=>{
         const fallbackHeight=station.id==="hidrantes"?2.37:
           station.id==="firetrack"?5.45:station.id==="acreditaciones"?4.50:3.72;
@@ -174,17 +189,39 @@ function FireAtStation({
         const heightScale=station.id==="hidrantes"?.75:.87;
         return (
           <group key={index} ref={node=>{flames.current[index]=node;}}
-            position={[x,flameY+.64*heightScale,z]}>
-            <mesh>
-              <coneGeometry args={[.51*heightScale,1.32*heightScale,9]}/>
-              <meshStandardMaterial color="#fa722f" emissive="#ee431a"
-                emissiveIntensity={1.05} transparent opacity={.89} depthWrite={false}/>
+            position={[x,flameY,z]} scale={heightScale}>
+            <mesh position={[0,.12,0]}>
+              <sphereGeometry args={[.56,.26,.42,12,8]}/>
+              <meshBasicMaterial color="#f26829" transparent opacity={.76}
+                depthWrite={false}/>
             </mesh>
-            <mesh position={[.09,-.14,0]}>
-              <coneGeometry args={[.30*heightScale,.88*heightScale,8]}/>
-              <meshStandardMaterial color="#ffdb87" emissive="#ffb34b"
-                emissiveIntensity={.82} transparent opacity={.86} depthWrite={false}/>
-            </mesh>
+            {[0,1.05,2.1].map((angle,tongue)=>(
+              <group key={tongue} rotation={[0,angle,0]}
+                position={[(tongue-1)*.19,0,(tongue%2)*.15]}
+                scale={[tongue===1?.82:1,tongue===2?.76:1,1]}>
+                <mesh>
+                  <shapeGeometry args={[FLAME_SHAPE,10]}/>
+                  <meshBasicMaterial color={tongue===1?"#ff922c":"#ff5324"}
+                    transparent opacity={.90} side={THREE.DoubleSide}
+                    depthWrite={false}/>
+                </mesh>
+                <mesh position={[0,.03,.012]} scale={[.47,.62,1]}>
+                  <shapeGeometry args={[FLAME_SHAPE,10]}/>
+                  <meshBasicMaterial color="#ffeaa2" transparent opacity={.83}
+                    side={THREE.DoubleSide} depthWrite={false}/>
+                </mesh>
+              </group>
+            ))}
+            {[0,1,2,3,4].map(ember=>(
+              <mesh key={ember} position={[
+                  Math.sin(index*1.9+ember*2.4)*.44,
+                  .72+(ember%3)*.40,
+                  Math.cos(ember*2.7+index)*.27,
+                ]}>
+                <icosahedronGeometry args={[.045+(ember%2)*.025,0]}/>
+                <meshBasicMaterial color="#ffd36b"/>
+              </mesh>
+            ))}
           </group>
         );
       })}
