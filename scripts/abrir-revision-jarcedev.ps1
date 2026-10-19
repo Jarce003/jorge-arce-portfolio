@@ -64,7 +64,7 @@ try {
     foreach ($name in @("ladder-truck.glb", "firetrack-station.glb", "evacuaplan-station.glb", "acreditaciones-station.glb", "hidrantes-station.glb")) {
         if (-not (Test-Path (Join-Path $modelDirectory $name))) { throw "Missing Blender model: $name" }
     }
-    foreach ($port in @(3000, 4174)) {
+    foreach ($port in @(3000, 3001)) {
         if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
             throw "Port $port already in use. Stop the other server using this port."
         }
@@ -79,33 +79,39 @@ try {
             if ($LASTEXITCODE -ne 0) { throw "WebGL2 npm ci failed." }
         } finally { Pop-Location }
     }
-    $scene = Join-Path $lab "experiments\r3f"
-    $viteBin = Join-Path $scene "node_modules\vite\bin\vite.js"
-    if (-not (Test-Path $viteBin)) {
-        Write-Host "Instalando dependencias React Three Fiber..." -ForegroundColor Cyan
-        Push-Location $scene
+    $candidateNextBin = Join-Path $lab "node_modules\next\dist\bin\next"
+    if (-not (Test-Path $candidateNextBin)) {
+        Write-Host "Instalando dependencias del portafolio integrado..." -ForegroundColor Cyan
+        Push-Location $lab
         try {
-            & npm.cmd install --no-package-lock --no-audit --no-fund
-            if ($LASTEXITCODE -ne 0) { throw "R3F npm install failed." }
+            & npm.cmd ci --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) { throw "Next.js npm ci failed." }
         } finally { Pop-Location }
     }
+    Write-Host "Preparando la experiencia 3D integrada..." -ForegroundColor Cyan
+    Push-Location $lab
+    try {
+        & npm.cmd run build:experience
+        if ($LASTEXITCODE -ne 0) { throw "3D experience build failed." }
+    } finally { Pop-Location }
 
     $nodeExe = (Get-Command node.exe).Source
     $webOut = Join-Path $env:TEMP "jarcedev-review-webgl2.stdout.log"
     $webErr = Join-Path $env:TEMP "jarcedev-review-webgl2.stderr.log"
-    $labOut = Join-Path $env:TEMP "jarcedev-review-r3f.stdout.log"
-    $labErr = Join-Path $env:TEMP "jarcedev-review-r3f.stderr.log"
-    Write-Host "Iniciando ambas versiones sin nuevas ventanas..." -ForegroundColor Cyan
-    $webProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $web -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3000' -f $nextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $webOut -RedirectStandardError $webErr
-    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $scene -ArgumentList ('"{0}" --host 127.0.0.1 --port 4174 --strictPort' -f $viteBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
+    $labOut = Join-Path $env:TEMP "jarcedev-review-final.stdout.log"
+    $labErr = Join-Path $env:TEMP "jarcedev-review-final.stderr.log"
+    Write-Host "Iniciando portafolio final y referencia WebGL2 sin nuevas ventanas..." -ForegroundColor Cyan
+    $webProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $web -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3001' -f $nextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $webOut -RedirectStandardError $webErr
+    $labProcess = Start-Process -FilePath $nodeExe -WorkingDirectory $lab -ArgumentList ('"{0}" dev --hostname 127.0.0.1 -p 3000' -f $candidateNextBin) -WindowStyle Hidden -PassThru -RedirectStandardOutput $labOut -RedirectStandardError $labErr
 
-    Wait-Ready "http://127.0.0.1:3000/es" $webProcess $webErr
-    Wait-Ready "http://127.0.0.1:4174/" $labProcess $labErr
+    Wait-Ready "http://127.0.0.1:3000/es" $labProcess $labErr
+    Wait-Ready "http://127.0.0.1:3001/es" $webProcess $webErr
+    Wait-Ready "http://127.0.0.1:3000/experience/index.html" $labProcess $labErr
     Write-Host ""
     Write-Host "LISTO. Abre en Chrome:" -ForegroundColor Green
-    Write-Host "WebGL2:    http://127.0.0.1:3000/es" -ForegroundColor Yellow
-    Write-Host "Blender:   http://127.0.0.1:4174/" -ForegroundColor Yellow
-    Write-Host "Para cerrar ambos servidores: Stop-Process -Id $($webProcess.Id),$($labProcess.Id)" -ForegroundColor DarkGray
+    Write-Host "CANDIDATO FINAL: http://127.0.0.1:3000/es" -ForegroundColor Yellow
+    Write-Host "WEBGL2 ANTERIOR: http://127.0.0.1:3001/es" -ForegroundColor Gray
+    Write-Host "Para cerrar: Stop-Process -Id $($webProcess.Id),$($labProcess.Id)" -ForegroundColor DarkGray
     Write-Host "Sin modificar main, tus cambios locales o Vercel." -ForegroundColor DarkGray
 } catch {
     Write-Host ("ERROR: " + $_.Exception.Message) -ForegroundColor Red
