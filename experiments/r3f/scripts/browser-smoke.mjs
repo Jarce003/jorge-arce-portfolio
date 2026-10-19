@@ -1,129 +1,118 @@
-import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
-
 import { chromium } from "@playwright/test";
 
-const project = resolve(import.meta.dirname, "..");
-const screenshots = resolve(project, "test-artifacts");
-await mkdir(screenshots, { recursive: true });
-
-const address = "http://127.0.0.1:4174";
-const errors = [];
-const server = spawn(
-  process.execPath,
-  [resolve(project, "node_modules", "vite", "bin", "vite.js"),
-   "--host", "127.0.0.1", "--port", "4174", "--strictPort"],
-  { cwd: project, stdio: ["ignore", "pipe", "pipe"] },
-);
+const root=resolve(import.meta.dirname,"..");
+const screenshots=resolve(root,"test-artifacts");
+await mkdir(screenshots,{recursive:true});
+const url="http://127.0.0.1:4174";
+const errors=[];
+const server=spawn(process.execPath,[
+  resolve(root,"node_modules","vite","bin","vite.js"),
+  "--host","127.0.0.1","--port","4174","--strictPort",
+],{cwd:root,stdio:["ignore","pipe","pipe"]});
 let browser;
 
-function delay(ms) {
-  return new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
-}
-
-async function untilServer() {
-  for (let i = 0; i < 100; i++) {
-    if (server.exitCode !== null) throw new Error("Vite exited before readiness");
-    try {
-      const response = await fetch(address);
-      if (response.ok) return;
-    } catch { /* Wait for Vite startup. */ }
-    await delay(170);
+const delay=ms=>new Promise(resolveDelay=>setTimeout(resolveDelay,ms));
+async function waitForServer(){
+  for(let attempt=0;attempt<100;attempt++){
+    if(server.exitCode!==null)throw Error("Vite stopped early");
+    try{const r=await fetch(url);if(r.ok)return;}catch{/*starting*/}
+    await delay(160);
   }
-  throw new Error("Local Vite server never became ready");
+  throw Error("Vite did not start");
 }
-
-async function pageReady(page) {
-  await page.goto(address, { waitUntil: "networkidle", timeout: 35_000 });
+async function loadPage(page){
+  await page.goto(url,{waitUntil:"networkidle",timeout:45000});
   await page.getByText("JARCEDEV / LABORATORIO 3D").waitFor();
   await page.locator("canvas").waitFor();
-  await page.waitForFunction(() => {
-    const canvas = document.querySelector("canvas");
-    return !!canvas && canvas.width > 0 && canvas.height > 0;
+  await page.waitForFunction(()=>{
+    const el=document.querySelector("canvas");
+    return Boolean(el && el.width>0 && el.height>0);
   });
-  await page.waitForTimeout(1100);
+  await page.getByText("5 GLB listos").waitFor({timeout:18000});
+  await page.waitForTimeout(700);
 }
-
-try {
-  await untilServer();
-  browser = await chromium.launch({
-    headless: true,
-    args: [
-      "--enable-webgl",
-      "--use-gl=angle",
-      "--use-angle=swiftshader",
-      "--enable-unsafe-swiftshader",
-      "--disable-dev-shm-usage",
-    ],
+async function rescueStation(page,name,label){
+  // This is not an automatic rescue: select an approach point, then press
+  // the same Discover control used with touch/keyboard. The truck moves
+  // through the new four-project layout and all rescue states are tested.
+  await page.getByRole("button",{name:new RegExp(name),exact:false}).first().click();
+  const discover=page.getByRole("button",{name:/Descubrir/});
+  await discover.waitFor();
+  await page.waitForFunction(()=>{
+    const button=[...document.querySelectorAll("button")].find(
+      el=>el.textContent?.includes("Descubrir"),
+    );
+    return Boolean(button&&!button.disabled);
+  },{timeout:10000});
+  await discover.click();
+  await page.waitForTimeout(710);
+  await page.screenshot({path:resolve(screenshots,label+"-water.png")});
+  await page.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
+  await page.screenshot({path:resolve(screenshots,label+"-recovered.png")});
+  await page.getByRole("button",{name:"Cerrar proyecto"}).click();
+  console.log(name+": rescue and project panel OK");
+}
+try{
+  await waitForServer();
+  browser=await chromium.launch({
+    headless:true,
+    args:["--enable-webgl","--use-gl=angle","--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader","--disable-dev-shm-usage"],
   });
+  const desktop=await browser.newPage({viewport:{width:1366,height:768}});
+  desktop.on("pageerror",error=>errors.push("Desktop: "+error.message));
+  await loadPage(desktop);
+  await desktop.screenshot({path:resolve(screenshots,"all-four-day.png")});
+  const toggle=desktop.getByRole("button",{name:/Modelos GLB|Geometría básica/});
+  assert.equal(await toggle.isDisabled(),false);
+  assert.equal(await toggle.getAttribute("aria-pressed"),"true");
+  await toggle.click();
+  assert.equal(await toggle.getAttribute("aria-pressed"),"false");
+  await toggle.click();
+  assert.equal(await toggle.getAttribute("aria-pressed"),"true");
+  await desktop.getByRole("button",{name:/Vista aérea/}).click();
+  await desktop.waitForTimeout(400);
+  await desktop.screenshot({path:resolve(screenshots,"all-four-blender-overview.png")});
+  await desktop.getByRole("button",{name:/Día|Noche/}).click();
+  await desktop.waitForTimeout(330);
+  await desktop.screenshot({path:resolve(screenshots,"all-four-night.png")});
+  console.log("5 real GLB assets, camera and day/night switch OK");
 
-  const desktop = await browser.newPage({ viewport: { width: 1366, height: 768 } });
-  desktop.on("pageerror", (error) => errors.push("Desktop: " + error.message));
-  await pageReady(desktop);
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-day.png") });
-  console.log("Desktop startup and WebGL canvas: OK");
-
-  const modelButton = desktop.getByRole("button", { name: /Geometría básica|Modelos GLB/ });
-  await desktop.getByText("GLB disponibles").waitFor({ timeout: 12_000 });
-  assert.equal(await modelButton.isDisabled(), false, "Models should load from the generated GLBs");
-  await modelButton.click();
-  await desktop.waitForTimeout(1000);
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-blender-models.png") });
-  console.log("Exported Blender GLB loading and scene switch: OK");
-
-  await desktop.getByRole("button", { name: /Día|Noche/ }).click();
-  await desktop.waitForTimeout(450);
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-night.png") });
-  console.log("Day/night switch: OK");
-
-  // The truck starts 17 world units from the FireTrack building.
-  // Driving in a straight line for a few seconds should enter the
-  // 11.5-unit discovery range, without unrealistic teleportation.
-  const discoverButton = desktop.getByRole("button", { name: /Descubrir/ });
-  await desktop.keyboard.down("w");
-  let withinReach = false;
-  // Software Chromium may run at a fraction of real monitor FPS. Poll actual
-  // reach rather than assuming an equal distance after 2.8 wall-clock seconds.
-  for (let attempt = 0; attempt < 18; attempt++) {
-    await desktop.waitForTimeout(800);
-    if (await discoverButton.isEnabled()) {
-      withinReach = true;
-      break;
-    }
+  for(const [name,label] of [
+    ["FireTrack","firetrack"],["EvacuaPlan Studio","evacuaplan"],
+    ["Acreditaciones","acreditaciones"],["Hidrantes","hidrantes"],
+  ]){
+    await rescueStation(desktop,name,label);
   }
-  await desktop.keyboard.up("w");
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-approach.png") });
-  if (!withinReach) {
-    const displayedZ = await desktop.locator(".indicators").innerText();
-    throw new Error("Truck failed to enter discovery radius. HUD: " + displayedZ);
-  }
-  await discoverButton.click();
-  await desktop.waitForTimeout(750);
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-water-rescue.png") });
-  await desktop.getByText("ESTACIÓN RECUPERADA").waitFor({ timeout: 12_000 });
-  await desktop.screenshot({ path: resolve(screenshots, "desktop-recovered.png") });
-  console.log("Movement, water rescue, fire extinguish and project panel: OK");
+  await desktop.getByText("4/4").waitFor({timeout:5000});
+  console.log("Four stations discovered and counted correctly.");
 
-  const mobile = await browser.newPage({
-    viewport: { width: 390, height: 844 },
-    isMobile: true, deviceScaleFactor: 1, hasTouch: true,
+  const mobile=await browser.newPage({
+    viewport:{width:390,height:844},isMobile:true,
+    deviceScaleFactor:1,hasTouch:true,
   });
-  mobile.on("pageerror", (error) => errors.push("Mobile: " + error.message));
-  await pageReady(mobile);
-  await mobile.screenshot({ path: resolve(screenshots, "mobile-portrait.png") });
-  assert.equal(await mobile.getByRole("button", { name: "Acelerar" }).count(), 1);
-  assert.equal(await mobile.getByRole("button", { name: "Izquierda" }).count(), 1);
-  console.log("Mobile portrait UI and touch steering controls: OK");
+  mobile.on("pageerror",error=>errors.push("Mobile: "+error.message));
+  await loadPage(mobile);
+  await mobile.screenshot({path:resolve(screenshots,"mobile-portrait.png")});
+  assert.equal(await mobile.getByRole("button",{name:"Acelerar"}).count(),1);
+  assert.equal(await mobile.getByRole("button",{name:"Izquierda"}).count(),1);
+  assert.equal(await mobile.locator(".stations-dock button").count(),4);
+  const nav=mobile.getByRole("button",{name:/Acreditaciones/}).first();
+  await nav.click();
+  await mobile.getByRole("button",{name:/Descubrir/}).click();
+  await mobile.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
+  console.log("Portrait viewport, touch controls and mobile discovery OK.");
 
-  if (errors.length) throw new Error("Unexpected JavaScript errors:\n" + errors.join("\n"));
-  console.log("All R3F browser smoke checks passed.");
-  console.log("Screenshots: " + screenshots);
-} catch (error) {
-  console.error("R3F browser smoke test failed:", error);
-  process.exitCode = 1;
-} finally {
-  if (browser) await browser.close().catch(() => {});
+  if(errors.length)throw Error("JavaScript errors:\n"+errors.join("\n"));
+  console.log("All four-project R3F browser checks passed; screenshots: "+screenshots);
+}catch(error){
+  console.error("Browser smoke test failed",error);
+  process.exitCode=1;
+}finally{
+  if(browser)await browser.close().catch(()=>{});
   server.kill("SIGTERM");
 }
