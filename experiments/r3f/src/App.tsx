@@ -180,21 +180,18 @@ export function App(){
         <button type="button" onClick={()=>setDay(s=>!s)}
           aria-label={day?"Noche: activar modo nocturno":"Día: activar modo diurno"}
           title={day?"Activar modo noche":"Activar modo día"}>
-          <span aria-hidden="true">{day?"☾":"☀"}</span>
           <span className="tool-label">{day?"Noche":"Día"}</span>
         </button>
         <button type="button" onClick={()=>setOverview(s=>!s)}
           aria-label={overview?"Seguir camión":"Vista aérea"}
           title={overview?"Seguir camión":"Vista aérea"}>
-          <span aria-hidden="true">◈</span>
-          <span className="tool-label">{overview?"Seguir camión":"Vista aérea"}</span>
+          <span className="tool-label">{overview?"Seguir":"Cámara"}</span>
         </button>
         <button type="button" onClick={()=>setLights(s=>!s)}
           aria-pressed={lights}
           title="Controla los destellos luminosos del camión; no produce sonido."
           aria-label={lights?"Apagar luces de emergencia":"Encender luces de emergencia"}>
-          <span aria-hidden="true">✦</span>
-          <span className="tool-label">{lights?"Luces de emergencia":"Luces apagadas"}</span>
+          <span className="tool-label">{lights?"Luces encendidas":"Luces apagadas"}</span>
         </button>
       </section>
       <nav className="stations-dock" aria-label="Proyectos disponibles">
@@ -217,10 +214,9 @@ export function App(){
         })}
       </nav>
       <section className="overview" aria-label="Introducción y recorrido">
-        <span className="eyebrow">PORTAFOLIO INTERACTIVO</span>
-        <h1>Conduce y descubre mis proyectos.</h1>
-        <p>Selecciona uno de los cuatro edificios a la derecha o conduce hasta él.
-          Pulsa «Descubrir» para apagar el incendio y conocer el proyecto.</p>
+        <span className="eyebrow">JARCEDEV · MUNDO 3D</span>
+        <h1>Recorre mis proyectos.</h1>
+        <p>Conduce hasta una estación y descubre lo que hay detrás de cada aplicación.</p>
         <div className="journey-status" role="status">
           <span>Proyectos descubiertos</span>
           <strong>{rescued.size}/4</strong>
@@ -228,7 +224,7 @@ export function App(){
         <div className="journey-track" aria-label={rescued.size+" de 4 proyectos descubiertos"}>
           <span style={{width:(rescued.size/stations.length*100)+"%"}}/>
         </div>
-        <p className="key-hint">WASD: conducir · E: apagar fuego · C: cámara · N: día/noche</p>
+        <p className="key-hint">WASD o flechas para conducir · E para descubrir</p>
       </section>
       <div className="mobile-progress" role="status" aria-label={"Proyectos descubiertos: "+rescued.size+" de 4"}>
         <span>Rescates</span> <strong>{rescued.size}/4</strong>
@@ -282,14 +278,14 @@ export function App(){
             <span aria-hidden="true">{busy?"💧":nearby?"🔥":"🚒"}</span>
             <div className="rescue-text">
               <strong>{busy?"Extinguiendo el incendio…":nearbyProject?
-                nearbyProject.title:"Elige una estación y comienza"}</strong>
-              <small>{busy?"La ficha del proyecto se abrirá al completar el rescate.":
+                nearbyProject.title:"Acércate a una estación"}</strong>
+              <small>{busy?"Al terminar conocerás el proyecto.":
                 nearby?(rescued.has(nearby)?"Este proyecto ya fue descubierto. Abre su ficha.":
-                "Pulsa Descubrir para apagar el fuego y abrir su ficha."):"Selecciona una estación a la derecha o conduce hasta ella."}</small>
+                "Apaga el fuego para conocer el proyecto."):"Conduce hasta un edificio para conocerlo."}</small>
             </div>
             <button type="button" className="discover"
               onClick={discover} disabled={!nearby||busy}>
-              {nearby&&rescued.has(nearby)?"Ver proyecto":"💧 Descubrir"}
+              {nearby&&rescued.has(nearby)?"Ver proyecto":"Descubrir"}
             </button>
           </div>
         )}
@@ -333,8 +329,15 @@ export function App(){
         initialProject={focusedProject} onBack={()=>setPortfolioOpen(false)}/>}
       <section className="drive-controls" aria-label="Conducción táctil">
         <div className="steering">
-          {driveButton("left","Izquierda","↶")}
-          {driveButton("right","Derecha","↷")}
+          <div className="steering-wheel-art" aria-hidden="true">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="41" stroke="currentColor" strokeWidth="7"/>
+              <circle cx="50" cy="50" r="10" fill="currentColor"/>
+              <path d="M10 45h29l11 13 11-13h29M50 58v31" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
+            </svg>
+          </div>
+          {driveButton("left","Izquierda","←")}
+          {driveButton("right","Derecha","→")}
         </div>
         <div className="pedals">
           {driveButton("reverse","Retroceder","↓")}
