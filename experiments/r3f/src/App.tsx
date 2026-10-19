@@ -170,6 +170,7 @@ export function App(){
   const nearbyProject=nearby?projects.find(project=>project.station.id===nearby):null;
   const modelMode=assetStatus==="ready";
   const allRescued=rescued.size===stations.length;
+  const progressReadable=t.progressLabel+": "+rescued.size+(lang==="es"?" de ":" of ")+stations.length;
   const showReward=allRescued&&!rewardDismissed;
   return (
     <main className="pilot portfolio-world" data-assets={assetStatus}
@@ -231,8 +232,8 @@ export function App(){
       <button type="button" className={"rescue-progress "+(allRescued?"is-complete":"")}
         onClick={()=>{if(allRescued)setRewardDismissed(false);}}
         disabled={!allRescued} aria-label={allRescued
-          ?t.progressLabel+": "+rescued.size+" / "+stations.length+". "+t.rewardAction
-          :t.progressLabel+": "+rescued.size+" / "+stations.length}
+          ?progressReadable+". "+t.rewardAction
+          :progressReadable}
         title={allRescued?t.rewardAction:t.progressLabel}>
         {allRescued && <WorldIcon name="reset" size={15}/>}
         <span>{allRescued?t.reward:t.progress}</span>
