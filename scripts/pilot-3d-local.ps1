@@ -74,6 +74,9 @@ try {
       $entries = @(
         "public/models/jarcedev/v1/ladder-truck.glb",
         "public/models/jarcedev/v1/firetrack-station.glb",
+        "public/models/jarcedev/v1/evacuaplan-station.glb",
+        "public/models/jarcedev/v1/acreditaciones-station.glb",
+        "public/models/jarcedev/v1/hidrantes-station.glb",
         "tools/blender/output/jarcedev-assets.blend"
       )
       foreach ($entryName in $entries) {
@@ -113,14 +116,20 @@ try {
     Write-Host "Se omite Blender por solicitud." -ForegroundColor DarkGray
   }
 
-  $truckGLB = Join-Path $models "ladder-truck.glb"
-  $stationGLB = Join-Path $models "firetrack-station.glb"
-  if ((Test-Path -LiteralPath $truckGLB) -and (Test-Path -LiteralPath $stationGLB)) {
-    Checked "Validar tamano, materiales y estructura animable de los dos GLB" {
-      & node (Join-Path $root "tools\blender\verify_glb.mjs") $truckGLB $stationGLB
+  $assetPaths = @(
+    "ladder-truck.glb", "firetrack-station.glb",
+    "evacuaplan-station.glb", "acreditaciones-station.glb",
+    "hidrantes-station.glb"
+  ) | ForEach-Object { Join-Path $models $_ }
+  $missing = @($assetPaths | Where-Object { -not (Test-Path -LiteralPath $_) })
+  if ($missing.Count -eq 0) {
+    Checked "Validar cinco modelos Blender y presupuesto movil" {
+      & node (Join-Path $root "tools\blender\verify_glb.mjs") $assetPaths
     }
+  } elseif ($ModelZip) {
+    throw "El ZIP de Blender no incluye los cinco modelos. Descarga el paquete actualizado."
   } else {
-    Write-Host "No hay dos GLB todavia. Se utilizaran los modelos geometricos del laboratorio." -ForegroundColor Yellow
+    Write-Warning "Faltan modelos GLB: se iniciara en geometria basica. Requiere un ZIP actualizado de 5 GLB."
   }
 
   Set-Location -LiteralPath $experiment
