@@ -134,22 +134,22 @@ export function WaterSpray({
  */
 const BEACONS = [
   // Two cab roof groups and front grille warning lights.
-  {at:[-.78,2.95,-2.34], size:[.40,.20,.28], phase:0, light:true},
-  {at:[ .78,2.95,-2.34], size:[.40,.20,.28], phase:1, light:true},
+  {at:[-.43,2.65,-2.16], size:[.35,.18,.23], phase:0, light:true},
+  {at:[ .43,2.65,-2.16], size:[.35,.18,.23], phase:1, light:true},
   {at:[-.69,1.13,-3.02], size:[.36,.23,.10], phase:0, light:false},
   {at:[ .69,1.13,-3.02], size:[.36,.23,.10], phase:1, light:false},
-  // Both sides: cab, middle service body and rear equipment bays.
-  {at:[-1.24,1.79,-1.86], size:[.10,.28,.43], phase:0, light:true},
-  {at:[ 1.24,1.79,-1.86], size:[.10,.28,.43], phase:1, light:true},
-  {at:[-1.24,1.72,.62], size:[.10,.27,.41], phase:1, light:false},
-  {at:[ 1.24,1.72,.62], size:[.10,.27,.41], phase:0, light:false},
-  {at:[-1.24,1.74,2.14], size:[.10,.28,.44], phase:0, light:true},
-  {at:[ 1.24,1.74,2.14], size:[.10,.28,.44], phase:1, light:true},
+  // Lower body-mounted side lights, clear of cab windows; no floating lenses.
+  {at:[-1.23,1.16,-1.72], size:[.11,.18,.31], phase:0, light:false},
+  {at:[ 1.23,1.16,-1.72], size:[.11,.18,.31], phase:1, light:false},
+  {at:[-1.23,1.13,.62], size:[.10,.19,.36], phase:1, light:true},
+  {at:[ 1.23,1.13,.62], size:[.10,.19,.36], phase:0, light:true},
+  {at:[-1.23,1.13,2.14], size:[.10,.19,.38], phase:0, light:false},
+  {at:[ 1.23,1.13,2.14], size:[.10,.19,.38], phase:1, light:false},
   // Tail lamps and elevated rear ladder warning markers.
-  {at:[-.82,1.20,3.01], size:[.33,.23,.10], phase:1, light:false},
-  {at:[ .82,1.20,3.01], size:[.33,.23,.10], phase:0, light:false},
-  {at:[-.61,2.48,2.47], size:[.19,.19,.25], phase:1, light:true},
-  {at:[ .61,2.48,2.47], size:[.19,.19,.25], phase:0, light:true},
+  {at:[-.82,1.13,2.81], size:[.30,.19,.10], phase:1, light:false},
+  {at:[ .82,1.13,2.81], size:[.30,.19,.10], phase:0, light:false},
+  {at:[-.61,2.53,2.47], size:[.19,.17,.23], phase:1, light:true},
+  {at:[ .61,2.53,2.47], size:[.19,.17,.23], phase:0, light:true},
 ] as const;
 
 export function RedEmergencyLights({
