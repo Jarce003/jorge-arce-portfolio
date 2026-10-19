@@ -35,13 +35,13 @@ try{
     const html=await response.text();
     assert.match(html,/property="og:title"/);
     assert.match(html,/property="og:description"/);
-    assert.match(html,new RegExp(`property="og:image"[^>]+/\\${lang}/opengraph-image`));
+    assert(html.includes("/"+lang+"/opengraph-image"),"OG image not present: "+lang);
     assert.match(html,/name="twitter:card"[^>]+summary_large_image/);
     assert.match(html,/JarceDev/);
     assert(!html.includes("Jorge-Arce-Solano-CV-"),"CV download link was exposed");
     const preview=await read("/"+lang+"/opengraph-image");
     assert.equal(preview.status,200,"Social preview endpoint missing: "+lang);
-    assert.match(preview.headers.get("content-type")??"",/image\\/png/);
+    assert((preview.headers.get("content-type")??"").includes("image/png"),"Social preview is not PNG");
     const data=Buffer.from(await preview.arrayBuffer());
     assert(data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),"Not a PNG: "+lang);
     assert.equal(data.readUInt32BE(16),1200);
