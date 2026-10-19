@@ -4,7 +4,8 @@ import * as THREE from "three";
  * Purpose-built street lighting for the four-way playable town.
  * Posts stay outside the drivable lanes; their heads project warm light
  * toward the asphalt and their transparent discs suggest road reflections.
- * Eight unshadowed local lights avoid a large night-time GPU cost.
+ * Four unshadowed local lights illuminate eight visible lamp fixtures,
+ * retaining the road glow without overloading low-end laptop GPUs.
  */
 const LAMPS = [
   [-4.8, -30, "vertical"], [4.8, -18, "vertical"],
@@ -46,8 +47,10 @@ export function StreetLights({ day }: { day: boolean }) {
             </mesh>
             {!day && (
               <>
-                <pointLight position={[lampX,4.65,lampZ]}
-                  color="#ffe0ac" intensity={16} distance={14} decay={2}/>
+                {index%2===0 && (
+                  <pointLight position={[lampX,4.65,lampZ]}
+                    color="#ffe0ac" intensity={17} distance={16} decay={2}/>
+                )}
                 <mesh position={[lampX,4.75,lampZ]}>
                   <sphereGeometry args={[.35,12,8]}/>
                   <meshBasicMaterial color="#ffddac" transparent opacity={.20}
