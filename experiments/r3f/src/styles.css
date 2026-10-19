@@ -14,7 +14,7 @@ button,a{font-family:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.56}
 button:focus-visible,a:focus-visible{outline:3px solid #b9a7ff;outline-offset:3px}
-.portfolio-world{position:relative;width:100vw;height:100svh;min-height:460px;overflow:hidden;isolation:isolate}
+.portfolio-world{position:relative;width:100%;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;isolation:isolate}
 .viewport{position:absolute;inset:0;z-index:0}
 .viewport canvas{display:block;touch-action:none}
 .topbar,.tools,.overview,.interaction,.drive-controls,.stations-dock{position:absolute;z-index:5}
@@ -551,4 +551,196 @@ button.identity{border:0;background:none;padding:0;cursor:pointer;text-align:lef
   .topbar{padding-inline:8px}
   .header-actions{gap:3px}
   .go-back{font-size:10px;padding:7px 6px}
+}
+
+/* Responsive world: a horizontal PHONE is not a tablet or desktop.
+   Never force 460px minimum height inside a ~375px phone viewport. */
+html,body,#root{height:100%;min-height:0;max-height:100%;overflow:hidden}
+.portfolio-world,.viewport{min-width:0;min-height:0}
+.viewport canvas{width:100%;height:100%;max-width:100%;max-height:100%;display:block}
+
+/* Landscape PHONE: prioritize the 3D scene, not a letterboxed desktop canvas.
+   Matches small physical height even when the phone reports >600 CSS px wide. */
+@media (orientation:landscape) and (max-height:550px) and (max-width:1050px){
+  html,body,#root{width:100%;height:100%;overflow:hidden}
+  .portfolio-world{width:100%;height:100dvh;max-height:100dvh;min-height:0}
+  .topbar{
+    top:0;left:0;right:0;min-height:44px;max-height:48px;
+    padding:5px max(11px,env(safe-area-inset-right)) 5px max(11px,env(safe-area-inset-left));
+    gap:6px;align-items:center;
+  }
+  .identity strong{font-size:13px;letter-spacing:.105em}
+  .identity small{display:none}
+  .header-actions{gap:5px}
+  .world-language-switch{padding:2px}
+  .world-language-switch button{min-height:25px;min-width:26px;padding:4px 7px;font-size:9px}
+  .go-back{min-height:30px;padding:5px 9px;font-size:10px;gap:5px}
+  .go-back svg{width:14px;height:14px}
+  .reset-button{min-height:30px;width:32px;padding:5px;justify-content:center}
+  .reset-button>span{display:none}
+  .tools{
+    left:auto;right:max(11px,env(safe-area-inset-right));top:49px;
+    width:auto;max-width:none;gap:6px;justify-content:flex-end;
+  }
+  .tools button{
+    display:grid;place-items:center;
+    width:32px;height:32px;min-width:32px;min-height:32px;
+    padding:0;border-radius:10px;
+  }
+  .tools button svg{width:17px;height:17px}
+  .rescue-progress{
+    top:91px;right:max(11px,env(safe-area-inset-right));
+    padding:5px 10px;gap:7px;font-size:10px;
+  }
+  .rescue-progress strong{font-size:13px}
+  .drive-controls{
+    left:max(10px,env(safe-area-inset-left));
+    right:max(10px,env(safe-area-inset-right));
+    bottom:max(6px,env(safe-area-inset-bottom));align-items:flex-end;
+  }
+  .steering{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:126px;height:75px;gap:0;border-radius:42px;
+    background:#0b1c33d9;border:1px solid #a5b5d16c;
+    backdrop-filter:blur(8px);box-shadow:0 6px 18px #03081766;
+    overflow:hidden;
+  }
+  .steering-wheel-art{
+    position:absolute;inset:7px 27px;display:grid;place-items:center;
+    pointer-events:none;color:#bfd3e4;opacity:.92;
+  }
+  .steering-wheel-art svg{width:59px;height:59px}
+  .steering .drive-button{
+    z-index:1;flex:1;width:50%;height:100%;min-height:0;border:0;
+    border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;
+    padding:0;
+  }
+  .steering .drive-button>span{font-size:15px;line-height:1}
+  .steering .drive-button small{display:none}
+  .steering .drive-left{align-items:flex-start;padding-left:7px}
+  .steering .drive-right{align-items:flex-end;padding-right:7px}
+  .steering .drive-button:active{background:#a996ee33}
+  .pedals{gap:7px}
+  .pedals .drive-button{
+    width:55px;min-height:65px;height:65px;padding:5px 3px;
+    border-radius:12px;
+  }
+  .pedals .drive-button>span{font-size:24px}
+  .pedals .drive-button small{font-size:8px;margin-top:1px}
+  .drive-hint{
+    left:50%;bottom:80px;max-width:calc(100vw - 150px);
+    padding:4px 7px 4px 12px;font-size:10px;
+  }
+  .interaction:has(.rescue-card){
+    bottom:80px;max-width:min(520px,calc(100vw - 35px));
+  }
+  .interaction .rescue-card{padding:7px 10px}
+  .interaction:has(.project-info),.interaction:has(.ai-demo-panel){
+    bottom:80px;width:min(620px,calc(100vw - 32px));max-width:calc(100vw - 32px);
+  }
+  .project-info,.interaction:has(.ai-demo-panel) .project-info{
+    max-height:calc(100dvh - 135px);overflow-y:auto;
+    padding:10px 13px;border-radius:14px;
+  }
+  .project-info .project-heading{margin-top:4px}
+  .project-info .project-heading img{width:76px;height:58px}
+  .project-info .project-heading h2{font-size:16px}
+  .project-story{gap:8px;margin-top:8px}
+  .technology-tags{margin-top:7px}
+  .actions{margin-top:9px;gap:6px}
+  .actions button,.actions a{min-height:32px;padding:6px 9px;font-size:10px}
+  .reward-backdrop{inset:0;padding:5px max(8px,env(safe-area-inset-right)) 5px max(8px,env(safe-area-inset-left))}
+  .reward-backdrop .rescue-reward{
+    width:min(540px,100%);max-height:calc(100dvh - 10px);
+    padding:10px 14px;overflow-y:auto;
+  }
+  .rescue-reward .reward-medal,.rescue-reward .reward-projects{display:none}
+  .rescue-reward h2{font-size:20px;margin:4px 0}
+  .rescue-reward>p:not(.eyebrow){font-size:11px;line-height:1.3}
+  .reward-total{margin:6px auto}
+  .reward-actions{margin-top:8px}
+  .reward-actions button{min-height:32px;padding:5px}
+}
+
+/* Portrait TABLET (e.g. iPad 768-1024px): roomier touch layout and camera. */
+@media (min-width:601px) and (max-width:1100px) and (orientation:portrait){
+  .portfolio-world{height:100dvh;min-height:0}
+  .topbar{padding:12px 19px;min-height:64px}
+  .identity strong{font-size:16px}
+  .header-actions{gap:8px}
+  .tools{top:76px;left:auto;right:18px;justify-content:flex-end}
+  .tools button{width:43px;height:43px;min-width:43px;min-height:43px}
+  .rescue-progress{top:138px;right:18px}
+  .drive-controls{
+    bottom:max(16px,env(safe-area-inset-bottom));
+    left:18px;right:18px;
+  }
+  .steering{
+    position:relative;width:144px;height:102px;gap:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:54px;background:#0b1c33db;
+    border:1px solid #a5b5d16c;overflow:hidden;
+  }
+  .steering-wheel-art{
+    position:absolute;inset:9px 28px;display:grid;place-items:center;
+    pointer-events:none;color:#bfd3e4;
+  }
+  .steering-wheel-art svg{width:84px;height:84px}
+  .steering .drive-button{
+    z-index:1;width:50%;height:100%;min-height:0;
+    border:0;border-radius:0;background:transparent;box-shadow:none;
+    padding:0;
+  }
+  .steering .drive-button>span{font-size:18px}
+  .steering .drive-button small{display:none}
+  .pedals{gap:9px}
+  .pedals .drive-button{width:74px;min-height:89px;padding:7px}
+  .pedals .drive-button small{font-size:11px}
+  .drive-hint{bottom:129px}
+  .interaction:has(.rescue-card){bottom:131px}
+  .interaction:has(.project-info){bottom:141px;width:min(600px,calc(100vw - 36px))}
+  .project-info{max-height:calc(100dvh - 220px)}
+}
+
+/* Landscape TABLET: full-bleed map and distinct, touch-friendly controls.
+   Compact compared with desktop; never inherit the phone-short-height sizing. */
+@media (orientation:landscape) and (min-width:701px) and (max-width:1399px) and (min-height:551px){
+  .portfolio-world{width:100%;height:100dvh;min-height:0}
+  .topbar{padding:10px 20px;min-height:59px}
+  .identity strong{font-size:15px}
+  .tools{top:71px;right:18px;gap:7px}
+  .tools button{width:41px;min-width:41px;height:41px;min-height:41px}
+  .rescue-progress{top:125px;right:18px}
+  .drive-controls{
+    bottom:max(12px,env(safe-area-inset-bottom));left:17px;right:17px
+  }
+  .steering{
+    position:relative;width:140px;height:90px;gap:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50px;border:1px solid #a5b5d16c;
+    background:#0b1c33db;overflow:hidden;
+  }
+  .steering-wheel-art{
+    position:absolute;inset:8px 30px;display:grid;place-items:center;
+    pointer-events:none;color:#bfd3e4;
+  }
+  .steering-wheel-art svg{width:75px;height:75px}
+  .steering .drive-button{
+    z-index:1;width:50%;height:100%;min-height:0;
+    padding:0;border:0;background:transparent;border-radius:0;box-shadow:none;
+  }
+  .steering .drive-button>span{font-size:17px}
+  .steering .drive-button small{display:none}
+  .pedals .drive-button{width:68px;min-height:79px;padding:6px}
+  .drive-hint{bottom:112px}
+  .interaction:has(.rescue-card){bottom:113px}
+  .interaction:has(.project-info){bottom:125px}
+  .project-info{max-height:calc(100dvh - 190px)}
+}
+
+/* Reduce iPhone notch/home-bar collisions when landscape safe areas exist. */
+@supports(padding:max(0px,env(safe-area-inset-left))){
+  @media (orientation:landscape) and (max-height:550px) and (max-width:1050px){
+    .portfolio-browser{padding-inline:max(0px,env(safe-area-inset-left)) max(0px,env(safe-area-inset-right))}
+  }
 }
