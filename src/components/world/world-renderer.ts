@@ -623,9 +623,14 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
     );
     if (strength <= 0.005) return;
 
-    const locations = lowDetail
-      ? [[-2.15, 1.55], [2.15, -1.80]]
-      : [[-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]];
+    // FireTrack has one taller central plume, visible from the approach road;
+    // all other buildings retain the compact fire layout already approved.
+    const fireTrack = station.structure === "operations";
+    const locations = fireTrack
+      ? (lowDetail ? [[0, -1.25], [2.10, 1.45]]
+        : [[0, -1.25], [-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]])
+      : (lowDetail ? [[-2.15, 1.55], [2.15, -1.80]]
+        : [[-2.15, 1.55], [2.15, -1.80], [-2.35, -1.65], [2.25, 1.65]]);
 
     for (let index = 0; index < locations.length; index++) {
       const [offsetX, offsetZ] = locations[index];
@@ -634,13 +639,16 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
       const motion = reducedMotion
         ? 1
         : 0.86 + Math.sin(elapsed * 4.1 + index * 1.53 + station.x) * 0.14;
-      const height = (1.65 + (index % 2) * .48) * motion * strength;
-      const baseHeight = index % 2 ? 4.05 : 3.36;
+      const heroPlume = fireTrack && index === 0;
+      const height = (heroPlume ? 3.25 : 1.65 + (index % 2) * .48) * motion * strength;
+      const baseHeight = heroPlume ? 4.48 : index % 2 ? 4.05 : 3.36;
       const y = baseHeight + height * .30;
       const sway = reducedMotion ? 0 : Math.sin(elapsed * 5.0 + index * 1.91) * .14;
       // Several irregular moving flame tongues give a softer silhouette
       // than a single geometrically perfect triangular flame.
-      draw("cone", x + sway, y, z, .88 * strength, height, .88 * strength,
+      draw("cone", x + sway, y, z,
+        (heroPlume ? 1.28 : .88) * strength, height,
+        (heroPlume ? 1.28 : .88) * strength,
         "#ef6532", 0, 0, .7);
       draw("cone", x - .15 - sway * .7, y - .22, z + .20,
         .52 * strength, height * .73, .52 * strength, "#ffb24e", 0, 0, .85);
@@ -669,13 +677,15 @@ export function createWorldRenderer(canvas: HTMLCanvasElement): WorldRenderer {
         0, 0, 1, (daylightTarget > .5 ? .11 : .23) * strength);
 
       if (!lowDetail) {
-        // A few low-opacity smoke puffs give the scene visual depth without
-        // particle engines, texture downloads or extra packages.
+        // Sparse layered smoke and warm embers, no textures or post-processing.
+        // Fade to a pale steam plume when a fire is being extinguished.
         const rise = reducedMotion ? .65 : (elapsed * .72 + index * .31) % 1.3;
+        const cooling = extinguished && strength < .9;
         draw("cone", x + .16, baseHeight + 1.5 + rise,
           z + .04, (1.05 + rise * .35) * strength, .48 * strength,
-          (1.05 + rise * .35) * strength, "#9da5b6",
-          0, 0, 0, .075 * strength);
+          (1.05 + rise * .35) * strength,
+          cooling ? "#c1d8db" : "#889ba8",
+          0, 0, 0, (cooling ? .12 : .075) * strength);
       }
     }
   }
