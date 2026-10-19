@@ -50,3 +50,14 @@ test("WebGL renderer reuses matrices and updates environment once per frame", ()
   const uniforms = renderer.match(/gl\.uniform1f\(daylightUniform, daylight\);/g) ?? [];
   assert.equal(uniforms.length, 1);
 });
+
+// The original approved 3D world uses R3F for Spanish and English. Both
+// locales must share the same west-road spawn and the reset action.
+test("Bilingual R3F starts at west road, facing the stations, and resets there",()=>{
+  const physics=readFileSync(resolve("experiments/r3f/src/physics.ts"),"utf8");
+  const app=readFileSync(resolve("experiments/r3f/src/App.tsx"),"utf8");
+  assert.match(physics,/initialPose\s*=.*x:\s*-22,\s*z:\s*0,\s*heading:\s*-Math\.PI\/2/);
+  assert.match(app,/useRef<TruckPose>\(initialPose\(\)\)/);
+  assert.match(app,/Object\.assign\(truck\.current,initialPose\(\)\)/);
+  assert.match(app,/getProjects\(lang\)/);
+});
