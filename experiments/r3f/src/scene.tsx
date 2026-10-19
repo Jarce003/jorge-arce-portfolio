@@ -23,13 +23,14 @@ export type SceneProps = {
   truck:MutableRefObject<TruckPose>;
   rescue:MutableRefObject<Rescue|null>;
   onNearby:(stationId:StationId|null)=>void;
+  onStationSelect:(stationId:StationId)=>void;
   onRescueComplete:(stationId:StationId)=>void;
   onMetrics:(fps:number,calls:number)=>void;
 };
 
 export function WorldScene({
   day,overview,modelMode,lights,reducedMotion,rescued,controls,truck,rescue,
-  onNearby,onRescueComplete,onMetrics,
+  onNearby,onRescueComplete,onMetrics,onStationSelect,
 }: SceneProps) {
   const truckGroup=useRef<THREE.Group>(null);
   const cameraDesired=useMemo(()=>new THREE.Vector3(),[]);
@@ -145,6 +146,15 @@ export function WorldScene({
         <ThemedStations modelMode={modelMode}/>
       </Suspense>
       <StreetLights day={day}/>
+      {/* Select buildings directly; no separate project navigation cards. */}
+      {stations.map(station=>(
+        <mesh key={station.id+"-pick"} position={[station.x,2.2,station.z]}
+          onClick={event=>{event.stopPropagation();onStationSelect(station.id);}}>
+          <boxGeometry args={[8,4.4,6.2]}/>
+          <meshBasicMaterial transparent opacity={0} depthWrite={false}
+            colorWrite={false} side={THREE.DoubleSide}/>
+        </mesh>
+      ))}
       {/* Street furniture and landscaped lots add depth at driving-camera distance. */}
       {stations.map((station) => (
         <group key={station.id + "-streetscape"} position={[station.x, 0, station.z]}>
