@@ -20,6 +20,7 @@ from pathlib import Path
 import sys
 
 import bpy
+from mathutils import Matrix
 
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_MODELS = REPO / "public" / "models" / "jarcedev" / "v1"
@@ -61,6 +62,34 @@ def material(name: str, color: str, metallic: float = 0.0, roughness: float = .6
     bsdf.inputs["Base Color"].default_value = (*rgb(color), 1)
     bsdf.inputs["Metallic"].default_value = metallic
     bsdf.inputs["Roughness"].default_value = roughness
+
+    # Compact baked-looking PBR base-color images. Unlike procedural shader
+    # noise, these actually survive glTF export and are embedded in each GLB.
+    textured = {"red", "red_bright", "concrete", "glass", "navy",
+                "silver", "sky", "violet", "rubber"}
+    key = name.removeprefix("JD_")
+    if key in textured:
+        size = 64
+        pixels = []
+        base = rgb(color)
+        for y in range(size):
+            for x in range(size):
+                grain = ((x * 13 + y * 7 + (x*y) % 17) % 7 - 3) / 220.0
+                panel = .025 if key in {"concrete", "navy", "sky"} and y % 19 == 0 else 0.0
+                metal_line = .035 if key == "silver" and x % 24 < 2 else 0.0
+                window_line = .035 if key == "glass" and y % 25 == 0 else 0.0
+                factor = max(.72, min(1.13, 1.0 + grain - panel + metal_line + window_line))
+                pixels.extend((min(1, base[0]*factor),
+                               min(1, base[1]*factor),
+                               min(1, base[2]*factor), 1.0))
+        image = bpy.data.images.new(name + "_Albedo", width=size, height=size, alpha=True)
+        image.pixels.foreach_set(pixels)
+        image.file_format = "PNG"
+        image.pack()
+        image_node = mat.node_tree.nodes.new("ShaderNodeTexImage")
+        image_node.name = name + "_EmbeddedAlbedo"
+        image_node.image = image
+        mat.node_tree.links.new(image_node.outputs["Color"], bsdf.inputs["Base Color"])
     return mat
 
 
@@ -124,6 +153,32 @@ def cylinder(name: str, location, radius, depth, mat, target, parent=None,
     ob.data.materials.append(mat)
     if parent is not None:
         mesh_parent(ob, parent)
+    return ob
+
+
+def facade_label(name, value, location, size, mat, target, parent):
+    """Physically modeled project names: readable from the public-road side."""
+    curve = bpy.data.curves.new(name + "_Letters", "FONT")
+    curve.body = value
+    curve.size = size
+    curve.align_x = "CENTER"
+    curve.align_y = "CENTER"
+    curve.extrude = .004
+    curve.bevel_depth = .001
+    ob = bpy.data.objects.new(name, curve)
+    target.objects.link(ob)
+    ob.location = location
+    # X reads left-to-right to a camera outside the positive-Y facade;
+    # local glyph up points toward world +Z and front normal toward +Y.
+    ob.rotation_euler = Matrix(((-1, 0, 0), (0, 0, 1), (0, 1, 0))).to_euler()
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.convert(target="MESH")
+    ob = bpy.context.view_layer.objects.active
+    ob.name = name
+    ob.data.materials.append(mat)
+    mesh_parent(ob, parent)
     return ob
 
 
@@ -314,6 +369,9 @@ def firetrack(mats):
     cylinder("TelemetryDisc", (3.5, -2.0, 7.45),
              .43, .12, mats["cyan"], target, root, vertices=12)
 
+    facade_label("FireTrackFacadeName", "FIRETRACK", (0, 2.37, 5.13), .41,
+                 dark, target, root)
+
     # Practical forecourt painted markings around equipment access.
     for index in range(5):
         b(f"ApronLine_{index}", (-3.8+index*1.9, 3.7, .018),
@@ -379,6 +437,8 @@ def evacuaplan(mats):
     for index in range(4):
         b(f"ForecourtEscapeArrow_{index}", (-2.1 + index * 1.3, 3.84, .02),
           (.73, .29, .05), mint)
+    facade_label("EvacuaPlanFacadeName", "EVACUAPLAN", (0, 1.38, 3.52), .53,
+                 navy, target, root)
     print("Built EvacuaPlan design station:", len(target.objects), "objects")
     return target, root
 
@@ -444,6 +504,8 @@ def acreditaciones(mats):
     for x in (-1.5, 1.5):
         b(f"AcademyEntrancePost_{x}", (x, 3.08, 1.59),
           (.19, .18, 3.12), light)
+    facade_label("AcademyFacadeName", "ACREDITACIONES", (0, 2.49, 3.48), .39,
+                 navy, target, root)
     print("Built Acreditaciones AI station:", len(target.objects), "objects")
     return target, root
 
@@ -523,6 +585,8 @@ def hidrantes(mats):
     for index in range(4):
         b(f"NetworkFlowIndicator_{index}", (-3.0+index*1.65, 1.31, .06),
           (.91, .14, .085), mats["cyan"])
+    facade_label("HidrantesFacadeName", "HIDRANTES", (0, 2.07, 2.11), .51,
+                 white, target, root)
     print("Built Hidrantes map station:", len(target.objects), "objects")
     return target, root
 
