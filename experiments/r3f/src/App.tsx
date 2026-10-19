@@ -178,7 +178,7 @@ export function App(){
       </header>
       <section className="tools" aria-label="Preferencias de exploración">
         <button type="button" onClick={()=>setDay(s=>!s)}
-          aria-label={day?"Activar modo noche":"Activar modo día"}
+          aria-label={day?"Noche: activar modo nocturno":"Día: activar modo diurno"}
           title={day?"Activar modo noche":"Activar modo día"}>
           <span aria-hidden="true">{day?"☾":"☀"}</span>
           <span className="tool-label">{day?"Noche":"Día"}</span>
