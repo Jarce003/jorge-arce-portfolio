@@ -118,7 +118,9 @@ try{
   assert.equal(await desktop.getByText(/FPS aproximados|draw calls|Laboratorio 3D/).count(),0);
   assert.equal(await desktop.locator(".stations-dock button").count(),4);
   assert.equal(await desktop.locator(".overview").isVisible(),false);
-  assert.equal(await desktop.locator(".stations-dock").isVisible(),false);
+  const dockSize=await desktop.locator(".stations-dock").boundingBox();
+  assert(dockSize && dockSize.width<=2 && dockSize.height<=2,
+    "The station navigation must be visually hidden without losing keyboard access");
   // The small help toast is allowed to expire while SwiftShader captures.
   assert.equal(await desktop.locator(".drive-hint").count()<=1,true);
   assert.equal(await desktop.getByRole("button",{name:/Rescates completados: 0 de 4/}).count(),1);
@@ -196,7 +198,9 @@ try{
   assert.equal(await mobile.getByRole("button",{name:"Acelerar"}).count(),1);
   assert.equal(await mobile.getByRole("button",{name:"Izquierda"}).count(),1);
   // Phone: same clean HUD, no sidebar and no blocking welcome card.
-  assert.equal(await mobile.locator(".stations-dock").isVisible(),false);
+  const mobileDock=await mobile.locator(".stations-dock").boundingBox();
+  assert(mobileDock && mobileDock.width<=2 && mobileDock.height<=2,
+    "Mobile project dock must not cover the 3D world");
   assert.equal(await mobile.locator(".overview").isVisible(),false);
   assert.equal(await mobile.locator(".steering-wheel-art").isVisible(),true);
   await mobile.getByRole("button",{name:/Rescates completados: 0 de 4/}).waitFor();
