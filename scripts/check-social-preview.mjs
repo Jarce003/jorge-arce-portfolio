@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 
+// The site owner provided the original world image (1731 x 909 PNG).
+const imagePath="/og/Portafolio%20interactivo%20de%20rescate.png";
+
 const root=process.cwd();
 const port=3187;
 const origin=`http://127.0.0.1:${port}`;
@@ -35,26 +38,27 @@ try{
     const html=await response.text();
     assert.match(html,/property="og:title"/);
     assert.match(html,/property="og:description"/);
-    assert(html.includes("/"+lang+"/opengraph-image"),"OG image not present: "+lang);
+    assert(html.includes(imagePath),"Actual world social preview not present: "+lang);
+    assert(html.includes(lang==="es"?"Portafolio interactivo":"Interactive portfolio"),"Localized metadata missing: "+lang);
     assert.match(html,/name="twitter:card"[^>]+summary_large_image/);
     assert.match(html,/JarceDev/);
     assert(html.includes("/experience/index.html?lang="+lang),"Wrong 3D experience for locale "+lang);
     assert(!html.includes("Jorge-Arce-Solano-CV-"),"CV download link was exposed");
-    const preview=await read("/"+lang+"/opengraph-image");
+    const preview=await read(imagePath);
     assert.equal(preview.status,200,"Social preview endpoint missing: "+lang);
     assert((preview.headers.get("content-type")??"").includes("image/png"),"Social preview is not PNG");
     const data=Buffer.from(await preview.arrayBuffer());
     assert(data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),"Not a PNG: "+lang);
-    assert.equal(data.readUInt32BE(16),1200);
-    assert.equal(data.readUInt32BE(20),630);
-    console.log(lang+": OG/Twitter tags and 1200x630 PNG verified.");
+    assert.equal(data.readUInt32BE(16),1731);
+    assert.equal(data.readUInt32BE(20),909);
+    console.log(lang+": localized OG/Twitter tags and genuine 3D PNG verified.");
   }
-  for(const path of ["/es/portfolio","/es/projects/firetrack"]){
+  for(const path of ["/es/portfolio","/en/portfolio","/es/projects/firetrack","/en/projects/firetrack"]){
     const response=await read(path);
     assert.equal(response.status,200);
     const html=await response.text();
     assert.match(html,/property="og:image"/);
-    assert.match(html,/opengraph-image/);
+    assert(html.includes(imagePath),"Subpage is missing 3D OG image: "+path);
     assert(!html.includes("Jorge-Arce-Solano-CV-"));
   }
   for(const path of ["/cv/Jorge-Arce-Solano-CV-ES.pdf","/cv/Jorge-Arce-Solano-CV-EN.pdf"]){
