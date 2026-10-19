@@ -84,7 +84,7 @@ function PaintedParts({color,items}:{color:string;items:THREE.Matrix4[]}){
       castShadow receiveShadow>
       <boxGeometry args={[1,1,1]}/>
       <meshStandardMaterial color={color}
-        metalness={color.startsWith("#c")||color.startsWith("#e")?.34:.10}
+        metalness={(color.startsWith("#c")||color.startsWith("#e")) ? .34 : .10}
         roughness={.49}/>
     </instancedMesh>
   );
