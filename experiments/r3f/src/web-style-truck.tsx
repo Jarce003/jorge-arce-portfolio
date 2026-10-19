@@ -47,20 +47,23 @@ function buildParts(){
     put(side*1.13,.65,-2.14,.26,.11,1.13,"#b8c9d6");
     // Rear-side alert lens belongs to the animated beacon system only.
   }
-  // One elevated Costa Rican flag at the rear, matching the approved
-  // WebGL2 version. Static cloth is intentional: no cloth simulation cost.
-  // The broad central red band follows the correct 1:1:2:1:1 stripes.
-  const flagX=-.71, flagZ=3.15;
-  put(flagX-.52,2.80,flagZ,.065,1.76,.085,"#e5eef7"); // flagpole
-  put(flagX-.52,3.72,flagZ,.12,.11,.11,"#f4c670"); // finial
+  // Rear flag pole is bolted into the rear-right body corner,
+  // not outboard of the truck. All parts share the SAME truck group transform,
+  // so the flag turns and drives with the fire truck.
+  const poleX=.85, poleZ=2.84;
+  put(poleX,1.35,2.75,.38,.32,.49,"#8da3b4"); // welded mount on rear body
+  put(poleX,2.34,poleZ,.075,2.42,.075,"#e5eef7");
+  put(poleX,3.59,poleZ,.13,.13,.13,"#f4c670");
+  // Inboard hanging cloth, five bands with a double-height red stripe.
+  const clothX=.30;
   for(const [y,height,color] of [
-    [3.38,.15,"#002B7F"],
-    [3.23,.15,"#FFFFFF"],
-    [3.005,.30,"#CE1126"],
-    [2.78,.15,"#FFFFFF"],
-    [2.63,.15,"#002B7F"],
+    [3.29,.15,"#002B7F"],
+    [3.14,.15,"#FFFFFF"],
+    [2.915,.30,"#CE1126"],
+    [2.69,.15,"#FFFFFF"],
+    [2.54,.15,"#002B7F"],
   ] as const){
-    put(flagX,y,flagZ,1.02,height,.070,color);
+    put(clothX,y,poleZ+.09,1.12,height,.065,color);
   }
   // A single open aerial ladder, with a clearly separated turntable pivot.
   // Earlier versions accidentally rendered a large deck AND two overlapping
