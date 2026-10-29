@@ -43,7 +43,7 @@ assert(ts.isArrayLiteralExpression(arr), "projectDefinitions must be an array");
 const entries = arr.elements;
 assert(entries.length >= 4, "Expected existing four projects");
 const ids = new Set(), stations = new Set(), positions = new Set();
-const templates = new Set(["academy", "operations", "design-studio", "mapping-hub", "generic"]);
+const templates = new Set(["academy", "operations", "design-studio", "pump-training", "mapping-hub", "generic"]);
 const previews = new Set();
 for (const item of entries) {
   const slug = value(item, "slug");
