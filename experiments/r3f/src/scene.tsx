@@ -135,6 +135,19 @@ export function WorldScene({
         <planeGeometry args={[87,8]}/>
         <meshStandardMaterial color={day?"#6d8390":"#39516b"} roughness={1}/>
       </mesh>
+      {/* An east-west access street connects EvacuaPlan's new southern plot.
+          The existing four-way intersection and station positions stay unchanged. */}
+      <mesh rotation={[-Math.PI/2,0,0]} position={[14,-.085,-24]} receiveShadow>
+        <planeGeometry args={[28,7.6]}/>
+        <meshStandardMaterial color={day?"#6d8390":"#39516b"} roughness={1}/>
+      </mesh>
+      {Array.from({length:5},(_,index)=>(
+        <mesh key={"south-spur-"+index} rotation={[-Math.PI/2,0,0]}
+          position={[5+index*4.2,-.05,-24]}>
+          <planeGeometry args={[1.8,.12]}/>
+          <meshStandardMaterial color="#edf5ed"/>
+        </mesh>
+      ))}
       {Array.from({length:16},(_,i)=>{
         const z=-37+i*5;
         return Math.abs(z)<6?null:(
