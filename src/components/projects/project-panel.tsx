@@ -87,6 +87,12 @@ export function ProjectPanel({
                   ✳ {aiOpen ? t.hideAi : t.ai}
                 </button>
               )}
+              {project.externalUrl && (
+                <a href={project.externalUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex min-h-10 items-center rounded-full bg-cyan-300 px-4 text-xs font-bold text-slate-950 hover:bg-cyan-200">
+                  {project.externalLabel ?? (lang === "es" ? "Abrir aplicación" : "Open application")} ↗
+                </a>
+              )}
               <Link href={"/" + lang + "/portfolio#contacto".replace("contacto",lang === "es" ? "contacto" : "contact")} className="inline-flex min-h-10 items-center rounded-full border border-white/20 px-4 text-xs font-semibold text-white hover:bg-white/10">{t.contact} ↗</Link>
               {directLink && <Link href={"/" + lang + "/projects/" + project.slug} className="inline-flex min-h-10 items-center rounded-full border border-white/10 px-3 text-xs font-semibold text-slate-400 hover:text-white">{t.open} ↗</Link>}
             </div>
