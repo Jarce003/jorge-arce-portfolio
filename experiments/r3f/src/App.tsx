@@ -118,7 +118,7 @@ export function App(){
       const key=event.key.toLowerCase();
       if(portfolioOpen)return;
       if(map[key]){controls.current[map[key]]=true;event.preventDefault();setHintVisible(false);}
-      if(/^[1-4]$/.test(key)&&!event.repeat){
+      if(/^[1-5]$/.test(key)&&!event.repeat){
         const station=stations[Number(key)-1];
         if(station)travel(station.id);
       }
@@ -243,7 +243,7 @@ export function App(){
         <strong>{rescued.size}/{stations.length}</strong>
       </button>
       {/* Kept in the accessibility tree but offscreen: projects are chosen
-          by approaching/clicking a building or shortcuts 1–4, not a sidebar. */}
+          by approaching/clicking a building or shortcuts 1–5, not a sidebar. */}
       <nav className="stations-dock" aria-label={t.stationAccess}>
         {projects.map(project=>(
           <button key={project.station.id} type="button" disabled={busy}
@@ -292,6 +292,12 @@ export function App(){
                   ✳ {aiOpen?t.hideDemo:t.tryDemo}
                 </button>
               )}
+              {selected.externalUrl && (
+                <a className="external-app-link" href={selected.externalUrl}
+                  target="_blank" rel="noopener noreferrer">
+                  {selected.externalLabel ?? (lang==="es"?"Abrir app":"Open app")} ↗
+                </a>
+              )}
               <button type="button" onClick={()=>{setPanel(null);setAiOpen(false);}}>
                 {t.continue}
               </button>
@@ -335,8 +341,8 @@ export function App(){
           <p id="rescue-reward-detail">
             {t.missionDescription}
           </p>
-          <div className="reward-total" aria-label={"4/4 "+t.recoveredStations}>
-            <strong>4/4</strong><span>{t.recoveredStations}</span>
+          <div className="reward-total" aria-label={stations.length+"/"+stations.length+" "+t.recoveredStations}>
+            <strong>{stations.length}/{stations.length}</strong><span>{t.recoveredStations}</span>
           </div>
           <div className="reward-projects" aria-label={t.projectsFound}>
             {projects.map(project=>(
