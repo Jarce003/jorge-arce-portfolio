@@ -32,7 +32,7 @@ export function isAtStation(pose: TruckPose, id: StationId): boolean {
 export function travelToStation(pose: TruckPose, id: StationId): TruckPose {
   const station=stations.find(s=>s.id===id);
   if(!station) return pose;
-  // Position at 9 units before the model along its front access road.
+  // Position on the front approach lane; the new southern plot has a road at z=-24.
   const front=station.z < 0 ? 1 : -1;
   return {x:station.x,z:station.z+front*9.5,
     heading:station.z<0?0:Math.PI,speed:0};
@@ -46,7 +46,7 @@ export function advanceTruck(pose: TruckPose, controls: Controls, dt: number): T
   const heading=pose.heading+(Math.abs(speed)>.04?steer*1.9*step*Math.sign(speed):0);
   return {
     x:Math.max(-26,Math.min(26,pose.x-Math.sin(heading)*speed*step)),
-    z:Math.max(-26,Math.min(26,pose.z-Math.cos(heading)*speed*step)),
+    z:Math.max(-47,Math.min(26,pose.z-Math.cos(heading)*speed*step)),
     heading, speed:Math.abs(speed)<.02?0:speed,
   };
 }
