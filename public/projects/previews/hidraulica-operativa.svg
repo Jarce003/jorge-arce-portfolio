@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">Hidráulica Operativa · Cálculos para operadores de bombas</title>
+<desc id="desc">Interfaz conceptual con manómetro, flujo en GPM, presión en PSI y tendidos de mangueras</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071523"/><stop offset="1" stop-color="#0e3446"/></linearGradient>
+  <linearGradient id="panel" x2="0" y2="1"><stop stop-color="#17364e"/><stop offset="1" stop-color="#102438"/></linearGradient>
+  <linearGradient id="accent" x2="1" y2="1"><stop stop-color="#35c9ef"/><stop offset="1" stop-color="#5ce6c4"/></linearGradient>
+  <filter id="drop"><feDropShadow dx="0" dy="14" stdDeviation="19" flood-color="#00111b" flood-opacity=".45"/></filter>
+</defs>
+<rect width="1200" height="720" fill="url(#bg)"/>
+<circle cx="1000" cy="40" r="325" fill="#38bdf8" opacity=".065"/>
+<circle cx="80" cy="675" r="285" fill="#5ce6c4" opacity=".04"/>
+<rect x="50" y="43" width="1100" height="631" rx="28" fill="#0d2335" stroke="#5d8198" stroke-width="2" filter="url(#drop)"/>
+<rect x="52" y="45" width="1096" height="75" rx="24" fill="#18364b"/>
+<rect x="52" y="102" width="1096" height="18" fill="#18364b"/>
+<circle cx="92" cy="82" r="11" fill="#50d6db"/>
+<path d="M92 62L78 85C70 105 112 105 106 85Z" fill="#16a8cb"/>
+<text x="126" y="91" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700" fill="#f0f9ff">HIDRÁULICA OPERATIVA</text>
+<rect x="925" y="69" width="185" height="35" rx="17" fill="#245068"/>
+<text x="951" y="92" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#9ff7e9" font-weight="700">PANEL OPERATIVO</text>
+<rect x="78" y="150" width="468" height="463" rx="22" fill="url(#panel)" stroke="#355c76"/>
+<text x="104" y="188" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#b4d4e6" font-weight="700">PRESIÓN DE BOMBA</text>
+<circle cx="312" cy="366" r="148" fill="#0a2033" stroke="#31637b" stroke-width="17"/>
+<circle cx="312" cy="366" r="126" fill="none" stroke="#57c8e9" stroke-width="3" opacity=".65"/>
+<path d="M207 417 A115 115 0 1 1 418 417" fill="none" stroke="#1c4b63" stroke-width="22" stroke-linecap="round"/>
+<path d="M207 417 A115 115 0 0 1 406 293" fill="none" stroke="url(#accent)" stroke-width="22" stroke-linecap="round"/>
+<g stroke="#97cad9" stroke-width="4" stroke-linecap="round">
+<path d="M206 427L222 419"/><path d="M199 365L220 365"/><path d="M225 288L244 302"/>
+<path d="M312 244L312 263"/><path d="M397 286L381 302"/><path d="M428 366L407 366"/><path d="M417 422L399 414"/>
+</g>
+<path d="M312 366 L380 294" stroke="#f7db8e" stroke-width="9" stroke-linecap="round"/>
+<circle cx="312" cy="366" r="14" fill="#e9f6ff"/>
+<text x="312" y="411" font-family="Arial,Helvetica,sans-serif" font-size="66" text-anchor="middle" font-weight="700" fill="#edfaff">150</text>
+<text x="312" y="443" font-family="Arial,Helvetica,sans-serif" font-size="19" text-anchor="middle" font-weight="700" fill="#79dff3">PSI</text>
+<rect x="163" y="546" width="298" height="42" rx="21" fill="#1b4960"/>
+<text x="312" y="572" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#d2f7ff">PRESIÓN DINÁMICA</text>
+<rect x="571" y="150" width="551" height="182" rx="21" fill="url(#panel)" stroke="#355c76"/>
+<text x="599" y="191" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#b4d4e6">CAUDAL AL INCENDIO</text>
+<text x="599" y="274" font-family="Arial,Helvetica,sans-serif" font-size="70" font-weight="700" fill="#f3fbff">250</text>
+<text x="776" y="274" font-family="Arial,Helvetica,sans-serif" font-size="29" font-weight="700" fill="#6ae6d5">GPM</text>
+<path d="M925 284C945 257 952 242 951 232C967 254 977 259 979 275C979 299 947 304 940 288Z" fill="#38bdf8"/>
+<path d="M1002 268C1014 251 1022 239 1022 230C1037 250 1043 259 1045 271C1045 290 1010 294 1002 268Z" fill="#63e1da"/>
+<rect x="571" y="352" width="551" height="261" rx="21" fill="url(#panel)" stroke="#355c76"/>
+<text x="599" y="391" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#b4d4e6">TENDIDOS Y FRICCIÓN</text>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M617 474 H762" stroke="#42c6e6" stroke-width="19"/>
+<path d="M762 474L841 430H965" stroke="#42c6e6" stroke-width="14"/>
+<path d="M762 474L841 517H965" stroke="#42c6e6" stroke-width="14"/>
+</g>
+<g fill="#d5e4ef" stroke="#9bbaca" stroke-width="3">
+<rect x="608" y="456" width="26" height="36" rx="6"/>
+<rect x="743" y="454" width="25" height="39" rx="6"/>
+<rect x="957" y="412" width="27" height="35" rx="6"/>
+<rect x="957" y="499" width="27" height="35" rx="6"/>
+</g>
+<text x="624" y="566" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#b6e7f1">MANGUERA</text>
+<text x="856" y="566" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#b6e7f1">BIFURCACIÓN</text>
+<rect x="50" y="43" width="1100" height="631" rx="28" fill="none" stroke="#8de8f2" stroke-opacity=".18" stroke-width="2"/>
+</svg>
