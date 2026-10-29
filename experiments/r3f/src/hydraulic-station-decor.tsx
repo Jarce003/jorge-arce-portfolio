@@ -241,12 +241,12 @@ export function HydraulicStationDecor() {
 
       {/* A legible technical entrance and understated painted bay lines. */}
       {[-3.98,-1.1,1.74,4.3].map(offset=>(
-        <Plate key={offset} at={[offset,.145,-5.06]}
+        <Plate key={offset} at={[offset,-.044,-5.06]}
           size={[.13,.024,1.0]} color="#eac67d" metallic={0}/>
       ))}
-      <Plate at={[0,.15,-5.45]} size={[7.95,.025,.08]}
+      <Plate at={[0,-.044,-5.45]} size={[7.95,.025,.08]}
         color="#eac67d" metallic={0}/>
-      <Plate at={[0,.18,-5.02]} size={[2.3,.09,.20]} color="#46798f"/>
+      <Plate at={[0,-.026,-5.02]} size={[2.3,.09,.20]} color="#46798f"/>
     </group>
   );
 }
