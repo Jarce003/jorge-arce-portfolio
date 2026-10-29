@@ -10,6 +10,7 @@ export type StructureType =
   | "academy"
   | "operations"
   | "design-studio"
+  | "pump-training"
   | "mapping-hub"
   | "generic";
 
@@ -91,8 +92,34 @@ export const projectDefinitions = [
     },
   },
   {
+    slug: "hidraulica-operativa",
+    station: { id: "hidraulica", x: 14, z: -12, structure: "pump-training" },
+    icon: "💧",
+    accent: "#38bdf8",
+    preview: "/projects/previews/hidraulica-operativa.svg",
+    technologies: ["React", "TypeScript", "Vite", "PWA"],
+    locale: {
+      es: {
+        title: "Hidráulica Operativa",
+        category: "Cálculo · Operaciones",
+        problem: "Los cálculos de presión y tendidos de mangueras requieren consultar varios datos durante la operación.",
+        solution: "Herramientas de hidráulica, caudal, tendidos y presión reunidas en una app para operadores.",
+        status: "App operativa · demo disponible",
+        previewAlt: "Vista ilustrativa de Hidráulica Operativa con manómetros, caudal y cálculo de tendidos",
+      },
+      en: {
+        title: "Operational Hydraulics",
+        category: "Calculations · Field operations",
+        problem: "Pump pressure and hose-line calculations require several references in the field.",
+        solution: "Flow, hose-line and pump-pressure tools designed for fire apparatus operators.",
+        status: "Working app · demo available",
+        previewAlt: "Illustration of the Operational Hydraulics app showing gauges, flow and hose-line calculations",
+      },
+    },
+  },
+  {
     slug: "evacuaplan-studio",
-    station: { id: "evacuaplan", x: 14, z: -12, structure: "design-studio" },
+    station: { id: "evacuaplan", x: 14, z: -36, structure: "design-studio" },
     icon: "▦",
     accent: "#67e8f9",
     preview: "/projects/previews/evacuaplan.svg",
@@ -190,10 +217,13 @@ export function getProjects(lang: Locale): ProjectView[] {
       alt: project.locale[lang].previewAlt,
     }],
     caseStudyLabel: lang === "es" ? "Ver proyecto" : "View project",
-    externalUrl: project.slug === "firetrack" ? "https://firetrackcr.com" : undefined,
+    externalUrl: project.slug === "firetrack" ? "https://firetrackcr.com"
+      : project.slug === "hidraulica-operativa" ? "https://hidraulica-operativa-demo.pages.dev/" : undefined,
     externalLabel: project.slug === "firetrack"
       ? (lang === "es" ? "Abrir FireTrack" : "Open FireTrack")
-      : undefined,
+      : project.slug === "hidraulica-operativa"
+        ? (lang === "es" ? "Abrir Hidráulica Operativa" : "Open Operational Hydraulics")
+        : undefined,
   }));
 }
 

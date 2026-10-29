@@ -43,7 +43,7 @@ assert(ts.isArrayLiteralExpression(arr), "projectDefinitions must be an array");
 const entries = arr.elements;
 assert(entries.length >= 4, "Expected existing four projects");
 const ids = new Set(), stations = new Set(), positions = new Set();
-const templates = new Set(["academy", "operations", "design-studio", "mapping-hub", "generic"]);
+const templates = new Set(["academy", "operations", "design-studio", "pump-training", "mapping-hub", "generic"]);
 const previews = new Set();
 for (const item of entries) {
   const slug = value(item, "slug");
@@ -55,7 +55,7 @@ for (const item of entries) {
   assert(!ids.has(slug), "Duplicate project slug " + slug);
   assert(!stations.has(id), "Duplicate station id " + id);
   assert(!positions.has(x + "," + z), "Overlapping station: " + slug);
-  assert(Math.abs(x) <= 23 && Math.abs(z) <= 23, "Station outside drive bounds: " + slug);
+  assert(Math.abs(x) <= 23 && z >= -43 && z <= 23, "Station outside expanded drive bounds: " + slug);
   assert(templates.has(structure), "Unsupported structure: " + structure);
   assert(/^\/projects\/(?:[a-z0-9-]+\/)*[a-z0-9.-]+\.(?:svg|webp|png)$/i.test(preview),
     "Preview must be a local validated project illustration or app screenshot: " + slug);

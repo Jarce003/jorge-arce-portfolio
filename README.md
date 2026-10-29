@@ -16,6 +16,14 @@ A multi-company fire extinguisher management product covering inventory, inspect
 
 **My role:** identifying the operational need, defining business rules and permissions, prioritizing capabilities, guiding AI-assisted implementation and validating the workflows.
 
+### Hidráulica Operativa
+
+A mobile-friendly hydraulic calculations application for fire apparatus operators, covering hose-line pressure, flow, friction calculations and pumping operations. The public app is at https://hidraulica-operativa-demo.pages.dev/.
+
+**My role:** identifying field needs, defining the operational calculation flow, validating formulas and usability, and coordinating AI-assisted implementation.
+
+**3D world:** its own pump-operations building occupies EvacuaPlan's former location. The original EvacuaPlan Studio building is preserved in a newly accessible southern parcel.
+
 ### EvacuaPlan Studio
 
 A specialized browser-based emergency plan editor with object manipulation and interactions designed around real documentation workflows.
@@ -54,7 +62,7 @@ The website itself is built with Next.js 16, React 19, TypeScript and Tailwind C
 
 The JarceDev homepage at `/es` and `/en` is now **exclusively the playable 3D world**, featuring an original American-style aerial ladder truck. Visiting `/` redirects to `/es`.
 
-The extended information is now a **compact interactive** `/es/portfolio` / `/en/portfolio` experience. Four normalized vector previews, a brief process selector and one-line professional profile all use the same shared project catalog. Shareable `/[lang]/projects/[slug]` routes show the *same short project panel*, not large case-study articles. The navigation menu and contact links now point to those routes, so accessibility and search discovery remain available without entering WebGL.
+The extended information is now a **compact interactive** `/es/portfolio` / `/en/portfolio` experience. Five normalized vector previews, a brief process selector and one-line professional profile all use the same shared project catalog. Shareable `/[lang]/projects/[slug]` routes show the *same short project panel*, not large case-study articles. The navigation menu and contact links now point to those routes, so accessibility and search discovery remain available without entering WebGL.
 
 **Minimal mobile HUD:** the immersive world takes the entire available viewport beneath the global navigation. The long hero text, description, main action row and persistent project strip are gone on phones. The visible controls are:
 - 🚨 **Luces / Lights** toggles working headlights, alternating **red-only** emergency beacons and their luminous reflections. Desktop shortcut: **L**. Motion-sensitive users see static lights without strobing.
@@ -83,7 +91,7 @@ A floating “Hablemos / Let's talk” action opens a focused dialog. Visitors c
 
 ## Discovery firefighting sequence (local preview)
 
-Four stylized fires appear at undiscovered project stations. When the ladder truck reaches one and the visitor presses **Discover / E**, it sprays a lightweight animated water jet from its ladder, the fire fades and the concise project panel opens. A small progress badge tracks recovered stations. **R** resets the rescue and allows replay. Reduced-motion users skip the animated sequence, with full access to all projects.
+Five stylized fires appear at undiscovered project stations. When the ladder truck reaches one and the visitor presses **Discover / E**, it sprays a lightweight animated water jet from its ladder, the fire fades and the concise project panel opens. A small progress badge tracks recovered stations. **R** resets the rescue and allows replay. Reduced-motion users skip the animated sequence, with full access to all projects.
 
 Fire and water are fictional, simplified game visuals, not a realistic firefighting simulation. The sequence has deterministic regression tests (`npm run test:world`) and still requires browser/mobile appearance review.
 

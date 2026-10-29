@@ -123,8 +123,8 @@ async function loadPage(page){
 async function rescueStation(page,name,label){
   // This is not an automatic rescue: select an approach point, then press
   // the same Discover control used with touch/keyboard. The truck moves
-  // through the new four-project layout and all rescue states are tested.
-  const shortcuts={"FireTrack":"2","EvacuaPlan Studio":"3","Acreditaciones":"1","Hidrantes":"4"};
+  // through the new five-project layout and all rescue states are tested.
+  const shortcuts={"FireTrack":"2","Hidráulica Operativa":"3","EvacuaPlan Studio":"4","Acreditaciones":"1","Hidrantes":"5"};
   await page.keyboard.press(shortcuts[name]);
   const discover=page.getByRole("button",{name:/Descubrir/});
   await discover.waitFor();
@@ -150,7 +150,7 @@ async function rescueStation(page,name,label){
     console.log("FireTrack case study and return open inline without redirects or new tabs.");
   }
   if(label==="hidrantes"){
-    // Fourth distinct rescue unlocks a reward once, without opening a tab.
+    // Fifth distinct rescue unlocks a reward once, without opening a tab.
     const reward=page.locator('[data-testid="rescue-reward"]');
     await reward.waitFor({timeout:12000});
     await reward.getByText("¡Todos los incendios extinguidos!").waitFor();
@@ -184,16 +184,16 @@ try{
   const desktop=await browser.newPage({viewport:{width:1366,height:768}});
   desktop.on("pageerror",error=>errors.push("Desktop: "+error.message));
   await loadPage(desktop);
-  await capture(desktop,"all-four-day.png");
+  await capture(desktop,"all-five-day.png");
   assert.equal(await desktop.getByText(/FPS aproximados|draw calls|Laboratorio 3D/).count(),0);
-  assert.equal(await desktop.locator(".stations-dock button").count(),4);
+  assert.equal(await desktop.locator(".stations-dock button").count(),5);
   assert.equal(await desktop.locator(".overview").isVisible(),false);
   const dockSize=await desktop.locator(".stations-dock").boundingBox();
   assert(dockSize && dockSize.width<=2 && dockSize.height<=2,
     "The station navigation must be visually hidden without losing keyboard access");
   // The small help toast is allowed to expire while SwiftShader captures.
   assert.equal(await desktop.locator(".drive-hint").count()<=1,true);
-  assert.equal(await desktop.getByRole("button",{name:/Rescates completados: 0 de 4/}).count(),1);
+  assert.equal(await desktop.getByRole("button",{name:/Rescates completados: 0 de 5/}).count(),1);
   // Navigate to the restored compact project gallery without losing the
   // localhost origin or opening the old production website.
   const previewOrigin=new URL(desktop.url()).origin;
@@ -201,9 +201,9 @@ try{
   const gallery=desktop.locator('[data-testid="inline-portfolio"]');
   await gallery.waitFor();
   const approvedCards=gallery.getByRole("group",{name:"MIS PROYECTOS"}).getByRole("button");
-  assert.equal(await approvedCards.count(),4);
+  assert.equal(await approvedCards.count(),5);
   const galleryImages=gallery.locator('img[data-testid^="preview-"]');
-  assert.equal(await galleryImages.count(),5);
+  assert.equal(await galleryImages.count(),6);
   const approvedPaths=await galleryImages.evaluateAll(images=>images.map(node=>
     new URL(node.src).pathname
   ));
@@ -223,25 +223,26 @@ try{
   assert.equal(await gallery.count(),0);
   assert.equal(new URL(desktop.url()).origin,previewOrigin);
   await desktop.locator(".viewport canvas").waitFor();
-  console.log("Four approved normalized artworks, original AI and in-app return to 3D OK.");
+  console.log("Five approved normalized artworks, original AI and in-app return to 3D OK.");
   await desktop.getByRole("button",{name:/Activar vista aérea/}).click();
   await desktop.waitForTimeout(400);
-  await capture(desktop,"all-four-blender-overview.png");
+  await capture(desktop,"all-five-blender-overview.png");
   await desktop.getByRole("button",{name:/Activar modo noche/}).click();
   await desktop.waitForTimeout(330);
-  await capture(desktop,"all-four-night.png");
-  console.log("Four Blender buildings, web-style truck, camera and day/night switch OK");
+  await capture(desktop,"all-five-night.png");
+  console.log("Four preserved Blender plus one hydraulic buildings, web-style truck, camera and day/night switch OK");
 
   for(const [name,label] of [
-    ["FireTrack","firetrack"],["EvacuaPlan Studio","evacuaplan"],
+    ["FireTrack","firetrack"],["Hidráulica Operativa","hidraulica"],
+    ["EvacuaPlan Studio","evacuaplan"],
     ["Acreditaciones","acreditaciones"],["Hidrantes","hidrantes"],
   ]){
     await rescueStation(desktop,name,label);
   }
-  await desktop.getByRole("button",{name:/Rescates completados: 4 de 4/}).waitFor();
+  await desktop.getByRole("button",{name:/Rescates completados: 5 de 5/}).waitFor();
   const desktopAward=desktop.locator('[data-testid="rescue-reward"]');
-  // The fourth-station helper already verified the reward and closed it
-  // with "Ver último proyecto". Reopen from 4/4 before asserting visibility.
+  // The fifth-station helper already verified the reward and closed it
+  // with "Ver último proyecto". Reopen from 5/5 before asserting visibility.
   await desktop.getByRole("button",{name:/Ver recompensa/}).click();
   await desktopAward.waitFor({state:"visible",timeout:10000});
   assert.equal(await desktop.locator('[data-testid="reward-backdrop"]').isVisible(),true);
@@ -252,9 +253,9 @@ try{
   await desktop.getByRole("button",{name:/Ver recompensa/}).click();
   await desktopAward.waitFor({state:"visible"});
   await desktopAward.getByRole("button",{name:/Seguir explorando/}).click();
-  console.log("Desktop: award appears at 4/4 and can be reopened after dismissal.");
+  console.log("Desktop: award appears at 5/5 and can be reopened after dismissal.");
   await desktop.getByRole("button",{name:/Reiniciar recorrido/}).click();
-  await desktop.getByText("0/4").waitFor({timeout:5000});
+  await desktop.getByText("0/5").waitFor({timeout:5000});
   assert.equal(await desktop.locator('[data-testid="rescue-reward"]').count(),0);
   console.log("Reset clears completion reward, ready for another rescue run.");
   // Release the desktop WebGL context before creating a second software
@@ -276,7 +277,7 @@ try{
     "Mobile project dock must not cover the 3D world");
   assert.equal(await mobile.locator(".overview").isVisible(),false);
   assert.equal(await mobile.locator(".steering-wheel-art").isVisible(),true);
-  await mobile.getByRole("button",{name:/Rescates completados: 0 de 4/}).waitFor();
+  await mobile.getByRole("button",{name:/Rescates completados: 0 de 5/}).waitFor();
   for(const label of ["Activar modo noche","Activar vista aérea","Apagar luces de emergencia"]){
     assert.equal(await mobile.getByRole("button",{name:label}).isVisible(),true);
   }
@@ -290,17 +291,17 @@ try{
   // A real touchscreen tap exercises browser-managed pointer capture;
   // synthetic pointerdown has no active pointer ID in headless Chromium.
   await mobile.getByRole("button",{name:"Acelerar"}).tap();
-  // Completing ALL FOUR in portrait used to fail silently. Verify actual
+  // Completing ALL FIVE in portrait used to fail silently. Verify actual
   // visibility and ability to revisit the reward after closing it.
-  for(const number of ["2","3","1","4"]){
+  for(const number of ["2","3","4","1","5"]){
     await mobile.keyboard.press(number);
     const discover=mobile.getByRole("button",{name:"Descubrir"});
     await discover.waitFor({state:"visible",timeout:10000});
     await discover.click();
-    if(number!=="4"){
+    if(number!=="5"){
       await mobile.getByText("ESTACIÓN RECUPERADA").waitFor({timeout:12000});
       await mobile.getByRole("button",{name:"Cerrar proyecto"}).click();
-      // Previously this made the 4/4 reward disappear completely.
+      // Previously this made the 5/5 reward disappear completely.
       await mobile.keyboard.press("Escape");
     }
   }
@@ -315,7 +316,7 @@ try{
   await mobile.getByRole("button",{name:/Ver recompensa/}).click();
   await phoneAward.waitFor({state:"visible"});
   await phoneAward.getByRole("button",{name:"Seguir explorando"}).click();
-  console.log("Mobile: four rescues, visible 4/4 award, dismiss and reopen OK.");
+  console.log("Mobile: five rescues, visible 5/5 award, dismiss and reopen OK.");
 
   // Independent device contexts emulate the TRUE viewport dimensions of a
   // physical landscape phone and portrait/landscape tablets. Each should be
@@ -347,7 +348,7 @@ try{
   await english.locator("canvas").waitFor();
   assert.equal(await english.locator("html").getAttribute("lang"),"en");
   await english.getByRole("button",{name:"View profile and projects"}).waitFor();
-  await english.getByRole("button",{name:/Rescues completed: 0 of 4/}).waitFor();
+  await english.getByRole("button",{name:/Rescues completed: 0 of 5/}).waitFor();
   await english.getByRole("button",{name:"Switch to aerial view"}).waitFor();
   // The project preview must not silently fall back to Spanish.
   await english.keyboard.press("1");
@@ -366,7 +367,7 @@ try{
   console.log("Bilingual 3D: English station, localized portfolio and ES/EN switch OK.");
 
   if(errors.length)throw Error("JavaScript errors:\n"+errors.join("\n"));
-  console.log("All four-project R3F browser checks passed; screenshots: "+screenshots);
+  console.log("All five-project R3F browser checks passed; screenshots: "+screenshots);
 }catch(error){
   console.error("Browser smoke test failed",error);
   process.exitCode=1;

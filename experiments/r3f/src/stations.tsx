@@ -73,6 +73,50 @@ function GeometryStation({ station }: { station: Station }) {
           {[-4,4].map(i=><Drum key={i} x={i} y={.97} z={2.1} color="#dc3448"/>)}
         </>
       )}
+      {station.id==="hidraulica" && (
+        <>
+          {/* A new pumping and hydraulic-training hall, distinct from the
+              original EvacuaPlan drafting studio. */}
+          <Block at={[0,2.05,-1.35]} size={[9.1,4.1,5.8]} color="#9ab6c8"/>
+          <Block at={[0,4.26,-1.35]} size={[9.7,.42,6.5]} color="#166e90" metallic={.3}/>
+          <Block at={[0,4.55,-1.35]} size={[8.8,.16,5.7]} color="#a4e1e9"/>
+          {[-2.85,0,2.85].map(offset=>(
+            <group key={offset}>
+              <Block at={[offset,1.85,1.62]} size={[2.4,2.85,.19]} color="#173c57" metallic={.4}/>
+              <Block at={[offset,1.85,1.73]} size={[1.94,2.35,.12]} color="#3c89a3"/>
+              <Block at={[offset,2.9,1.81]} size={[1.58,.13,.08]} color="#83e0f0" glow={.3}/>
+            </group>
+          ))}
+          {/* Pump manifolds, an exterior pressure gauge, tank and pipework. */}
+          <Block at={[0,.68,3.25]} size={[6.7,1.18,.88]} color="#1a425e" metallic={.35}/>
+          {[-2.35,0,2.35].map(offset=>(
+            <group key={offset}>
+              <Drum x={offset} y={.94} z={3.72} radius={.46} height={1.55} color="#c5d5df"/>
+              <Drum x={offset} y={1.64} z={3.72} radius={.55} height={.20} color="#34c8e2"/>
+            </group>
+          ))}
+          <Drum x={3.55} y={5.35} z={-1.55} radius={1.18} height={1.45} color="#7ebad0"/>
+          <Drum x={3.55} y={6.13} z={-1.55} radius={1.30} height={.18} color="#d3e8ed"/>
+          <Block at={[3.55,4.61,-1.55]} size={[1.85,.26,1.85]} color="#2d617b" metallic={.3}/>
+          <Block at={[-3.55,5.35,-1.6]} size={[.20,2.0,.20]} color="#d2edf2" metallic={.3}/>
+          <Block at={[-3.55,6.35,-1.6]} size={[1.3,.15,1.3]} color="#34c8e2" glow={.35}/>
+          {/* Large analog gauge identifies the hydraulic operations building. */}
+          <mesh position={[0,4.72,2.08]} rotation={[Math.PI/2,0,0]} castShadow>
+            <cylinderGeometry args={[1.11,1.11,.30,30]}/>
+            <meshStandardMaterial color="#effaff" metalness={.42} roughness={.33}/>
+          </mesh>
+          <mesh position={[0,4.72,2.26]}>
+            <torusGeometry args={[.79,.12,8,32]}/>
+            <meshStandardMaterial color="#147da2" emissive="#126b91" emissiveIntensity={.25}/>
+          </mesh>
+          <Block at={[.23,4.82,2.32]} size={[.14,.80,.10]} color="#ed754d" metallic={.15}/>
+          <mesh position={[0,4.72,2.35]}>
+            <sphereGeometry args={[.19,12,8]}/>
+            <meshStandardMaterial color="#123a51"/>
+          </mesh>
+          <Block at={[0,6.56,-1.5]} size={[3.55,.25,.75]} color="#28b6d8" glow={.32}/>
+        </>
+      )}
       {station.id==="evacuaplan" && (
         <>
           <Block at={[0,1.57,-1.38]} size={[7.8,3.15,4.6]} color="#c5e9ec"/>
@@ -124,7 +168,7 @@ export function ThemedStations({ modelMode }: {modelMode:boolean}) {
     <group>
       {stations.map(station=>(
         <group key={station.id}>
-          {modelMode
+          {modelMode && station.id!=="hidraulica"
             ? <BlenderStation station={station}/>
             : <GeometryStation station={station}/>}
         </group>
@@ -144,6 +188,11 @@ export const FIRE_ANCHORS: Record<Station["id"], readonly [number,number,number]
     [-3.2,5.98,.45],[0,5.98,1.1],[3.1,5.98,.45],
     [-2.75,3.3,-2.51],[0,3.55,-2.51],[2.75,3.3,-2.51],
     [-3.7,.11,-3.43],[3.7,.11,-3.43],
+  ],
+  hidraulica: [
+    [-3.0,4.46,.45],[0,4.5,-.75],[3.0,4.46,.45],
+    [-2.9,3.00,-1.70],[0,3.0,-1.70],[2.9,3.00,-1.70],
+    [-3.7,.1,-3.3],[3.7,.1,-3.3],
   ],
   evacuaplan: [
     [-3.0,3.66,.4],[0,3.70,1.1],[3.05,3.66,.4],
@@ -202,11 +251,11 @@ function FireAtStation({
       rotation={[0,station.z<0?Math.PI:0,0]}>
       <pointLight ref={roofGlow}
         position={[0,station.id==="firetrack"?6.45:station.id==="acreditaciones"?4.7:
-          station.id==="evacuaplan"?4.3:2.8,0]}
+          station.id==="evacuaplan"?4.3:station.id==="hidraulica"?5.0:2.8,0]}
         color="#ff853e" distance={9} intensity={0} decay={2}/>
       {anchors.map(([x,height,z],index)=>{
         const fallbackHeight=station.id==="hidrantes"?2.37:
-          station.id==="firetrack"?5.45:station.id==="acreditaciones"?4.50:3.72;
+          station.id==="firetrack"?5.45:station.id==="acreditaciones"?4.50:station.id==="hidraulica"?4.60:3.72;
         const flameY=modelMode?height:fallbackHeight;
         const heightScale=index>=6?.82:station.id==="hidrantes"?.96:1.08;
         return (

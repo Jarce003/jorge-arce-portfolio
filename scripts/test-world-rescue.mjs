@@ -60,7 +60,7 @@ test("The project panel only opens after the rescue sequence finishes", () => {
 });
 
 test("Discovering does not double-count a station; replay resets progress", () => {
-  const stations = ["firetrack", "evacuaplan", "acreditaciones", "hidrantes"];
+  const stations = ["firetrack", "hidraulica", "evacuaplan", "acreditaciones", "hidrantes"];
   const rescued = new Set();
   assert.equal(completedStations(stations, rescued), 0);
   rescued.add("firetrack");
@@ -103,7 +103,8 @@ test("Discovery activates before the truck reaches the building", () => {
 test("Closest station is selected without ambiguity in initial city layout", () => {
   const stations = [
     { id: "firetrack", x: -14, z: -12 },
-    { id: "evacuaplan", x: 14, z: -12 },
+    { id: "hidraulica", x: 14, z: -12 },
+    { id: "evacuaplan", x: 14, z: -36 },
     { id: "acreditaciones", x: -14, z: 12 },
     { id: "hidrantes", x: 14, z: 12 },
   ];
@@ -111,7 +112,8 @@ test("Closest station is selected without ambiguity in initial city layout", () 
   assert.equal(closestDiscoverableStation({ x: 13.8, z: 22.9 }, stations), "hidrantes");
   assert.equal(closestDiscoverableStation({ x: -14, z: -1 }, stations), "firetrack");
   assert.equal(closestDiscoverableStation({ x: 14, z: 0 }, stations), null);
-  // No two activation zones overlap in the current 24-unit station spacing.
+  assert.equal(closestDiscoverableStation({ x: 14, z: -26 }, stations), "evacuaplan");
+  // No two activation zones overlap, including the new southern block.
   for (let i = 0; i < stations.length; i++) {
     for (let j = i + 1; j < stations.length; j++) {
       const dx = stations[i].x - stations[j].x;
