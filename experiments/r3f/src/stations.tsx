@@ -4,6 +4,7 @@ import { useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 
 import { stations, type Rescue } from "./physics";
+import { HydraulicStationDecor } from "./hydraulic-station-decor";
 
 export const MODEL_FILES = {
   firetrack: "/models/jarcedev/v1/firetrack-station.glb",
@@ -115,6 +116,7 @@ function GeometryStation({ station }: { station: Station }) {
             <meshStandardMaterial color="#123a51"/>
           </mesh>
           <Block at={[0,6.56,-1.5]} size={[3.55,.25,.75]} color="#28b6d8" glow={.32}/>
+          <HydraulicStationDecor/>
         </>
       )}
       {station.id==="evacuaplan" && (
