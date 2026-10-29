@@ -73,7 +73,7 @@ export function CompactPortfolio({lang,initialSlug="acreditaciones-app"}:{lang:L
             <h2 className="text-[.66rem] font-bold tracking-[.18em] text-violet-300">{t.projects}</h2>
             <p className="text-xs text-slate-400">{t.select}</p>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3" role="group" aria-label={t.projects}>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3" role="group" aria-label={t.projects}>
             {projects.map((project) => {
               const active = selected.slug === project.slug;
               return (
