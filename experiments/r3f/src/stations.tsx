@@ -101,16 +101,16 @@ function GeometryStation({ station }: { station: Station }) {
           <Block at={[-3.55,5.35,-1.6]} size={[.20,2.0,.20]} color="#d2edf2" metallic={.3}/>
           <Block at={[-3.55,6.35,-1.6]} size={[1.3,.15,1.3]} color="#34c8e2" glow={.35}/>
           {/* Large analog gauge identifies the hydraulic operations building. */}
-          <mesh position={[0,4.66,1.35]} castShadow>
+          <mesh position={[0,4.72,2.08]} rotation={[Math.PI/2,0,0]} castShadow>
             <cylinderGeometry args={[1.11,1.11,.30,30]}/>
             <meshStandardMaterial color="#effaff" metalness={.42} roughness={.33}/>
           </mesh>
-          <mesh position={[0,4.86,1.35]} rotation={[Math.PI/2,0,0]}>
+          <mesh position={[0,4.72,2.26]}>
             <torusGeometry args={[.79,.12,8,32]}/>
             <meshStandardMaterial color="#147da2" emissive="#126b91" emissiveIntensity={.25}/>
           </mesh>
-          <Block at={[.23,4.91,1.36]} size={[.14,.80,.10]} color="#ed754d" metallic={.15}/>
-          <mesh position={[0,4.95,1.35]}>
+          <Block at={[.23,4.82,2.32]} size={[.14,.80,.10]} color="#ed754d" metallic={.15}/>
+          <mesh position={[0,4.72,2.35]}>
             <sphereGeometry args={[.19,12,8]}/>
             <meshStandardMaterial color="#123a51"/>
           </mesh>
