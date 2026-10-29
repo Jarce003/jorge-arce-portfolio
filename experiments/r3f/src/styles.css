@@ -744,3 +744,13 @@ html,body,#root{height:100%;min-height:0;max-height:100%;overflow:hidden}
     .portfolio-browser{padding-inline:max(0px,env(safe-area-inset-left)) max(0px,env(safe-area-inset-right))}
   }
 }
+
+/* Direct access to running portfolio applications from their station panels. */
+.external-app-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:0 16px;border-radius:12px;
+  color:#061a28;background:#66dbeb;text-decoration:none;
+  font-size:13px;font-weight:750;white-space:nowrap;
+}
+.external-app-link:hover{background:#9cebf5;}
+.external-app-link:focus-visible{outline:3px solid #f5dc8f;outline-offset:3px;}
